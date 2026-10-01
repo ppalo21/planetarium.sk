@@ -1,7 +1,7 @@
 {
-  "name": "Hĺbka oblohy",
-  "short_name": "Hĺbka oblohy",
-  "description": "Súhvezdia v skutočných vzdialenostiach – KHaP MH",
+  "name": "Vesmír na dosah – KHaP MH",
+  "short_name": "Vesmír na dosah",
+  "description": "VR a AR zážitky Krajskej hvezdárne a planetária Maximiliána Hella",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

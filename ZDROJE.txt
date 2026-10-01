@@ -1,0 +1,28 @@
+Vesmír na dosah – zdroje a licencie
+====================================
+Všetky použité materiály sú voľne dostupné. Pri verejnom použití ponechajte uvedenie zdroja (v appke sa zobrazuje automaticky).
+
+PANORÁMY 360°
+- Mars, kráter Jezero – NASA/JPL-Caltech/MSSS/ASU, PIA24264 (Mastcam-Z, 21. 2. 2021)
+  https://science.nasa.gov/photojournal/mastcam-zs-first-360-degree-panorama/
+  Materiály NASA spravidla nie sú chránené autorským právom (NASA Images and Media Usage Guidelines).
+- Mesiac, Apollo 17, zastávka 1 – NASA, snímky AS17-134-20408 až 20431; panoráma z Wikimedia Commons (public domain)
+  https://commons.wikimedia.org/wiki/File:Apollo_17_Moon_Panorama.jpg
+- Observatórium Paranal – ESO, CC BY 4.0
+  https://www.eso.org/public/images/165309674464e758889a6_eq-ext/
+- Celá Mliečna cesta – ESO/S. Brunier, CC BY 4.0
+  https://www.eso.org/public/images/eso0932a/
+
+TEXTÚRY PLANÉT
+- Solar System Scope, CC BY 4.0 – https://www.solarsystemscope.com/textures/
+
+3D MODELY
+- Rover Curiosity – NASA/JPL-Caltech, NASA 3D Resources
+  https://science.nasa.gov/resource/curiosity-3d-model/
+
+ĎALŠIE ZDROJE NA ROZŠÍRENIE
+- NASA 3D Resources (modely .glb): https://science.nasa.gov/3d-resources/
+- ESO 360° panorámy: https://www.eso.org/public/images/archive/category/360pano/
+- NASA Photojournal: https://photojournal.jpl.nasa.gov/
+
+Logo: Krajská hvezdáreň a planetárium Maximiliána Hella.

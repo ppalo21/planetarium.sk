@@ -1,9 +1,16 @@
-Hĺbka oblohy – WebXR aplikácia pre Meta Quest 3
-1) Nahrajte celý obsah tohto priečinka do nového verejného repozitára na GitHube.
-2) Settings -> Pages -> Source: "Deploy from a branch", branch main, priečinok / (root) -> Save.
-3) O 1-2 minúty je aplikácia na https://<meno>.github.io/<repozitar>/
-4) V Queste otvorte Browser, zadajte adresu, pridajte medzi záložky.
-5) Kliknite "Spustiť v AR" alebo "Spustiť vo VR".
-Ovládanie v okuliaroch: štipnutie = ďalej, štipnúť a potiahnuť = otočiť,
-dlho podržať (1,5 s) = vycentrovať pred návštevníka a začať od začiatku.
-Tlačidlá na paneli pod pohľadom: výber súhvezdia, Späť, Ďalej, Vycentrovať.
+VESMÍR NA DOSAH – návod
+=======================
+1) Na počítači s Pythonom:   pip install pillow
+                             python stiahni_obsah.py
+   Do priečinka assets/ sa stiahnu panorámy, textúry a 3D model (spolu cca 40 MB).
+   Vlastná 360° fotka hvezdárne: assets/pano/khap.jpg (nepovinné).
+2) Na GitHube otvor repozitár -> Add file -> Upload files -> pretiahni VŠETKO
+   z tohto priečinka (aj priečinok assets) -> Commit changes.
+3) Settings -> Pages -> Deploy from a branch -> main, / (root) -> Save.
+4) V Queste otvor Browser, zadaj adresu, pridaj do záložiek, klikni Spustiť vo VR / v AR.
+5) Raz pred podujatím klikni na "Pripraviť offline" (s Wi-Fi) – appka potom beží aj bez internetu.
+
+Ovládanie: ukáž lúčom a štipni. Dlhé štipnutie 1,5 s = domov + vycentrovanie.
+Po 2 minútach nečinnosti sa appka sama vráti na úvod.
+Texty, otázky kvízu a zoznam panorám sa dajú upraviť priamo v index.html
+(sekcia "NASTAVENIA A OBSAH" na začiatku skriptu).
