@@ -58,6 +58,7 @@
   <div class="row more">
     <button id="btnLang"></button>
     <button id="btnOffline"></button>
+    <button id="btnOper"></button>
   </div>
   <div class="row keep"><button id="btnMin"></button></div>
   <p id="msg" hidden></p>
@@ -4030,7 +4031,7 @@ function drawHud(){
 }
 let hudMode='full',hudTimer=0,keepHudMode=false;
 const HUD_AUTOHIDE=9; // sekúnd, po ktorých sa info tabuľa zbalí
-function hudAuto(){return hudCfg&&hudCfg.autoHide!==false&&current!=='lobby'&&current!=='quiz';}
+function hudAuto(){return hudCfg&&hudCfg.autoHide!==false&&!['lobby','quiz','intro','thanks','operator'].includes(current);}
 function setHud(cfg){
   hudCfg=cfg;if(!keepHudMode){hudMode='full';}keepHudMode=false;hudTimer=0;buildHud();
 }
@@ -4078,6 +4079,7 @@ function refreshHud(){if(hudCfg&&hudCfg.rebuild)hudCfg.rebuild();else if(hudCfg)
 const M={};let current=null;
 function goTo(id,arg){
   if(current&&M[current]){M[current].exit();}
+  if(current&&current!==id&&!['operator'].includes(id))SND.whoosh();
   current=id;const m=M[id];
   if(!m.built){m.build();m.built=true;}
   m.enter(arg);applyEnv();lastAct=performance.now();
@@ -4098,7 +4100,7 @@ M.lobby={stars:true,
     loadTex(ASSET.logo).then(t=>{if(!t)return;const a=t.image.width/t.image.height,w=2.6;
       t.anisotropy=renderer.capabilities.getMaxAnisotropy();t.minFilter=THREE.LinearMipmapLinearFilter;t.generateMipmaps=true;t.needsUpdate=true;
       const p=new THREE.Mesh(new THREE.PlaneGeometry(w,w/a),new THREE.MeshBasicMaterial({map:t,transparent:true,depthWrite:false}));
-      p.position.set(0,1.25,-6.0);p.lookAt(0,0,0);r.add(p);});
+      p.position.set(0,1.25,-6.0);p.lookAt(0,0,0);r.add(p);makeClickable(p,{onClick:()=>logoTap()});});
     loadTex(ASSET.milky).then(t=>{if(!t)return;
       const s=new THREE.Mesh(new THREE.SphereGeometry(55,64,32),new THREE.MeshBasicMaterial({map:t,color:0x777777,depthWrite:false}));
       s.geometry.scale(-1,1,1);s.renderOrder=-15;s.name='milkyBg';r.add(s);this.milky=s;applyEnv();});
@@ -4111,10 +4113,8 @@ M.lobby={stars:true,
       {id:'quiz',label:{sk:'Kvíz',en:'Quiz'},icon:'quiz'}
     ];
     this.portals=[];
-    const n=items.length;
     items.forEach((it,i)=>{
-      const ang=(-55+110*i/(n-1))*D2R,R=1.75;
-      const g=new THREE.Group();g.position.set(Math.sin(ang)*R,-0.02,-Math.cos(ang)*R);r.add(g);
+      const g=new THREE.Group();r.add(g);
       const mat=new THREE.MeshStandardMaterial({color:new THREE.Color(it.c||'#334477'),roughness:.9,metalness:0});
       if(it.icon)mat.map=iconTex(it.icon),mat.color.set('#ffffff'),mat.emissive=new THREE.Color('#ffffff'),mat.emissiveMap=mat.map,mat.emissiveIntensity=.55;
       if(it.tex)loadTex(it.tex).then(t=>{if(t){mat.map=t;mat.color.set('#ffffff');mat.needsUpdate=true;}});
@@ -4128,13 +4128,16 @@ M.lobby={stars:true,
     });
   },
   relabel(){this.portals.forEach(p=>{p.remove(p.userData.lab);disposeTree(p.userData.lab);const l=textSprite(T(p.userData.it.label),'#e9ecf7',60);setSpriteH(l,0.065);l.position.y=-0.25;p.add(l);p.userData.lab=l;});},
-  enter(){this.root.visible=true;this.hud();},
+  layout(){const on=this.portals.filter(p=>SET.mods[p.userData.it.id]);const n=on.length,span=Math.min(110,24*(n-1));
+    this.portals.forEach(p=>{p.visible=on.includes(p);});
+    on.forEach((g,i)=>{const ang=(n>1?-span/2+span*i/(n-1):0)*D2R,R=1.75;g.position.set(Math.sin(ang)*R,-0.02,-Math.cos(ang)*R);});},
+  enter(){this.root.visible=true;this.layout();this.hud();},
   hud(){setHud({kicker:'KHaP MH',title:UI.title,
     body:{sk:'Vyberte si zážitok: ukážte lúčom na guľu a štipnite prstami. Domov sa vrátite tlačidlom Domov alebo dlhým štipnutím.',en:'Choose an experience: point at a sphere and pinch. Return with the Home button or a long pinch.'},
     rows:[[{label:T(UI.lang),onClick:toggleLang},{label:T(UI.recenter),onClick:recenter}]]});},
   exit(){this.root.visible=false;},
   update(dt,t){this.portals.forEach((p,i)=>{const u=p.userData;u.s.rotation.y+=dt*0.25;
-    const k=u.hover?1.18:1;p.scale.lerp(new THREE.Vector3(k,k,k),Math.min(1,dt*10));
+    const k=u.hover?1.3:1;p.scale.lerp(new THREE.Vector3(k,k,k),Math.min(1,dt*10));
     u.halo.material.opacity+=((u.hover?0.9:0)-u.halo.material.opacity)*Math.min(1,dt*10);
     u.halo.lookAt(anchor.localToWorld(new THREE.Vector3(0,0,0)));
     p.position.y=-0.02+Math.sin(t*0.9+i)*0.012;});
@@ -4555,7 +4558,7 @@ M.quiz={stars:true,
     const q=textSprite('?','#ffb46b',200,700);setSpriteH(q,0.5);q.position.set(0,0.25,-2.2);this.root.add(q);this.qs=q;},
   enter(){this.root.visible=true;this.i=0;this.score=0;this.answered=null;this.hud();},
   exit(){this.root.visible=false;},
-  answer(k){if(this.answered!=null)return;this.answered=k;if(k===QUIZ[this.i].a)this.score++;this.hud();},
+  answer(k){if(this.answered!=null)return;this.answered=k;if(k===QUIZ[this.i].a){this.score++;SND.good();}else SND.bad();this.hud();},
   next(){this.i++;this.answered=null;if(this.i>=QUIZ.length){lastScore={s:this.score,n:QUIZ.length};showDiplomaUI();}this.hud();},
   hud(){
     if(this.i>=QUIZ.length){const s=this.score,n=QUIZ.length;
@@ -4575,6 +4578,122 @@ M.quiz={stars:true,
 };
 
 /* =====================================================================
+   NASTAVENIA OBSLUHY (uložené v okuliaroch)
+   ===================================================================== */
+const SET_DEF={mods:{trips:true,depth:true,planets:true,gravity:true,machines:true,quiz:true},limit:0,tutorial:true,sound:true};
+const SET=(()=>{try{const s=JSON.parse(localStorage.getItem('vnd-set')||'null');if(s)return Object.assign({},SET_DEF,s,{mods:Object.assign({},SET_DEF.mods,s.mods||{})});}catch(e){}return JSON.parse(JSON.stringify(SET_DEF));})();
+function saveSet(){try{localStorage.setItem('vnd-set',JSON.stringify(SET));}catch(e){}}
+
+/* =====================================================================
+   ZVUKY (syntetizované, bez súborov)
+   ===================================================================== */
+const SND={ctx:null,master:null,amb:null,
+  init(){if(this.ctx)return;try{const C=window.AudioContext||window.webkitAudioContext;this.ctx=new C();this.master=this.ctx.createGain();this.master.gain.value=0.7;this.master.connect(this.ctx.destination);}catch(e){this.ctx=null;}},
+  ok(){if(!this.ctx||!SET.sound)return false;if(this.ctx.state==='suspended')this.ctx.resume();return true;},
+  tone(f,dur,type,vol,f2,delay){if(!this.ok())return;const c=this.ctx,t=c.currentTime+(delay||0);
+    const o=c.createOscillator(),g=c.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+dur);
+    g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g);g.connect(this.master);o.start(t);o.stop(t+dur+0.05);},
+  hover(){this.tone(1200,0.045,'sine',0.035);},
+  click(){this.tone(620,0.09,'triangle',0.14,980);},
+  good(){[660,880,1320].forEach((f,i)=>this.tone(f,0.22,'sine',0.11,null,i*0.09));},
+  bad(){this.tone(260,0.3,'triangle',0.1,170);},
+  chime(){this.tone(1320,0.9,'sine',0.08);this.tone(1980,0.7,'sine',0.04,null,0.05);},
+  whoosh(){if(!this.ok())return;const c=this.ctx,t=c.currentTime,n=c.sampleRate*0.7,b=c.createBuffer(1,n,c.sampleRate),d=b.getChannelData(0);
+    for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.sin(Math.PI*i/n);
+    const s=c.createBufferSource();s.buffer=b;const f=c.createBiquadFilter();f.type='bandpass';f.Q.value=1.2;
+    f.frequency.setValueAtTime(300,t);f.frequency.exponentialRampToValueAtTime(2400,t+0.6);
+    const g=c.createGain();g.gain.value=0.16;s.connect(f);f.connect(g);g.connect(this.master);s.start(t);},
+  ambient(on){if(!this.ctx)return;
+    if(on&&SET.sound&&!this.amb){const c=this.ctx,g=c.createGain();g.gain.value=0;g.gain.linearRampToValueAtTime(0.045,c.currentTime+3);
+      const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=600;lp.connect(g);g.connect(this.master);
+      const os=[110,164.81,220.5,329.6].map((f,i)=>{const o=c.createOscillator();o.type=i%2?'triangle':'sine';o.frequency.value=f;o.detune.value=(i-1.5)*6;
+        const og=c.createGain();og.gain.value=i<2?0.5:0.18;
+        const l=c.createOscillator();l.frequency.value=0.05+i*0.03;const lg=c.createGain();lg.gain.value=0.15;l.connect(lg);lg.connect(og.gain);l.start();
+        o.connect(og);og.connect(lp);o.start();return [o,l];});
+      this.amb={g,os};}
+    else if((!on||!SET.sound)&&this.amb){const a=this.amb,c=this.ctx;a.g.gain.linearRampToValueAtTime(0,c.currentTime+1);setTimeout(()=>a.os.forEach(p=>p.forEach(o=>{try{o.stop();}catch(e){}})),1200);this.amb=null;}}
+};
+function haptic(c,int,ms){try{const g=c&&c.userData.src&&c.userData.src.gamepad;if(g&&g.hapticActuators&&g.hapticActuators[0])g.hapticActuators[0].pulse(int,ms);}catch(e){}}
+
+/* =====================================================================
+   NÁVŠTEVNÍK: úvod, časový limit, poďakovanie
+   ===================================================================== */
+const VISIT={start:null,warned:false};
+function startVisitor(){VISIT.start=null;VISIT.warned=false;recenter();
+  if(SET.tutorial&&renderer.xr.isPresenting)goTo('intro');else{goTo('lobby');if(renderer.xr.isPresenting)VISIT.start=performance.now();}}
+const timerSprite={s:null,last:''};
+function visitTick(){
+  const show=renderer.xr.isPresenting&&SET.limit>0&&VISIT.start&&!['intro','thanks','operator'].includes(current);
+  if(!show){if(timerSprite.s)timerSprite.s.visible=false;return;}
+  const left=Math.ceil(SET.limit-(performance.now()-VISIT.start)/1000);
+  if(left<=30&&!VISIT.warned){VISIT.warned=true;SND.chime();}
+  if(left<=0){SND.chime();goTo('thanks');return;}
+  const txt=left<=30?(L.lang==='en'?`${left} s left`:`zostáva ${left} s`):'';
+  if(txt!==timerSprite.last){timerSprite.last=txt;if(timerSprite.s){hud.remove(timerSprite.s);disposeTree(timerSprite.s);timerSprite.s=null;}
+    if(txt){const s=textSprite(txt,'#ffb46b',64);setSpriteH(s,0.05);s.material.depthTest=false;s.renderOrder=25;s.position.set(0.5,0.34,0.01);hud.add(s);timerSprite.s=s;}}
+  if(timerSprite.s)timerSprite.s.visible=true;
+}
+
+M.intro={stars:true,
+  build(){const r=this.root=new THREE.Group();anchor.add(r);
+    const orbMat=new THREE.MeshStandardMaterial({color:0x9fc0ff,emissive:new THREE.Color('#2a4a9a'),emissiveIntensity:.6,roughness:.6});
+    loadTex(ASSET.planets+'2k_earth_daymap.jpg').then(t=>{if(t){orbMat.map=t;orbMat.color.set('#ffffff');orbMat.emissive.set('#203050');orbMat.needsUpdate=true;}});
+    this.orb=new THREE.Mesh(new THREE.SphereGeometry(0.13,48,24),orbMat);this.orb.position.set(0,0.0,-1.3);r.add(this.orb);
+    this.ring=new THREE.Mesh(new THREE.RingGeometry(0.16,0.175,64),new THREE.MeshBasicMaterial({color:0xffb46b,transparent:true,side:THREE.DoubleSide,depthWrite:false}));
+    this.ring.position.copy(this.orb.position);r.add(this.ring);
+    // animované "prsty": palec a ukazovák sa spájajú
+    this.f1=new THREE.Mesh(new THREE.SphereGeometry(0.018,16,12),new THREE.MeshBasicMaterial({color:0xffd9b0}));
+    this.f2=this.f1.clone();r.add(this.f1,this.f2);
+    makeClickable(this.orb,{onClick:()=>this.done(),onHover:v=>{this.hover=v;}});
+  },
+  label(){if(this.lab){this.root.remove(this.lab);disposeTree(this.lab);}
+    this.lab=textSprite([L.lang==='en'?'Welcome to space!':'Vitaj vo vesmíre!',L.lang==='en'?'Point at Earth and pinch':'Namier na Zem a štipni'],['#ffb46b','#e9ecf7'],80);
+    setSpriteH(this.lab,0.24);this.lab.position.set(0,0.42,-1.6);this.root.add(this.lab);},
+  enter(){this.root.visible=true;this.label();this.hud();},
+  hud(){setHud({kicker:{sk:'Ako ovládať',en:'How to control'},title:{sk:'Spojte palec a ukazovák ako pinzetu',en:'Touch your thumb and index finger'},
+    body:{sk:'Najprv namierte lúčom z ruky na Zem pred sebou, potom štipnite. S ovládačom stlačte spúšť. Dlhé štipnutie vás kedykoľvek vráti domov.',en:'Point the ray from your hand at the Earth, then pinch. With a controller, press the trigger. A long pinch always takes you home.'},
+    rows:[[{label:'Slovensky',active:L.lang==='sk',onClick:()=>setLang('sk')},{label:'English',active:L.lang==='en',onClick:()=>setLang('en')}]],home:false,autoHide:false});},
+  done(){SND.good();VISIT.start=performance.now();VISIT.warned=false;goTo('lobby');},
+  relabel(){if(current==='intro'){this.label();this.hud();}},
+  exit(){this.root.visible=false;},
+  update(dt,t){const k=(this.hover?1.25:1)*(1+0.05*Math.sin(t*3));this.orb.scale.setScalar(k);this.orb.rotation.y+=dt*0.3;
+    this.ring.lookAt(anchor.localToWorld(new THREE.Vector3()));this.ring.scale.setScalar(k*(1+0.15*((t*0.8)%1)));this.ring.material.opacity=1-((t*0.8)%1);
+    const ph=(Math.sin(t*2.4)+1)/2,gap=0.012+0.05*ph,c=this.orb.position;
+    this.f1.position.set(c.x+0.3,c.y-0.02+gap,c.z+0.15);this.f2.position.set(c.x+0.3,c.y-0.02-gap,c.z+0.15);}
+};
+
+M.thanks={stars:true,
+  build(){this.root=new THREE.Group();anchor.add(this.root);},
+  enter(){this.root.visible=true;if(this.lab){this.root.remove(this.lab);disposeTree(this.lab);}
+    this.lab=textSprite([L.lang==='en'?'Thank you!':'Ďakujeme!',L.lang==='en'?'Please hand the headset to the next visitor':'Prosím, odovzdajte okuliare ďalšiemu návštevníkovi'],['#ffb46b','#e9ecf7'],80);
+    setSpriteH(this.lab,0.26);this.lab.position.set(0,0.2,-1.6);this.root.add(this.lab);
+    setHud({kicker:'KHaP MH',title:{sk:'Čas na návštevu vypršal',en:'Your time is up'},body:{sk:'Dúfame, že sa vám vesmír páčil. Príďte sa pozrieť aj do Hviezdnej sály!',en:'We hope you enjoyed space. Come and visit our planetarium dome too!'},
+      rows:[[{label:L.lang==='en'?'Next visitor ▶':'Ďalší návštevník ▶',onClick:startVisitor,primary:true}]],home:false,autoHide:false});},
+  exit(){this.root.visible=false;},update(){}
+};
+
+M.operator={stars:true,
+  build(){this.root=new THREE.Group();anchor.add(this.root);},
+  enter(){this.root.visible=true;this.hud();},
+  exit(){this.root.visible=false;},
+  hud(){
+    const MN={trips:{sk:'Výlety',en:'Trips'},depth:{sk:'Hĺbka',en:'Depth'},planets:{sk:'Planéty',en:'Planets'},gravity:{sk:'Gravitácia',en:'Gravity'},machines:{sk:'Rover',en:'Rover'},quiz:{sk:'Kvíz',en:'Quiz'}};
+    const tog=k=>({label:T(MN[k]),active:SET.mods[k],onClick:()=>{SET.mods[k]=!SET.mods[k];if(!Object.values(SET.mods).some(Boolean))SET.mods[k]=true;saveSet();this.hud();}});
+    const lim=s=>({label:s?(s/60)+' min':(L.lang==='en'?'No limit':'Bez limitu'),active:SET.limit===s,onClick:()=>{SET.limit=s;saveSet();this.hud();}});
+    setHud({kicker:{sk:'Režim obsluhy',en:'Staff mode'},title:{sk:'Čo uvidia návštevníci',en:'What visitors will see'},
+      body:{sk:'Oranžové = zapnuté. Druhý riadok je čas na jedného návštevníka. Nastavenie sa uloží v okuliaroch. Otvorenie: 5× rýchlo ťuknúť na logo.',en:'Orange = on. Row two is the time per visitor. Settings are stored in the headset. Open: tap the logo 5 times quickly.'},
+      rows:[Object.keys(MN).map(tog),[lim(0),lim(120),lim(180),lim(300)],
+        [{label:(L.lang==='en'?'Intro: ':'Úvod: ')+(SET.tutorial?(L.lang==='en'?'on':'zap'):(L.lang==='en'?'off':'vyp')),active:SET.tutorial,onClick:()=>{SET.tutorial=!SET.tutorial;saveSet();this.hud();}},
+         {label:(L.lang==='en'?'Sound: ':'Zvuk: ')+(SET.sound?(L.lang==='en'?'on':'zap'):(L.lang==='en'?'off':'vyp')),active:SET.sound,onClick:()=>{SET.sound=!SET.sound;saveSet();SND.ambient(SET.sound&&renderer.xr.isPresenting);this.hud();}},
+         {label:L.lang==='en'?'Slovensky':'English',onClick:toggleLang}],
+        [{label:L.lang==='en'?'Done, new visitor ▶':'Hotovo, nový návštevník ▶',primary:true,onClick:startVisitor}]],home:false,autoHide:false});},
+  relabel(){if(current==='operator')this.hud();},update(){}
+};
+let logoTaps=[];
+function logoTap(){const n=performance.now();logoTaps=logoTaps.filter(x=>n-x<4000);logoTaps.push(n);if(logoTaps.length>=5){logoTaps=[];SND.chime();goTo('operator');}}
+
+/* =====================================================================
    VSTUP: OVLÁDAČE, RUKY, MYŠ
    ===================================================================== */
 const raycaster=new THREE.Raycaster();raycaster.camera=camera;
@@ -4582,7 +4701,7 @@ function pick(origin,dir){raycaster.set(origin,dir);raycaster.far=60;const objs=
 let lastAct=performance.now(),needAnchor=false,anchorFrames=0;
 const hovered=new Set();
 function setHovered(set){hovered.forEach(o=>{if(!set.has(o)){hovered.delete(o);o.userData.click&&o.userData.click.onHover&&o.userData.click.onHover(false);}});
-  set.forEach(o=>{if(!hovered.has(o)){hovered.add(o);o.userData.click.onHover&&o.userData.click.onHover(true);}});}
+  set.forEach(o=>{if(!hovered.has(o)){hovered.add(o);SND.hover();o.userData.click.onHover&&o.userData.click.onHover(true);}});}
 
 const ctrls=[];const tmpV=new THREE.Vector3(),tmpQ=new THREE.Quaternion(),right=new THREE.Vector3();
 for(let i=0;i<2;i++){
@@ -4590,11 +4709,13 @@ for(let i=0;i<2;i++){
   const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(),new THREE.Vector3(0,0,-1)]),new THREE.LineBasicMaterial({color:0x9fc0ff,transparent:true,opacity:.55}));
   line.scale.z=0.4;c.add(line);c.userData.line=line;
   const dot=new THREE.Mesh(new THREE.SphereGeometry(0.007,12,8),new THREE.MeshBasicMaterial({color:0xffb46b,depthTest:false}));dot.renderOrder=30;dot.visible=false;scene.add(dot);c.userData.dot=dot;
+  c.addEventListener('connected',e=>{c.userData.src=e.data;});
+  c.addEventListener('disconnected',()=>{c.userData.src=null;});
   c.addEventListener('selectstart',()=>{lastAct=performance.now();
     const h=c.userData.hit;
-    if(h){const ck=h.object.userData.click;
-      if(ck.grab){c.userData.grabbing=ck;ck.grab.start(c);return;}
-      ck.onClick&&ck.onClick();return;}
+    if(h){const ck=h.object.userData.click;haptic(c,0.6,35);
+      if(ck.grab){SND.click();c.userData.grabbing=ck;ck.grab.start(c);return;}
+      SND.click();ck.onClick&&ck.onClick();return;}
     const m=M[current];c.userData.hold={t:performance.now(),p:c.position.clone(),moved:false,done:false,start:m&&m.dragStart?m.dragStart():0};});
   c.addEventListener('selectend',()=>{lastAct=performance.now();
     if(c.userData.grabbing){c.userData.grabbing.grab.end(c);c.userData.grabbing=null;return;}
@@ -4607,6 +4728,7 @@ function updateCtrl(c,hovSet){
   const h=c.userData.grabbing?null:pick(tmpV.clone(),dir);c.userData.hit=h;
   c.userData.line.scale.z=h?h.distance:0.4;c.userData.dot.visible=!!h;if(h)c.userData.dot.position.copy(h.point);
   if(h)hovSet.add(h.object);
+  const ho=h?h.object:null;if(ho&&ho!==c.userData.lastHover)haptic(c,0.15,12);c.userData.lastHover=ho;
   const hd=c.userData.hold;if(!hd)return;
   const d=c.position.clone().sub(hd.p);if(d.length()>0.04)hd.moved=true;
   if(hd.moved){right.set(1,0,0).applyQuaternion(anchor.quaternion);const m=M[current];m&&m.onDrag&&m.onDrag(d.dot(right),hd.start);lastAct=performance.now();}
@@ -4621,7 +4743,7 @@ renderer.domElement.addEventListener('pointermove',e=>{
     if(mdown.drag){look.yaw=mdown.yaw+dx*0.004;look.pitch=Math.max(-1.3,Math.min(1.3,mdown.pitch+dy*0.004));}}
   else{const h=mouseRay(e);setHovered(new Set(h?[h.object]:[]));renderer.domElement.style.cursor=h?'pointer':'default';}});
 renderer.domElement.addEventListener('pointerup',e=>{if(mdown&&!mdown.drag){const h=mouseRay(e);
-    if(h){const ck=h.object.userData.click;ck.onClick&&ck.onClick();}else{const m=M[current];m&&m.onTap&&m.onTap();}}
+    SND.init();if(h){const ck=h.object.userData.click;SND.click();ck.onClick&&ck.onClick();}else{const m=M[current];m&&m.onTap&&m.onTap();}}
   mdown=null;});
 
 function recenter(){needAnchor=true;anchorFrames=0;if(!renderer.xr.isPresenting){look.yaw=0;look.pitch=-0.12;}}
@@ -4632,13 +4754,14 @@ function recenter(){needAnchor=true;anchorFrames=0;if(!renderer.xr.isPresenting)
 const $=id=>document.getElementById(id);
 const msg=$('msg');function showMsg(t){msg.textContent=t;msg.hidden=!t;}
 async function startXR(mode){
+  SND.init();
   try{
     const s=await navigator.xr.requestSession(mode,{requiredFeatures:['local-floor'],optionalFeatures:['hand-tracking']});
     renderer.xr.setReferenceSpaceType('local-floor');await renderer.xr.setSession(s);
     isAR=mode==='immersive-ar';camera.position.set(0,0,0);camera.rotation.set(0,0,0);
-    needAnchor=true;anchorFrames=0;goHome();
+    needAnchor=true;anchorFrames=0;SND.ambient(true);startVisitor();
     s.addEventListener('end',()=>{isAR=false;anchor.position.set(0,1.6,0);anchor.rotation.set(0,0,0);floorG.position.set(0,0,0);floorG.rotation.set(0,0,0);
-      camera.position.set(0,1.6,0);ctrls.forEach(c=>{c.userData.dot.visible=false;c.userData.hit=null;});applyEnv();});
+      camera.position.set(0,1.6,0);ctrls.forEach(c=>{c.userData.dot.visible=false;c.userData.hit=null;});SND.ambient(false);VISIT.start=null;goHome();});
   }catch(err){showMsg(T(UI.xrfail)+' ('+err.name+')');}
 }
 function domTexts(){
@@ -4646,12 +4769,14 @@ function domTexts(){
   $('appTitle').textContent=T(UI.title);$('appSub').textContent=T(UI.sub);
   $('btnVR').textContent=T(UI.vr);$('btnAR').textContent=T(UI.ar);$('btnLang').textContent=T(UI.lang);
   $('btnOffline').textContent=T(UI.offline);$('btnMin').textContent=T($('ui').classList.contains('min')?UI.max:UI.min);
-  $('note').textContent=T(UI.note);$('dlabel').textContent=T(UI.dLabel);$('btnPrint').textContent=T(UI.dPrint);
+  $('note').textContent=T(UI.note);$('btnOper').textContent=L.lang==='en'?'Staff settings':'Nastavenia obsluhy';$('dlabel').textContent=T(UI.dLabel);$('btnPrint').textContent=T(UI.dPrint);
   if(!navigator.xr)showMsg(T(UI.noxr));
 }
+function setLang(l){if(L.lang!==l)toggleLang();else if(M[current]&&M[current].hud)M[current].hud();}
 function toggleLang(){L.lang=L.lang==='sk'?'en':'sk';try{localStorage.setItem('vnd-lang',L.lang);}catch(e){}
   domTexts();Object.values(M).forEach(m=>{if(m.built&&m.relabel)m.relabel();});if(M[current]&&M[current].hud&&current!=='trips'&&current!=='machines')M[current].hud();}
 $('btnLang').onclick=toggleLang;
+$('btnOper').onclick=()=>{SND.init();goTo('operator');};
 $('btnMin').onclick=()=>{$('ui').classList.toggle('min');domTexts();};
 if(navigator.xr){
   navigator.xr.isSessionSupported('immersive-vr').then(ok=>{if(ok){$('btnVR').hidden=false;$('xrrow').hidden=false;}}).catch(()=>{});
@@ -4685,7 +4810,8 @@ renderer.setAnimationLoop(()=>{
     const hs=new Set();ctrls.forEach(c=>updateCtrl(c,hs));setHovered(hs);
     if(needAnchor&&++anchorFrames>3){renderer.xr.getCamera(camera).matrixWorld.decompose(p3,q3,s3);
       if(p3.lengthSq()>1e-4){eul.setFromQuaternion(q3,'YXZ');anchor.position.copy(p3);anchor.rotation.set(0,eul.y,0);floorG.position.set(p3.x,0,p3.z);floorG.rotation.set(0,eul.y,0);needAnchor=false;}}
-    if(current!=='lobby'&&performance.now()-lastAct>120000){goHome();}
+    if(!['intro','operator'].includes(current)&&(current!=='lobby'||SET.tutorial)&&performance.now()-lastAct>120000){lastAct=performance.now();startVisitor();}
+    visitTick();
   }else{camera.rotation.set(look.pitch,look.yaw,0);}
   const m=M[current];if(m&&m.update)m.update(dt,t);
   hudTick(dt);hudFollow(dt);
