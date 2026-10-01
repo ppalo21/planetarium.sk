@@ -1,0 +1,9 @@
+Hĺbka oblohy – WebXR aplikácia pre Meta Quest 3
+1) Nahrajte celý obsah tohto priečinka do nového verejného repozitára na GitHube.
+2) Settings -> Pages -> Source: "Deploy from a branch", branch main, priečinok / (root) -> Save.
+3) O 1-2 minúty je aplikácia na https://<meno>.github.io/<repozitar>/
+4) V Queste otvorte Browser, zadajte adresu, pridajte medzi záložky.
+5) Kliknite "Spustiť v AR" alebo "Spustiť vo VR".
+Ovládanie v okuliaroch: štipnutie = ďalej, štipnúť a potiahnuť = otočiť,
+dlho podržať (1,5 s) = vycentrovať pred návštevníka a začať od začiatku.
+Tlačidlá na paneli pod pohľadom: výber súhvezdia, Späť, Ďalej, Vycentrovať.
