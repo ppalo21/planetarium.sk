@@ -18,7 +18,8 @@
   canvas{display:block;touch-action:none}
   #ui{position:fixed;left:16px;top:calc(16px + env(safe-area-inset-top,0px));width:min(380px,calc(100% - 32px));max-height:calc(100% - 32px);overflow:auto;
       background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 20px;backdrop-filter:blur(6px);box-sizing:border-box}
-  #ui.min .more{display:none}
+  #ui.min>*:not(.keep){display:none}
+  #ui.min{width:auto;padding:10px}
   .logo{display:block;width:140px;height:auto;margin-bottom:.6rem}
   h1{font-family:Fraunces,Georgia,serif;font-weight:700;font-size:1.55rem;margin:0}
   .sub{margin:.2rem 0 .9rem;color:var(--dim);font-size:.9rem;line-height:1.45}
@@ -57,8 +58,8 @@
   <div class="row more">
     <button id="btnLang"></button>
     <button id="btnOffline"></button>
-    <button id="btnMin"></button>
   </div>
+  <div class="row keep"><button id="btnMin"></button></div>
   <p id="msg" hidden></p>
   <div id="dipl" class="more" hidden>
     <label for="dname" id="dlabel" class="small" style="display:block;margin:0 0 .4rem"></label>
@@ -3933,7 +3934,7 @@ function isVisible(o){while(o){if(!o.visible)return false;o=o.parent;}return tru
 
 const HUD_W=1.3;
 const hud=new THREE.Group();anchor.add(hud);
-hud.position.set(0,-0.6,-1.25);hud.rotation.x=Math.atan(0.6/1.25);
+hud.position.set(0,-0.68,-1.15);hud.rotation.x=Math.atan(0.68/1.15);
 const hc=document.createElement('canvas');hc.width=1560;hc.height=470;const htex=canvasTex(hc);
 const hudText=new THREE.Mesh(new THREE.PlaneGeometry(HUD_W,HUD_W*470/1560),new THREE.MeshBasicMaterial({map:htex,transparent:true,depthTest:false,depthWrite:false}));
 hudText.renderOrder=20;hudText.position.y=0.13;hud.add(hudText);
@@ -3974,21 +3975,47 @@ function drawHud(){
   if(cfg.credit){g.fillStyle='#8a93b8';g.font='400 28px Figtree, system-ui, sans-serif';g.fillText('© '+T(cfg.credit),52,H-28);}
   htex.needsUpdate=true;
 }
+let hudMode='full',hudTimer=0,keepHudMode=false;
+const HUD_AUTOHIDE=9; // sekúnd, po ktorých sa info tabuľa zbalí
+function hudAuto(){return hudCfg&&hudCfg.autoHide!==false&&current!=='lobby'&&current!=='quiz';}
 function setHud(cfg){
-  hudCfg=cfg;drawHud();
+  hudCfg=cfg;if(!keepHudMode){hudMode='full';}keepHudMode=false;hudTimer=0;buildHud();
+}
+function setHudMode(m){hudMode=m;hudTimer=0;buildHud();}
+function buildHud(){
+  const cfg=hudCfg;
   hudButtons.forEach(b=>{hud.remove(b);b.userData.dispose();});hudButtons=[];
-  const rows=(cfg.rows||[]).slice();
-  if(cfg.home!==false&&current!=='lobby')rows.push([{label:T(UI.home),onClick:goHome}]);
   const gap=0.014,h=0.072;
+  const wrap=(fn)=>()=>{hudTimer=0;lastAct=performance.now();fn&&fn();};
+  let rows;
+  if(hudMode==='mini'&&hudAuto()){
+    hudText.visible=false;
+    const last=(cfg.rows&&cfg.rows.length)?cfg.rows[cfg.rows.length-1]:[];
+    rows=[[{label:'ⓘ '+(L.lang==='en'?'Info':'Info'),onClick:()=>setHudMode('full')}].concat(last,cfg.home!==false?[{label:T(UI.home),onClick:goHome}]:[])];
+  }else{
+    hudText.visible=true;drawHud();
+    rows=(cfg.rows||[]).map(r=>r.slice());
+    const extra=[];
+    if(hudAuto())extra.push({label:(L.lang==='en'?'Hide ▾':'Skryť ▾'),onClick:()=>setHudMode('mini')});
+    if(cfg.home!==false&&current!=='lobby')extra.push({label:T(UI.home),onClick:goHome});
+    if(extra.length)rows.push(extra);
+  }
   rows.forEach((row,ri)=>{
-    const n=row.length,w=Math.min(row.length>3?(HUD_W-gap*(n-1))/n:0.36,(HUD_W-gap*(n-1))/n);
+    const n=row.length,w=Math.min(n>3?(HUD_W-gap*(n-1))/n:0.34,(HUD_W-gap*(n-1))/n);
     const total=n*w+(n-1)*gap;
     row.forEach((b,i)=>{
-      const m=makeButton(b.label,w,h,b.onClick,b);
-      m.position.set(-total/2+w/2+i*(w+gap),-0.115-ri*(h+0.016),0.001);
-      hud.add(m);hudButtons.push(m);
+      const m=makeButton(b.label,w,h,wrap(b.onClick),b);
+      const y=hudText.visible?-0.115-ri*(h+0.016):-0.02-ri*(h+0.016);
+      m.position.set(-total/2+w/2+i*(w+gap),y,0.001);
+      m.userData.isHud=true;hud.add(m);hudButtons.push(m);
     });
   });
+}
+function hudTick(dt){
+  if(hudMode!=='full'||!hudAuto())return;
+  let looking=false;hovered.forEach(o=>{if(o.userData.isHud)looking=true;});
+  if(looking){hudTimer=0;return;}
+  hudTimer+=dt;if(hudTimer>HUD_AUTOHIDE)setHudMode('mini');
 }
 function refreshHud(){if(hudCfg&&hudCfg.rebuild)hudCfg.rebuild();else if(hudCfg)setHud(hudCfg);}
 
@@ -4001,6 +4028,7 @@ function goTo(id,arg){
   current=id;const m=M[id];
   if(!m.built){m.build();m.built=true;}
   m.enter(arg);applyEnv();lastAct=performance.now();
+  const ui=document.getElementById('ui');if(ui&&!renderer.xr.isPresenting){ui.classList.toggle('min',id!=='lobby');if(typeof domTexts==='function')domTexts();}
 }
 function goHome(){goTo('lobby');}
 function applyEnv(){
@@ -4226,8 +4254,8 @@ M.planets={stars:true,
       if(b.day)parts.push((L.lang==='en'?'Rotation ':'Otočka ')+T(b.day));if(b.year)parts.push((L.lang==='en'?'Year ':'Rok ')+T(b.year));
       body=parts.join(',  ')+'. '+T(b.fact);}
     setHud({kicker:{sk:'Planéty v ruke',en:'Planets in hand'},title,body,credit:{sk:'Textúry: Solar System Scope (CC BY 4.0)',en:'Textures: Solar System Scope (CC BY 4.0)'},
-      rows:[[{label:L.lang==='en'?'Same size':'Rovnaká veľkosť',active:!this.real,onClick:()=>{this.real=false;this.layout();this.hud();}},
-             {label:L.lang==='en'?'True sizes':'Skutočné pomery',active:this.real,onClick:()=>{this.real=true;this.layout();this.hud();}}]]});
+      rows:[[{label:L.lang==='en'?'Same size':'Rovnaká veľkosť',active:!this.real,onClick:()=>{this.real=false;this.layout();keepHudMode=true;this.hud();}},
+             {label:L.lang==='en'?'True sizes':'Skutočné pomery',active:this.real,onClick:()=>{this.real=true;this.layout();keepHudMode=true;this.hud();}}]]});
   },
   relabel(){this.items.forEach(it=>{it.holder.remove(it.lab);disposeTree(it.lab);it.lab=textSprite(T(it.b.name),'#e9ecf7',56);it.holder.add(it.lab);});if(current==='planets')this.hud();},
   update(dt){
@@ -4263,7 +4291,7 @@ M.gravity={floor:true,stars:true,
     const l2=col.time!=null?(L.lang==='en'?'landed in ':'dopad za ')+col.time.toFixed(2).replace('.',L.lang==='en'?'.':',')+' s':(L.lang==='en'?'g = ':'g = ')+String(col.w.g).replace('.',L.lang==='en'?'.':',')+' m/s²';
     col.lab=textSprite([T(col.w.name),l2],['#e9ecf7',col.time!=null?'#ffb46b':'#c9cfe6'],60);setSpriteH(col.lab,0.11);col.lab.position.set(0,DROP_H+0.22,0);col.g.add(col.lab);},
   reset(){this.cols.forEach(c=>{c.y=DROP_H;c.v=0;c.state='ready';c.time=null;c.ball.position.set(0,c.y,0);this.label(c);});this.running=false;this.hud();},
-  drop(){if(this.running){this.reset();return;}this.running=true;this.t0=0;this.cols.forEach(c=>{c.state='fall';});this.hud();},
+  drop(){if(this.running){keepHudMode=true;this.reset();return;}this.running=true;this.t0=0;this.cols.forEach(c=>{c.state='fall';});keepHudMode=true;this.hud();},
   hud(){setHud({kicker:{sk:'Gravitácia',en:'Gravity'},title:{sk:'Na ktorom svete dopadne loptička prvá?',en:'On which world does the ball land first?'},
     body:{sk:`Všetky loptičky padajú z výšky ${String(DROP_H).replace('.',',')} m. Na Mesiaci je gravitácia asi 6-krát slabšia ako na Zemi, na Jupiteri 2,5-krát silnejšia.`,en:`All balls fall from ${DROP_H} m. Gravity on the Moon is about 6 times weaker than on Earth, on Jupiter 2.5 times stronger.`},
     rows:[[{label:this.running?T(UI.again):(L.lang==='en'?'Drop the balls':'Pustiť loptičky'),onClick:()=>this.drop(),primary:true}]]});},
@@ -4304,7 +4332,7 @@ M.machines={floor:true,stars:true,
     this.hud(mc.info);},
   hud(body){const mc=MACHINES[this.i];
     setHud({kicker:{sk:'V skutočnej veľkosti',en:'Life size'},title:mc.name,body,credit:mc.credit,
-      rows:[[{label:this.spin?(L.lang==='en'?'Stop turning':'Zastaviť otáčanie'):(L.lang==='en'?'Turn':'Otáčať'),onClick:()=>{this.spin=!this.spin;this.hud(body);}}].concat(MACHINES.length>1?[{label:T(UI.next)+' ▶',onClick:()=>this.load((this.i+1)%MACHINES.length)}]:[])]});},
+      rows:[[{label:this.spin?(L.lang==='en'?'Stop turning':'Zastaviť otáčanie'):(L.lang==='en'?'Turn':'Otáčať'),onClick:()=>{this.spin=!this.spin;keepHudMode=true;this.hud(body);}}].concat(MACHINES.length>1?[{label:T(UI.next)+' ▶',onClick:()=>this.load((this.i+1)%MACHINES.length)}]:[])]});},
   onDrag(dx,start){this.spin=false;this.yaw=start+dx*4;},
   dragStart(){return this.yaw;},
   relabel(){if(!this.built)return;this.person.remove(this.personLbl);disposeTree(this.personLbl);const pl=textSprite(L.lang==='en'?'Person 1.7 m':'Človek 1,7 m','#9fc0ff',56);setSpriteH(pl,0.07);pl.position.y=1.82;this.person.add(pl);this.personLbl=pl;if(current==='machines')this.load(this.i);},
@@ -4450,6 +4478,7 @@ renderer.setAnimationLoop(()=>{
     if(current!=='lobby'&&performance.now()-lastAct>120000){goHome();}
   }else{camera.rotation.set(look.pitch,look.yaw,0);}
   const m=M[current];if(m&&m.update)m.update(dt,t);
+  hudTick(dt);
   renderer.render(scene,camera);
 });
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
