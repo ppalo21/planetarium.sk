@@ -24,14 +24,21 @@ export const gravity: any = {
   label(col: any) {
     if (col.lab) { col.g.remove(col.lab); disposeTree(col.lab); }
     const l2 = col.time != null ? (en() ? 'landed in ' : 'dopad za ') + dec(col.time) + ' s' : 'g = ' + dec(col.w.g) + ' m/s²';
-    col.lab = textSprite([T(col.w.name), l2], ['#e9ecf7', col.time != null ? '#ffb46b' : '#c9cfe6'], 60); setSpriteH(col.lab, 0.11); col.lab.position.set(0, this.H + 0.22, 0); col.g.add(col.lab);
+    const lines = [T(col.w.name), l2], colors = ['#e9ecf7', col.time != null ? '#ffb46b' : '#c9cfe6'];
+    if (this.mass) {   // váha: koľko by ukázala osobná váha na tomto svete
+      const kg = Math.round(this.mass * col.w.g / 9.81);
+      lines.push((en() ? 'scale shows ' : 'váha ukáže ') + kg + ' kg'); colors.push('#9fe0a8');
+    }
+    col.lab = textSprite(lines, colors, 60); setSpriteH(col.lab, 0.055 * lines.length); col.lab.position.set(0, this.H + 0.22, 0); col.g.add(col.lab);
   },
+  setMass(m: number) { this.mass = this.mass === m ? 0 : m; this.cols.forEach((c: any) => this.label(c)); keepHud(); this.hud(); },
   reset() { this.cols.forEach((c: any) => { c.y = this.H; c.v = 0; c.state = 'ready'; c.time = null; c.ball.position.set(0, c.y, 0); this.label(c); }); this.running = false; this.hud(); },
   drop() { keepHud(); if (this.running) { this.reset(); return; } this.running = true; this.cols.forEach((c: any) => { c.state = 'fall'; }); this.hud(); },
   hud() {
     setHud({ kicker: { sk: 'Gravitácia', en: 'Gravity' }, title: { sk: 'Na ktorom svete dopadne loptička prvá?', en: 'On which world does the ball land first?' },
-      body: isPlacing() ? { sk: 'Pozrite sa na podlahu, objaví sa oranžový terčík. Štipnite a pokus sa postaví tam.', en: 'Look at the floor until an orange target appears, then pinch to set up the experiment there.' } : { sk: `Všetky loptičky padajú z výšky ${dec(this.H, 1)} m. Na Mesiaci je gravitácia asi 6-krát slabšia ako na Zemi, na Jupiteri 2,5-krát silnejšia.`, en: `All balls fall from ${this.H} m. Gravity on the Moon is about 6 times weaker than on Earth, on Jupiter 2.5 times stronger.` },
-      rows: [[...(arReady() ? [{ label: en() ? 'Place' : 'Umiestniť', active: isPlacing(), onClick: () => this.place() }] : []), { label: this.running ? T(ctx.content.ui.again) : (en() ? 'Drop the balls' : 'Pustiť loptičky'), onClick: () => this.drop(), primary: true }]] });
+      body: isPlacing() ? { sk: 'Pozrite sa na podlahu, objaví sa oranžový terčík. Štipnite a pokus sa postaví tam.', en: 'Look at the floor until an orange target appears, then pinch to set up the experiment there.' } : { sk: `Všetky loptičky padajú z výšky ${dec(this.H, 1)} m. Na Mesiaci je gravitácia asi 6-krát slabšia ako na Zemi, na Jupiteri 2,5-krát silnejšia. Vyberte svoju hmotnosť a uvidíte, čo by ukázala osobná váha.`, en: `All balls fall from ${this.H} m. Gravity on the Moon is about 6 times weaker than on Earth, on Jupiter 2.5 times stronger. Pick your weight to see what a bathroom scale would show.` },
+      rows: [[20, 30, 40, 60, 80].map(m => ({ label: m + ' kg', active: this.mass === m, onClick: () => this.setMass(m) })),
+        [...(arReady() ? [{ label: en() ? 'Place' : 'Umiestniť', active: isPlacing(), onClick: () => this.place() }] : []), { label: this.running ? T(ctx.content.ui.again) : (en() ? 'Drop the balls' : 'Pustiť loptičky'), onClick: () => this.drop(), primary: true }]] });
   },
   onTap() { if (!isPlacing()) this.drop(); },
   enter() { this.root.visible = true; this.root.position.set(0, 0, 0); this.reset(); if (arReady()) this.place(); },

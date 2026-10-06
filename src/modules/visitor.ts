@@ -82,7 +82,7 @@ export const operator: any = {
   enter() { this.root.visible = true; this.hud(); },
   exit() { this.root.visible = false; },
   hud() {
-    const MN: Record<string, any> = { trips: { sk: 'Výlety', en: 'Trips' }, depth: { sk: 'Hĺbka', en: 'Depth' }, planets: { sk: 'Planéty', en: 'Planets' }, gravity: { sk: 'Gravitácia', en: 'Gravity' }, machines: { sk: 'Rover', en: 'Rover' }, quiz: { sk: 'Kvíz', en: 'Quiz' } };
+    const MN: Record<string, any> = { trips: { sk: 'Výlety', en: 'Trips' }, depth: { sk: 'Hĺbka', en: 'Depth' }, planets: { sk: 'Planéty', en: 'Planets' }, phases: { sk: 'Fázy', en: 'Phases' }, gravity: { sk: 'Gravitácia', en: 'Gravity' }, machines: { sk: 'Stroje', en: 'Machines' }, quiz: { sk: 'Kvíz', en: 'Quiz' } };
     const tog = (k: string) => ({ label: T(MN[k]), active: SET.mods[k], onClick: () => { SET.mods[k] = !SET.mods[k]; if (!Object.values(SET.mods).some(Boolean)) SET.mods[k] = true; saveSet(); this.hud(); } });
     const lim = (s: number) => ({ label: s ? (s / 60) + ' min' : (en() ? 'No limit' : 'Bez limitu'), active: SET.limit === s, onClick: () => { SET.limit = s; saveSet(); this.hud(); } });
     const onoff = (v: boolean) => v ? (en() ? 'on' : 'zap') : (en() ? 'off' : 'vyp');

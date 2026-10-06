@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Text } from 'troika-three-text';
+import { Text, preloadFont } from 'troika-three-text';
 import { ctx, url, type Txt } from './context';
 import { T, L, en } from './i18n';
 import { SND } from './sound';
@@ -16,13 +16,19 @@ export function isVisible(o: THREE.Object3D | null) { while (o) { if (!o.visible
 
 /* ---------------- ostré písmo (SDF, troika) ---------------- */
 export const FONT = { regular: url('fonts/Figtree-Regular.ttf'), semibold: url('fonts/Figtree-SemiBold.ttf'), bold: url('fonts/Figtree-Bold.ttf') };
+/** Písma sa načítajú postupne ešte pred vytvorením tabule (súbežné načítanie troika niekedy zasekne). */
+export async function preloadFonts() {
+  const chars = 'aáäbcčdďeéfghiíjklĺľmnňoóôpqrŕsštťuúvwxyýzžAÁÄBCČDĎEÉFGHIÍJKLĹĽMNŇOÓÔPQRŔSŠTŤUÚVWXYÝZŽ0123456789 .,:;!?()-–/×°‹›↓…';
+  const one = (f: string) => new Promise<void>(res => { preloadFont({ font: f, characters: chars }, () => res()); setTimeout(res, 6000); }); // poistka: appka sa spustí aj keby sa písmo zdržalo
+  for (const f of [FONT.regular, FONT.semibold, FONT.bold]) await one(f);
+}
 export function makeText(str: string, o: { size: number; color?: string | number; font?: string; maxWidth?: number; anchorX?: any; anchorY?: any; lineHeight?: number; order?: number }) {
   const t = new Text();
-  t.text = str; t.fontSize = o.size; t.color = o.color ?? '#e9ecf7'; t.font = o.font ?? FONT.regular;
+  t.text = str; (t as any).gpuAccelerateSDF = false; t.fontSize = o.size; t.color = o.color ?? '#e9ecf7'; t.font = o.font ?? FONT.regular;
   if (o.maxWidth) t.maxWidth = o.maxWidth;
   t.anchorX = o.anchorX ?? 'left'; t.anchorY = o.anchorY ?? 'top'; t.lineHeight = o.lineHeight ?? 1.25;
   t.material = new THREE.MeshBasicMaterial({ transparent: true, depthTest: false, depthWrite: false });
-  t.renderOrder = o.order ?? 22; t.sync(); return t;
+  t.renderOrder = o.order ?? 22; if (str) t.sync(); return t;
 }
 function rrGeo(w: number, h: number, r: number) {
   const s = new THREE.Shape(), x = -w / 2, y = -h / 2;
@@ -63,7 +69,8 @@ export interface HudCfg { kicker?: Txt; title: Txt; body?: Txt; credit?: Txt | n
 export const HUD_W = 1.3, HUD_H = 0.36;
 export const hudYaw = new THREE.Group();
 export const hud = new THREE.Group();
-let panel: THREE.Group, tKicker: Text, tTitle: Text, tBody: Text, tCredit: Text;
+let panel: THREE.Group, tKicker: Text, tTitle: Text, tBody: Text, tCredit: Text, panelBg: THREE.Mesh, panelOl: THREE.LineLoop;
+const PANEL_TOP = 0.13 + HUD_H / 2;
 let cfg: HudCfg | null = null, mode: 'full' | 'mini' = 'full', timer = 0, keep = false, yawTarget = 0;
 let buttons: THREE.Group[] = [];
 const AUTOHIDE = 9;
@@ -73,8 +80,8 @@ export function initHud() {
   hud.position.set(0, -0.56, -1.0); hud.rotation.x = -Math.atan(0.56 / 1.0);   // natočené kolmo k očiam
   panel = new THREE.Group(); panel.position.y = 0.13; hud.add(panel);
   const geo = rrGeo(HUD_W, HUD_H, 0.035);
-  const bg = new THREE.Mesh(geo.fill, new THREE.MeshBasicMaterial({ color: '#080e28', transparent: true, opacity: 0.93, depthTest: false, depthWrite: false })); bg.renderOrder = 20; panel.add(bg);
-  const ol = new THREE.LineLoop(geo.line, new THREE.LineBasicMaterial({ color: '#2b3a6b', transparent: true, depthTest: false })); ol.renderOrder = 20; panel.add(ol);
+  const bg = panelBg = new THREE.Mesh(geo.fill, new THREE.MeshBasicMaterial({ color: '#080e28', transparent: true, opacity: 0.93, depthTest: false, depthWrite: false })); bg.renderOrder = 20; panel.add(bg);
+  const ol = panelOl = new THREE.LineLoop(geo.line, new THREE.LineBasicMaterial({ color: '#2b3a6b', transparent: true, depthTest: false })); ol.renderOrder = 20; panel.add(ol);
   const x0 = -HUD_W / 2 + 0.045, top = HUD_H / 2 - 0.03;
   tKicker = makeText('', { size: 0.022, color: '#8a93b8', font: FONT.semibold }); tKicker.position.set(x0, top, 0.001);
   tTitle = makeText('', { size: 0.042, color: '#ffb46b', font: FONT.bold }); tTitle.position.set(x0, top - 0.04, 0.001);
@@ -105,21 +112,39 @@ export function buildHud() {
     tKicker.text = T(cfg.kicker); const title = T(cfg.title);
     tTitle.text = title; tTitle.fontSize = Math.min(0.042, (HUD_W - 0.09) / Math.max(1, title.length * 0.5));
     tBody.text = T(cfg.body); tCredit.text = cfg.credit ? '© ' + T(cfg.credit) : '';
-    [tKicker, tTitle, tBody, tCredit].forEach(t => t.sync());
+    [tKicker, tTitle, tCredit].forEach(t => t.sync());
+    tBody.sync(() => relayout());
     rows = (cfg.rows || []).map(r => r.slice());
     const extra: BtnCfg[] = [];
     if (autoOK()) extra.push({ label: en() ? 'Hide ↓' : 'Skryť ↓', onClick: () => setHudMode('mini') });
     if (cfg.home !== false && ctx.current !== 'lobby') extra.push({ label: T({ sk: 'Domov', en: 'Home' }), onClick: ctx.goHome });
     if (extra.length) rows.push(extra);
   }
+  rowsTop = mini ? -0.02 : -0.115;
   rows.forEach((row, ri) => {
     const n = row.length, w = Math.min(n > 3 ? (HUD_W - gap * (n - 1)) / n : 0.34, (HUD_W - gap * (n - 1)) / n), total = n * w + (n - 1) * gap;
     row.forEach((b, i) => {
       const m = makeButton({ ...b, onClick: wrap(b.onClick) }, w, h);
-      m.position.set(-total / 2 + w / 2 + i * (w + gap), (mini ? -0.02 : -0.115) - ri * (h + 0.016), 0.002);
+      m.position.set(-total / 2 + w / 2 + i * (w + gap), rowsTop - ri * (h + 0.016), 0.002); m.userData.row = ri;
       m.userData.bg.userData.isHud = true; hud.add(m); buttons.push(m);
     });
   });
+}
+let rowsTop = -0.115;
+/** Výška tabule podľa dĺžky textu: bez prázdneho miesta dole, tlačidlá hneď pod textom. */
+function relayout() {
+  if (!panel.visible) return;
+  const info = (tBody as any).textRenderInfo; if (!info) return;
+  const bodyH = Math.min(info.blockBounds[3] - info.blockBounds[1], HUD_H - 0.14);
+  const h = Math.max(0.2, Math.min(HUD_H, 0.13 + bodyH + (tCredit.text ? 0.045 : 0.025)));
+  const geo = rrGeo(HUD_W, h, 0.035);
+  panelBg.geometry.dispose(); panelBg.geometry = geo.fill; panelOl.geometry.dispose(); panelOl.geometry = geo.line;
+  panel.position.y = PANEL_TOP - h / 2;
+  const top = h / 2 - 0.03, x0 = -HUD_W / 2 + 0.045;
+  tKicker.position.set(x0, top, 0.001); tTitle.position.set(x0, top - 0.04, 0.001); tBody.position.set(x0, top - 0.1, 0.001);
+  tCredit.position.set(x0, -h / 2 + 0.035, 0.001);
+  rowsTop = PANEL_TOP - h - 0.05;
+  buttons.forEach(b => { b.position.y = rowsTop - b.userData.row * (0.072 + 0.016); });
 }
 export function hudTick(dt: number, hovered: Set<THREE.Object3D>) {
   // automatické zbalenie tabule

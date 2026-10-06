@@ -15,7 +15,7 @@ let onModeChange: () => void = () => {};
 
 function pick(origin: THREE.Vector3, dir: THREE.Vector3) {
   raycaster.set(origin, dir); raycaster.far = 60; raycaster.camera = ctx.camera;
-  return raycaster.intersectObjects([...clickables].filter(isVisible), false)[0] || null;
+  return raycaster.intersectObjects([...clickables].filter(o => isVisible(o) && o.userData.click?.enabled !== false), false)[0] || null;
 }
 function setHovered(set: Set<THREE.Object3D>) {
   hovered.forEach(o => { if (!set.has(o)) { hovered.delete(o); o.userData.click?.onHover?.(false); } });
@@ -47,11 +47,13 @@ export function initInput(modeChanged: () => void) {
         ck.onClick?.(); return;
       }
       const m = ctx.modules[ctx.current];
+      (m as any)?.onPinchStart?.(c);
       c.userData.hold = { t: performance.now(), p: c.position.clone(), moved: false, done: false, start: m?.dragStart ? m.dragStart() : 0 };
     });
     c.addEventListener('selectend', () => {
       ctx.lastAct = performance.now();
       if (c.userData.grabbing) { c.userData.grabbing.grab.end(c); c.userData.grabbing = null; return; }
+      (ctx.modules[ctx.current] as any)?.onPinchEnd?.(c);
       const h = c.userData.hold; c.userData.hold = null; if (!h || h.done) return;
       if (!h.moved && performance.now() - h.t < 600) { if (!tryPlace()) ctx.modules[ctx.current]?.onTap?.(); }
     });
@@ -122,7 +124,7 @@ function initMouse() {
   const ray = (e: PointerEvent) => {
     mouse.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
     raycaster.setFromCamera(mouse, ctx.camera); raycaster.far = 60;
-    return raycaster.intersectObjects([...clickables].filter(isVisible), false)[0] || null;
+    return raycaster.intersectObjects([...clickables].filter(o => isVisible(o) && o.userData.click?.enabled !== false), false)[0] || null;
   };
   el.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, yaw: look.yaw, pitch: look.pitch, drag: false }; el.setPointerCapture(e.pointerId); ctx.lastAct = performance.now(); });
   el.addEventListener('pointermove', e => {

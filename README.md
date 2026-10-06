@@ -36,3 +36,15 @@ a každá zmena v kóde sa v okuliaroch prejaví hneď.
 ## Meranie výkonu
 Do Questu nainštaluj **OVR Metrics Tool** (z obchodu Meta) a zapni prekrytie: ukáže fps a záťaž počas behu appky.
 Cieľ: stabilných 72 fps.
+
+## Štatistika (voliteľné)
+Anonymné údaje o návštevách (moduly, čas, kvíz, jazyk, VR/AR) sa môžu zapisovať do Google Sheets.
+Postup je na začiatku súboru `scripts/statistika.gs`. Adresu skriptu vlož do `public/content/stats.json`.
+Bez internetu sa záznamy ukladajú v okuliaroch a odošlú sa, keď sa pripojí.
+
+## 3D modely
+`public/assets/modely/` – modely NASA (NASA 3D Resources, voľné dielo). Curiosity a Perseverance stiahne skript.
+Nový model: pridaj .glb do priečinka a záznam do `public/content/machines.json`
+(`size` = skutočný rozmer v metroch, `scaleBy` = `length` / `height` / `max`, `float: true` = vznáša sa).
+Popisy dielov: v `machines.json` pole `parts` – `node` (názov dielu v .glb), `keys` (kľúčové slová v názvoch)
+alebo `at` ([x, y, z] od 0 do 1 v rámci rozmerov modelu, bod sa prichytí k povrchu).

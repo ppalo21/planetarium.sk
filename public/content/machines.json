@@ -2,7 +2,8 @@
  {
   "id": "curiosity",
   "file": "assets/modely/curiosity.glb",
-  "length": 2.9,
+  "size": 2.9,
+  "scaleBy": "length",
   "name": {
    "sk": "Rover Curiosity",
    "en": "Curiosity rover"
@@ -11,6 +12,547 @@
    "sk": "Na Marse jazdí od augusta 2012 v kráteri Gale. Je veľký ako auto, dlhý asi 2,9 m a váži 899 kg.",
    "en": "Driving in Gale Crater on Mars since August 2012. Car-sized, about 2.9 m long, 899 kg."
   },
-  "credit": "NASA/JPL-Caltech"
+  "credit": "NASA/JPL-Caltech",
+  "parts": [
+   {
+    "n": {
+     "sk": "ChemCam",
+     "en": "ChemCam"
+    },
+    "f": {
+     "sk": "laserom odparuje horniny až zo 7 m",
+     "en": "its laser zaps rocks from up to 7 m"
+    },
+    "keys": [
+     "chemcam",
+     "mast_head",
+     "head",
+     "mast"
+    ],
+    "at": [
+     0.53,
+     0.68,
+     0.64
+    ]
+   },
+   {
+    "n": {
+     "sk": "Robotická ruka",
+     "en": "Robotic arm"
+    },
+    "f": {
+     "sk": "dlhá 2,2 m, na konci má vŕtačku",
+     "en": "2.2 m long with a drill at the end"
+    },
+    "keys": [
+     "arm"
+    ],
+    "at": [
+     0.53,
+     0.66,
+     0.88
+    ]
+   },
+   {
+    "n": {
+     "sk": "Kolesá",
+     "en": "Wheels"
+    },
+    "f": {
+     "sk": "6 hliníkových kolies, priemer 50 cm",
+     "en": "6 aluminium wheels, 50 cm across"
+    },
+    "keys": [
+     "wheel"
+    ],
+    "at": [
+     0.5,
+     0.14,
+     0.55
+    ]
+   },
+   {
+    "n": {
+     "sk": "Jadrový zdroj MMRTG",
+     "en": "MMRTG power source"
+    },
+    "f": {
+     "sk": "teplo z plutónia mení na elektrinu",
+     "en": "turns heat from plutonium into electricity"
+    },
+    "keys": [
+     "rtg"
+    ],
+    "at": [
+     0.5,
+     0.63,
+     0.16
+    ]
+   },
+   {
+    "n": {
+     "sk": "Anténa",
+     "en": "Antenna"
+    },
+    "f": {
+     "sk": "spojenie so Zemou",
+     "en": "link to Earth"
+    },
+    "keys": [
+     "antenna",
+     "hga"
+    ],
+    "at": [
+     0.65,
+     0.7,
+     0.43
+    ]
+   }
+  ]
+ },
+ {
+  "id": "perseverance",
+  "file": "assets/modely/perseverance.glb",
+  "size": 3.0,
+  "scaleBy": "length",
+  "name": {
+   "sk": "Rover Perseverance",
+   "en": "Perseverance rover"
+  },
+  "info": {
+   "sk": "Na Marse od februára 2021 v kráteri Jezero. Zbiera vzorky hornín, ktoré majú raz priletieť na Zem. Je dlhý asi 3 m a váži 1 025 kg.",
+   "en": "On Mars since February 2021 in Jezero Crater, collecting rock samples meant to come to Earth one day. About 3 m long, 1,025 kg."
+  },
+  "credit": "NASA/JPL-Caltech",
+  "parts": [
+   {
+    "n": {
+     "sk": "Mastcam-Z",
+     "en": "Mastcam-Z"
+    },
+    "f": {
+     "sk": "dvojitá kamera so zoomom, fotí v 3D",
+     "en": "twin zoom camera that shoots in 3D"
+    },
+    "node": "Mastcam_Z_cams"
+   },
+   {
+    "n": {
+     "sk": "SuperCam",
+     "en": "SuperCam"
+    },
+    "f": {
+     "sk": "laserom odparí kúsok horniny až zo 7 m",
+     "en": "its laser zaps rocks from up to 7 m"
+    },
+    "node": "head"
+   },
+   {
+    "n": {
+     "sk": "Mikrofóny",
+     "en": "Microphones"
+    },
+    "f": {
+     "sk": "prvé nahrávky zvukov z Marsu",
+     "en": "the first recordings of sounds on Mars"
+    },
+    "node": "microphones"
+   },
+   {
+    "n": {
+     "sk": "Robotická ruka",
+     "en": "Robotic arm"
+    },
+    "f": {
+     "sk": "dlhá 2,1 m, má 5 kĺbov",
+     "en": "2.1 m long with 5 joints"
+    },
+    "node": "arm"
+   },
+   {
+    "n": {
+     "sk": "Vŕtačka",
+     "en": "Drill"
+    },
+    "f": {
+     "sk": "vyvŕta vzorku horniny do skúmavky",
+     "en": "drills a rock core into a sample tube"
+    },
+    "node": "corring_drill"
+   },
+   {
+    "n": {
+     "sk": "PIXL",
+     "en": "PIXL"
+    },
+    "f": {
+     "sk": "röntgenom zistí, z čoho je hornina",
+     "en": "uses X-rays to find out what rocks are made of"
+    },
+    "node": "PIXL"
+   },
+   {
+    "n": {
+     "sk": "Kolesá",
+     "en": "Wheels"
+    },
+    "f": {
+     "sk": "6 hliníkových kolies, priemer 52,5 cm",
+     "en": "6 aluminium wheels, 52.5 cm across"
+    },
+    "node": "Wheels_objs"
+   },
+   {
+    "n": {
+     "sk": "Jadrový zdroj MMRTG",
+     "en": "MMRTG power source"
+    },
+    "f": {
+     "sk": "teplo z plutónia mení na elektrinu",
+     "en": "turns heat from plutonium into electricity"
+    },
+    "node": "rtg"
+   },
+   {
+    "n": {
+     "sk": "Anténa",
+     "en": "Antenna"
+    },
+    "f": {
+     "sk": "posiela správy priamo na Zem",
+     "en": "sends messages straight to Earth"
+    },
+    "node": "antenna_hg"
+   },
+   {
+    "n": {
+     "sk": "Radar RIMFAX",
+     "en": "RIMFAX radar"
+    },
+    "f": {
+     "sk": "vidí vrstvy až 10 m pod povrchom",
+     "en": "sees layers up to 10 m underground"
+    },
+    "node": "RIMFAX"
+   },
+   {
+    "n": {
+     "sk": "Čipy s menami",
+     "en": "Name chips"
+    },
+    "f": {
+     "sk": "10,9 milióna mien ľudí zo Zeme",
+     "en": "10.9 million names of people from Earth"
+    },
+    "node": "Name_Chips"
+   }
+  ]
+ },
+ {
+  "id": "ingenuity",
+  "file": "assets/modely/ingenuity.glb",
+  "size": 1.2,
+  "scaleBy": "length",
+  "name": {
+   "sk": "Vrtuľník Ingenuity",
+   "en": "Ingenuity helicopter"
+  },
+  "info": {
+   "sk": "Prvý vrtuľník, ktorý lietal na inej planéte. Váži len 1,8 kg, rotory majú priemer 1,2 m a v rokoch 2021 až 2024 vzlietol na Marse 72-krát.",
+   "en": "The first helicopter to fly on another planet. Only 1.8 kg, rotors 1.2 m across; it flew 72 times on Mars between 2021 and 2024."
+  },
+  "credit": "NASA/JPL-Caltech",
+  "parts": [
+   {
+    "n": {
+     "sk": "Rotory",
+     "en": "Rotors"
+    },
+    "f": {
+     "sk": "dva protibežné, asi 2 500 otáčok za minútu",
+     "en": "two counter-rotating, about 2,500 rpm"
+    },
+    "node": "rotors_01"
+   },
+   {
+    "n": {
+     "sk": "Solárny panel",
+     "en": "Solar panel"
+    },
+    "f": {
+     "sk": "cez deň nabíja batérie",
+     "en": "charges the batteries during the day"
+    },
+    "node": "solar_panel"
+   },
+   {
+    "n": {
+     "sk": "Kamery",
+     "en": "Cameras"
+    },
+    "f": {
+     "sk": "navigačná a farebná",
+     "en": "navigation and colour cameras"
+    },
+    "node": "cams"
+   },
+   {
+    "n": {
+     "sk": "Telo",
+     "en": "Body"
+    },
+    "f": {
+     "sk": "batérie, počítač a ohrievače proti nočnému mrazu",
+     "en": "batteries, computer and heaters against the night frost"
+    },
+    "node": "bus"
+   },
+   {
+    "n": {
+     "sk": "Nohy",
+     "en": "Legs"
+    },
+    "f": {
+     "sk": "pružné, tlmia pristátie",
+     "en": "springy, they soften the landing"
+    },
+    "node": "leg_01"
+   }
+  ]
+ },
+ {
+  "id": "apollo-lm",
+  "file": "assets/modely/apollo-lm.glb",
+  "size": 7.0,
+  "scaleBy": "height",
+  "name": {
+   "sk": "Lunárny modul Apollo",
+   "en": "Apollo Lunar Module"
+  },
+  "info": {
+   "sk": "V takomto module pristáli astronauti na Mesiaci. Na Mesiac dosadlo šesť lunárnych modulov, posledný v decembri 1972. Je vysoký asi 7 m.",
+   "en": "Astronauts landed on the Moon in a module like this. Six lunar modules touched down, the last in December 1972. About 7 m tall."
+  },
+  "credit": "NASA",
+  "parts": [
+   {
+    "n": {
+     "sk": "Výstupný stupeň",
+     "en": "Ascent stage"
+    },
+    "f": {
+     "sk": "v ňom astronauti odleteli späť z Mesiaca",
+     "en": "the astronauts flew back from the Moon in it"
+    },
+    "at": [
+     0.5,
+     0.85,
+     0.5
+    ]
+   },
+   {
+    "n": {
+     "sk": "Zostupný stupeň",
+     "en": "Descent stage"
+    },
+    "f": {
+     "sk": "ostal na Mesiaci ako odpaľovacia rampa",
+     "en": "stayed on the Moon as a launch pad"
+    },
+    "at": [
+     0.5,
+     0.45,
+     0.5
+    ]
+   },
+   {
+    "n": {
+     "sk": "Motor zostupu",
+     "en": "Descent engine"
+    },
+    "f": {
+     "sk": "jeho ťah sa dal plynulo regulovať",
+     "en": "its thrust could be throttled smoothly"
+    },
+    "at": [
+     0.5,
+     0.18,
+     0.5
+    ]
+   },
+   {
+    "n": {
+     "sk": "Pristávacia noha",
+     "en": "Landing leg"
+    },
+    "f": {
+     "sk": "tanier zabránil zaboreniu do prachu",
+     "en": "the footpad kept it from sinking into dust"
+    },
+    "at": [
+     0.02,
+     0.03,
+     0.5
+    ]
+   }
+  ]
+ },
+ {
+  "id": "astronaut",
+  "file": "assets/modely/astronaut.glb",
+  "size": 1.9,
+  "scaleBy": "height",
+  "name": {
+   "sk": "Astronaut v skafandri",
+   "en": "Astronaut in a spacesuit"
+  },
+  "info": {
+   "sk": "Skafander na výstup do vesmíru je vlastne malá kozmická loď. Chráni pred vákuom, horúčavou, mrazom aj drobnými úlomkami.",
+   "en": "A spacewalk suit is really a tiny spacecraft. It protects against vacuum, heat, cold and tiny debris."
+  },
+  "credit": "NASA",
+  "parts": [
+   {
+    "n": {
+     "sk": "Prilba",
+     "en": "Helmet"
+    },
+    "f": {
+     "sk": "zlatý štít chráni oči pred Slnkom",
+     "en": "a gold visor protects the eyes from the Sun"
+    },
+    "at": [
+     0.5,
+     0.97,
+     0.5
+    ]
+   },
+   {
+    "n": {
+     "sk": "Rukavice",
+     "en": "Gloves"
+    },
+    "f": {
+     "sk": "majú vyhrievané končeky prstov",
+     "en": "they have heated fingertips"
+    },
+    "at": [
+     0.02,
+     0.62,
+     0.5
+    ]
+   },
+   {
+    "n": {
+     "sk": "Topánky",
+     "en": "Boots"
+    },
+    "f": {
+     "sk": "pevné, chránia pred ostrými kameňmi",
+     "en": "sturdy, protect from sharp rocks"
+    },
+    "at": [
+     0.35,
+     0.02,
+     0.5
+    ]
+   }
+  ]
+ },
+ {
+  "id": "hubble",
+  "file": "assets/modely/hubble.glb",
+  "size": 13.2,
+  "scaleBy": "max",
+  "float": true,
+  "name": {
+   "sk": "Hubblov ďalekohľad",
+   "en": "Hubble Space Telescope"
+  },
+  "info": {
+   "sk": "Obieha Zem od roku 1990 vo výške asi 540 km. Je dlhý 13,2 m, približne ako autobus.",
+   "en": "Orbiting Earth since 1990 at about 540 km. It is 13.2 m long, roughly the size of a bus."
+  },
+  "credit": "NASA",
+  "parts": [
+   {
+    "n": {
+     "sk": "Solárne panely",
+     "en": "Solar panels"
+    },
+    "f": {
+     "sk": "vymenili ich astronauti počas opráv",
+     "en": "astronauts replaced them during servicing"
+    },
+    "at": [
+     0.02,
+     0.5,
+     0.5
+    ]
+   },
+   {
+    "n": {
+     "sk": "Trubica s hlavným zrkadlom",
+     "en": "Tube with the main mirror"
+    },
+    "f": {
+     "sk": "zrkadlo vnútri má priemer 2,4 m",
+     "en": "the mirror inside is 2.4 m across"
+    },
+    "at": [
+     0.5,
+     1.0,
+     0.5
+    ]
+   }
+  ]
+ },
+ {
+  "id": "jwst",
+  "file": "assets/modely/jwst.glb",
+  "size": 21.2,
+  "scaleBy": "max",
+  "float": true,
+  "name": {
+   "sk": "Ďalekohľad Jamesa Webba",
+   "en": "James Webb Space Telescope"
+  },
+  "info": {
+   "sk": "Najväčší vesmírny ďalekohľad. Jeho slnečný štít má 21 × 14 m, ako tenisový kurt. Pracuje 1,5 milióna km od Zeme.",
+   "en": "The largest space telescope. Its sunshield is 21 × 14 m, like a tennis court. It works 1.5 million km from Earth."
+  },
+  "credit": "NASA",
+  "parts": [
+   {
+    "n": {
+     "sk": "Zlaté zrkadlo",
+     "en": "Golden mirror"
+    },
+    "f": {
+     "sk": "6,5 m, 18 šesťuholníkových dielov",
+     "en": "6.5 m, 18 hexagonal segments"
+    },
+    "at": [
+     0.5,
+     1.0,
+     0.5
+    ]
+   },
+   {
+    "n": {
+     "sk": "Slnečný štít",
+     "en": "Sunshield"
+    },
+    "f": {
+     "sk": "5 vrstiev tenkých ako vlas, chráni pred teplom",
+     "en": "5 hair-thin layers that block the heat"
+    },
+    "at": [
+     0.5,
+     0.25,
+     0.15
+    ]
+   }
+  ]
  }
 ]

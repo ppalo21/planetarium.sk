@@ -5,7 +5,7 @@ export interface Settings {
   tutorial: boolean;
   sound: boolean;
 }
-const DEF: Settings = { mods: { trips: true, depth: true, planets: true, gravity: true, machines: true, quiz: true }, limit: 0, tutorial: true, sound: true };
+const DEF: Settings = { mods: { trips: true, depth: true, planets: true, phases: true, gravity: true, machines: true, quiz: true }, limit: 0, tutorial: true, sound: true };
 
 function load(): Settings {
   try {

@@ -12,8 +12,9 @@ const ITEMS = [
   { id: 'trips', label: { sk: 'Výlety v 360°', en: '360° trips' }, tex: '2k_mars.jpg', c: '#c1440e' },
   { id: 'depth', label: { sk: 'Hĺbka oblohy', en: 'Depth of the sky' }, icon: 'stars' },
   { id: 'planets', label: { sk: 'Planéty v ruke', en: 'Planets in hand' }, tex: '2k_jupiter.jpg', c: '#d8b48a' },
+  { id: 'phases', label: { sk: 'Fázy Mesiaca', en: 'Moon phases' }, icon: 'phases' },
   { id: 'gravity', label: { sk: 'Gravitácia', en: 'Gravity' }, tex: '2k_moon.jpg', c: '#b8b8b8' },
-  { id: 'machines', label: { sk: 'Rover 1 : 1', en: 'Rover 1 : 1' }, icon: 'rover' },
+  { id: 'machines', label: { sk: 'Stroje 1 : 1', en: 'Machines 1 : 1' }, icon: 'rover' },
   { id: 'quiz', label: { sk: 'Kvíz', en: 'Quiz' }, icon: 'quiz' }
 ];
 let taps: number[] = [];
@@ -23,7 +24,12 @@ function logoTap() { // 5× rýchlo ťuknúť na logo = režim obsluhy
 }
 function iconTex(kind: string) {
   const c = document.createElement('canvas'); c.width = 512; c.height = 256; const g = c.getContext('2d')!;
-  if (kind === 'stars') {
+  if (kind === 'phases') {   // polovica osvetlená, polovica v tieni
+    g.fillStyle = '#0d0f18'; g.fillRect(0, 0, 512, 256);
+    const gr = g.createLinearGradient(0, 0, 512, 0); gr.addColorStop(0, '#d9d6cf'); gr.addColorStop(0.45, '#bdb9b0'); gr.addColorStop(0.5, '#15171f'); gr.addColorStop(1, '#0d0f18');
+    g.fillStyle = gr; g.fillRect(0, 0, 512, 256);
+    for (let i = 0; i < 60; i++) { g.fillStyle = 'rgba(80,80,80,.35)'; g.beginPath(); g.arc(Math.random() * 230, Math.random() * 256, Math.random() * 10 + 2, 0, 7); g.fill(); }
+  } else if (kind === 'stars') {
     g.fillStyle = '#0a1338'; g.fillRect(0, 0, 512, 256);
     for (let i = 0; i < 220; i++) { g.fillStyle = Math.random() < 0.15 ? '#ffb46b' : '#dfe8ff'; g.beginPath(); g.arc(Math.random() * 512, Math.random() * 256, Math.random() * 1.8 + 0.4, 0, 7); g.fill(); }
   } else {

@@ -7,6 +7,7 @@ import { initHud, hud, hudTick, hudCfg, buildHud, resetHudYaw } from './ui3d';
 import { initInput, updateInput, hovered, look, clearCtrlVisuals } from './input';
 import { textSprite, setSpriteH, disposeTree } from './util';
 import { initAR, startARSession, updateAR, stopPlacing } from './ar';
+import { track, newVisitor, moduleChange, flush } from './stats';
 
 /* =====================================================================
    SCÉNA
@@ -65,7 +66,7 @@ export function applyEnv() {
    ===================================================================== */
 export function goTo(id: string, arg?: unknown) {
   if (ctx.current && ctx.current !== id && id !== 'operator') SND.whoosh();
-  stopPlacing(); ctx.modules[ctx.current]?.exit();
+  stopPlacing(); moduleChange(id); ctx.modules[ctx.current]?.exit();
   ctx.current = id; const m = ctx.modules[id];
   if (!m.built) { m.build(); m.built = true; }
   m.enter(arg); applyEnv(); ctx.lastAct = performance.now();
@@ -78,6 +79,7 @@ export function recenter() { needAnchor = true; anchorFrames = 0; resetHudYaw();
 export const VISIT = { start: 0, warned: false };
 export function startVisitor() {
   VISIT.start = 0; VISIT.warned = false; recenter();
+  if (ctx.renderer.xr.isPresenting) { newVisitor(); flush(); }
   if (SET.tutorial && ctx.renderer.xr.isPresenting) goTo('intro');
   else { goTo('lobby'); if (ctx.renderer.xr.isPresenting) VISIT.start = performance.now(); }
 }
@@ -114,7 +116,7 @@ async function startXR(mode: XRSessionMode) {
     needAnchor = true; anchorFrames = 0; SND.ambient(true); startVisitor();
     s.addEventListener('end', () => {
       ctx.isAR = false; ctx.anchor.position.set(0, 1.6, 0); ctx.anchor.rotation.set(0, 0, 0); ctx.floor.position.set(0, 0, 0); ctx.floor.rotation.set(0, 0, 0);
-      ctx.camera.position.set(0, 1.6, 0); clearCtrlVisuals(); SND.ambient(false); VISIT.start = 0; ctx.goHome();
+      ctx.camera.position.set(0, 1.6, 0); clearCtrlVisuals(); SND.ambient(false); VISIT.start = 0; ctx.goHome(); flush();
     });
   } catch (err: any) { showMsg(T(ctx.content.ui.xrfail) + ' (' + err.name + ')'); }
 }
@@ -141,7 +143,7 @@ export function toggleLang() {
   if (!['trips', 'machines'].includes(ctx.current)) ctx.modules[ctx.current]?.hud?.();
 }
 export let lastScore: { s: number; n: number } | null = null;
-export function quizFinished(s: number, n: number) { lastScore = { s, n }; $('dipl').hidden = false; }
+export function quizFinished(s: number, n: number) { lastScore = { s, n }; $('dipl').hidden = false; track('kvíz', { score: s, of: n }); }
 
 export function initDom() {
   const UI = ctx.content.ui;
