@@ -4,6 +4,7 @@ import { T, fmt, en } from '../core/i18n';
 import { setHud, keepHud, makeClickable } from '../core/ui3d';
 import { loadTex, textSprite, setSpriteH, disposeTree, camWorld, sphereDir } from '../core/util';
 import { sunMaterial, buildSunExtras, SUN_U } from './sun';
+import { arReady, startPlacing, isPlacing } from '../core/ar';
 
 /** Planéty v ruke: chytiť, priblížiť, otáčať; popisy miest na povrchu sa ukazujú len na strane k divákovi. */
 export const planets: any = {
@@ -62,8 +63,13 @@ export const planets: any = {
   },
   grab(it: any, c: THREE.Object3D) { this.items.forEach((o: any) => (o.inspect = false)); this.sel = it; this.hud(); it.grabbed = c; c.attach(it.holder); it.holder.position.set(0, 0, -0.24); it.holder.rotation.set(0, 0, 0); it.holdScale = 0.1; },
   release(it: any) { it.grabbed = null; this.root.attach(it.holder); it.holder.rotation.set(0, 0, 0); },
-  enter() { this.root.visible = true; this.hud(); },
-  exit() { this.items.forEach((it: any) => { if (it.grabbed) this.release(it); it.inspect = false; }); this.root.visible = false; },
+  enter() { this.root.visible = true; this.root.position.set(0, 0, 0); this.hud(); },
+  /** AR: planéty sa položia na skutočný stôl (alebo podlahu). */
+  place() {
+    startPlacing(p => { const l = ctx.anchor.worldToLocal(p.clone()); this.real = false; this.layout(); this.root.position.set(l.x, l.y + 0.3, l.z + 1.15); keepHud(); this.hud(); });
+    this.hud();
+  },
+  exit() { this.items.forEach((it: any) => { if (it.grabbed) this.release(it); it.inspect = false; }); this.root.visible = false; this.root.position.set(0, 0, 0); },
   hud() {
     const s = this.sel; let title: any, body: any;
     if (!s) {
@@ -82,6 +88,8 @@ export const planets: any = {
     const rows: any[] = [[
       { label: en() ? 'Same size' : 'Rovnaká veľkosť', active: !this.real, onClick: () => { this.real = false; this.layout(); keepHud(); this.hud(); } },
       { label: en() ? 'True sizes' : 'Skutočné pomery', active: this.real, onClick: () => { this.real = true; this.layout(); keepHud(); this.hud(); } }]];
+    if (arReady()) rows[0].push({ label: en() ? 'Put on a table' : 'Položiť na stôl', active: isPlacing(), onClick: () => this.place() });
+    if (isPlacing()) body = T({ sk: 'Pozrite sa na stôl alebo podlahu, objaví sa oranžový terčík. Štipnite a planéty sa tam položia.', en: 'Look at a table or the floor until an orange target appears, then pinch to put the planets there.' });
     if (s?.b.sun) rows.push([
       { label: en() ? 'White light' : 'Biele svetlo', active: !this.ha, onClick: () => { this.ha = false; this.hud(); } },
       { label: en() ? 'H-alpha filter' : 'H-alfa filter', active: !!this.ha, onClick: () => { this.ha = true; this.hud(); } }]);

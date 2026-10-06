@@ -6,6 +6,7 @@ import { SND } from './sound';
 import { initHud, hud, hudTick, hudCfg, buildHud, resetHudYaw } from './ui3d';
 import { initInput, updateInput, hovered, look, clearCtrlVisuals } from './input';
 import { textSprite, setSpriteH, disposeTree } from './util';
+import { initAR, startARSession, updateAR, stopPlacing } from './ar';
 
 /* =====================================================================
    SCÉNA
@@ -30,7 +31,7 @@ export function initScene() {
   floorGrid = new THREE.PolarGridHelper(4, 16, 8, 64, 0x2b3a6b, 0x1b2648);
   (floorGrid.material as THREE.Material).transparent = true; (floorGrid.material as THREE.Material).opacity = 0.6; floor.add(floorGrid);
 
-  initHud();
+  initHud(); initAR();
   initInput(() => {
     const m = ctx.modules[ctx.current];
     if (ctx.current === 'intro') m.relabel?.();
@@ -64,7 +65,7 @@ export function applyEnv() {
    ===================================================================== */
 export function goTo(id: string, arg?: unknown) {
   if (ctx.current && ctx.current !== id && id !== 'operator') SND.whoosh();
-  ctx.modules[ctx.current]?.exit();
+  stopPlacing(); ctx.modules[ctx.current]?.exit();
   ctx.current = id; const m = ctx.modules[id];
   if (!m.built) { m.build(); m.built = true; }
   m.enter(arg); applyEnv(); ctx.lastAct = performance.now();
@@ -101,10 +102,15 @@ function visitTick() {
 async function startXR(mode: XRSessionMode) {
   SND.init();
   try {
-    const s = await navigator.xr!.requestSession(mode, { requiredFeatures: ['local-floor'], optionalFeatures: ['hand-tracking'] });
+    const ar = mode === 'immersive-ar';
+    // AR na Queste 3: hit-test (podlaha, stôl) a depth-sensing (skutočné predmety a ruky zakryjú virtuálne)
+    const opts: any = { requiredFeatures: ['local-floor'], optionalFeatures: ['hand-tracking', ...(ar ? ['hit-test', 'depth-sensing'] : [])] };
+    if (ar) opts.depthSensing = { usagePreference: ['gpu-optimized'], dataFormatPreference: ['luminance-alpha', 'float32', 'unsigned-short'] };
+    const s = await navigator.xr!.requestSession(mode, opts);
     ctx.renderer.xr.setReferenceSpaceType('local-floor');
     await ctx.renderer.xr.setSession(s);
     ctx.isAR = mode === 'immersive-ar'; ctx.camera.position.set(0, 0, 0); ctx.camera.rotation.set(0, 0, 0);
+    if (ctx.isAR) await startARSession(s);
     needAnchor = true; anchorFrames = 0; SND.ambient(true); startVisitor();
     s.addEventListener('end', () => {
       ctx.isAR = false; ctx.anchor.position.set(0, 1.6, 0); ctx.anchor.rotation.set(0, 0, 0); ctx.floor.position.set(0, 0, 0); ctx.floor.rotation.set(0, 0, 0);
@@ -170,10 +176,10 @@ export function initDom() {
    ===================================================================== */
 export function startLoop() {
   const clock = new THREE.Clock(), p3 = new THREE.Vector3(), q3 = new THREE.Quaternion(), s3 = new THREE.Vector3(), eul = new THREE.Euler();
-  ctx.renderer.setAnimationLoop(() => {
+  ctx.renderer.setAnimationLoop((_time: number, frame?: XRFrame) => {
     const dt = Math.min(clock.getDelta(), 0.1), t = clock.elapsedTime, { renderer, camera, anchor, floor } = ctx;
     if (renderer.xr.isPresenting) {
-      updateInput();
+      updateInput(); updateAR(frame);
       if (needAnchor && ++anchorFrames > 3) {
         renderer.xr.getCamera().matrixWorld.decompose(p3, q3, s3);
         if (p3.lengthSq() > 1e-4) {

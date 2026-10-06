@@ -54,7 +54,7 @@ export function makeButton(b: BtnCfg, w: number, h: number) {
   paint();
   makeClickable(bg, { onClick: b.onClick, onHover: v => { hover = v; paint(); } });
   g.userData.dispose = () => { clickables.delete(bg); geo.fill.dispose(); geo.line.dispose(); mat.dispose(); (ol.material as THREE.Material).dispose(); tx.dispose(); };
-  g.userData.bg = bg;
+  g.userData.bg = bg; bg.userData.size = [w, h];
   return g;
 }
 
@@ -136,4 +136,12 @@ export function hudTick(dt: number, hovered: Set<THREE.Object3D>) {
   hudYaw.rotation.y += wrapA(yawTarget - hudYaw.rotation.y) * Math.min(1, dt * 3);
 }
 export function resetHudYaw() { yawTarget = 0; hudYaw.rotation.y = 0; }
+/** Pri rukách je tabuľa blízko (na dosah prsta), pri ovládačoch ďalej (lúč). */
+let near = false;
+export function setHudNear(v: boolean) {
+  if (v === near) return; near = v;
+  if (v) { hud.position.set(0, -0.3, -0.5); hud.rotation.x = -Math.atan(0.3 / 0.5); hud.scale.setScalar(0.56); }
+  else { hud.position.set(0, -0.56, -1.0); hud.rotation.x = -Math.atan(0.56 / 1.0); hud.scale.setScalar(1); }
+}
+export function hudButtons() { return buttons; }
 export { L, SND };

@@ -4,6 +4,7 @@ import { ctx } from '../core/context';
 import { T, en } from '../core/i18n';
 import { setHud, keepHud } from '../core/ui3d';
 import { textSprite, setSpriteH, disposeTree } from '../core/util';
+import { arReady, startPlacing, isPlacing } from '../core/ar';
 
 /** Stroje v skutočnej veľkosti (3D modely NASA), vedľa silueta človeka. */
 export const machines: any = {
@@ -19,8 +20,13 @@ export const machines: any = {
     if (this.personLbl) { this.person.remove(this.personLbl); disposeTree(this.personLbl); }
     const pl = textSprite(en() ? 'Person 1.7 m' : 'Človek 1,7 m', '#9fc0ff', 56); setSpriteH(pl, 0.07); pl.position.y = 1.82; this.person.add(pl); this.personLbl = pl;
   },
-  async enter() { this.root.visible = true; await this.load(this.i); },
-  exit() { this.root.visible = false; },
+  async enter() { this.root.visible = true; this.root.position.set(0, 0, 0); await this.load(this.i); if (arReady()) this.place(); },
+  exit() { this.root.visible = false; this.root.position.set(0, 0, 0); },
+  /** AR: rover sa postaví na skutočnú podlahu tam, kam sa návštevník pozrie a štipne. */
+  place() {
+    startPlacing(p => { const l = ctx.floor.worldToLocal(p.clone()); this.root.position.set(l.x, l.y, l.z + 2.6); this.hud2(this.lastBody); });
+    this.hud2(this.lastBody);
+  },
   async load(i: number) {
     const list = ctx.content.machines, mc = list[i]; this.i = i; const tok = (this.tok = Math.random());
     if (this.model) { this.root.remove(this.model); disposeTree(this.model); this.model = null; }
@@ -38,8 +44,9 @@ export const machines: any = {
   hud2(body: any) {
     const list = ctx.content.machines, mc = list[this.i];
     this.lastBody = body;
-    setHud({ kicker: { sk: 'V skutočnej veľkosti', en: 'Life size' }, title: mc.name, body, credit: mc.credit,
-      rows: [[{ label: this.spin ? (en() ? 'Stop turning' : 'Zastaviť otáčanie') : (en() ? 'Turn' : 'Otáčať'), onClick: () => { this.spin = !this.spin; keepHud(); this.hud2(this.lastBody); } },
+    const hint = isPlacing() ? T({ sk: 'Pozrite sa na podlahu, objaví sa oranžový terčík. Štipnite a rover sa postaví tam.', en: 'Look at the floor until an orange target appears, then pinch to place the rover there.' }) : null;
+    setHud({ kicker: { sk: 'V skutočnej veľkosti', en: 'Life size' }, title: mc.name, body: hint ?? body, credit: mc.credit,
+      rows: [[...(arReady() ? [{ label: en() ? 'Place' : 'Umiestniť', active: isPlacing(), onClick: () => this.place() }] : []),{ label: this.spin ? (en() ? 'Stop turning' : 'Zastaviť otáčanie') : (en() ? 'Turn' : 'Otáčať'), onClick: () => { this.spin = !this.spin; keepHud(); this.hud2(this.lastBody); } },
         ...(list.length > 1 ? [{ label: T(ctx.content.ui.next) + ' ›', onClick: () => this.load((this.i + 1) % list.length) }] : [])]] });
   },
   onDrag(dx: number, start: number) { this.spin = false; this.yaw = start + dx * 4; },

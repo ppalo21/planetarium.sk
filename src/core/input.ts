@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { ctx } from './context';
-import { clickables, isVisible } from './ui3d';
+import { XRHandModelFactory } from 'three/addons/webxr/XRHandModelFactory.js';
+import { clickables, isVisible, hudButtons, setHudNear } from './ui3d';
+import { tryPlace } from './ar';
 import { SND, haptic } from './sound';
 import { INPUT } from './i18n';
 
@@ -8,6 +10,7 @@ import { INPUT } from './i18n';
 const raycaster = new THREE.Raycaster();
 export const hovered = new Set<THREE.Object3D>();
 export const ctrls: THREE.XRTargetRaySpace[] = [];
+export const hands: THREE.XRHandSpace[] = [];
 let onModeChange: () => void = () => {};
 
 function pick(origin: THREE.Vector3, dir: THREE.Vector3) {
@@ -22,7 +25,11 @@ function setHovered(set: Set<THREE.Object3D>) {
 export function initInput(modeChanged: () => void) {
   onModeChange = modeChanged;
   const { renderer, scene } = ctx;
+  const handFactory = new XRHandModelFactory();
   for (let i = 0; i < 2; i++) {
+    // viditeľné ruky (kĺby prstov) – kreslia sa len vo VR, v AR vidno skutočné ruky
+    const hand = renderer.xr.getHand(i); hand.add(handFactory.createHandModel(hand, 'spheres')); scene.add(hand); hands.push(hand);
+    hand.userData.poke = { btn: null as THREE.Object3D | null, armed: true, cool: 0 };
     const c = renderer.xr.getController(i); scene.add(c); ctrls.push(c);
     const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3(0, 0, -1)]),
       new THREE.LineBasicMaterial({ color: 0x9fc0ff, transparent: true, opacity: 0.55 }));
@@ -46,17 +53,18 @@ export function initInput(modeChanged: () => void) {
       ctx.lastAct = performance.now();
       if (c.userData.grabbing) { c.userData.grabbing.grab.end(c); c.userData.grabbing = null; return; }
       const h = c.userData.hold; c.userData.hold = null; if (!h || h.done) return;
-      if (!h.moved && performance.now() - h.t < 600) ctx.modules[ctx.current]?.onTap?.();
+      if (!h.moved && performance.now() - h.t < 600) { if (!tryPlace()) ctx.modules[ctx.current]?.onTap?.(); }
     });
   }
   initMouse();
 }
 
 const tmpV = new THREE.Vector3(), tmpQ = new THREE.Quaternion(), right = new THREE.Vector3();
-function updateCtrl(c: THREE.XRTargetRaySpace, hs: Set<THREE.Object3D>) {
+function updateCtrl(c: THREE.XRTargetRaySpace, hs: Set<THREE.Object3D>, rayOff: boolean) {
   c.getWorldPosition(tmpV); c.getWorldQuaternion(tmpQ);
   const dir = new THREE.Vector3(0, 0, -1).applyQuaternion(tmpQ);
-  const h = c.userData.grabbing ? null : pick(tmpV.clone(), dir); c.userData.hit = h;
+  const h = c.userData.grabbing || rayOff ? null : pick(tmpV.clone(), dir); c.userData.hit = h;
+  c.userData.line.visible = !rayOff;
   c.userData.line.scale.z = h ? h.distance : 0.4; c.userData.dot.visible = !!h; if (h) c.userData.dot.position.copy(h.point);
   if (h) hs.add(h.object);
   const ho = h ? h.object : null; if (ho && ho !== c.userData.lastHover) haptic(c.userData.src, 0.15, 12); c.userData.lastHover = ho;
@@ -65,9 +73,37 @@ function updateCtrl(c: THREE.XRTargetRaySpace, hs: Set<THREE.Object3D>) {
   if (hd.moved) { right.set(1, 0, 0).applyQuaternion(ctx.anchor.quaternion); ctx.modules[ctx.current]?.onDrag?.(d.dot(right), hd.start); ctx.lastAct = performance.now(); }
   if (!hd.moved && !hd.done && performance.now() - hd.t > 1400) { hd.done = true; ctx.goHome(); ctx.recenter(); }
 }
+/* ---------------- dotyk prstom (ťuknutie na tlačidlo ako na mobile) ---------------- */
+const tip = new THREE.Vector3(), loc = new THREE.Vector3(), wsc = new THREE.Vector3();
+/** Vráti true, ak je prst blízko tabule (vtedy sa lúč z tejto ruky vypne). */
+function updatePoke(hand: THREE.XRHandSpace, hs: Set<THREE.Object3D>): boolean {
+  const j = (hand as any).joints?.['index-finger-tip'] as THREE.Object3D | undefined;
+  const st = hand.userData.poke; if (!j || !j.visible) { st.btn = null; return false; }
+  j.getWorldPosition(tip); let near = false, best: THREE.Object3D | null = null, bestZ = 1;
+  for (const b of hudButtons()) {
+    const bg = b.userData.bg as THREE.Mesh; if (!isVisible(bg)) continue;
+    loc.copy(tip); bg.worldToLocal(loc); bg.getWorldScale(wsc);
+    const [w, h] = bg.userData.size, z = loc.z * wsc.z;      // vzdialenosť od roviny tlačidla v metroch
+    if (Math.abs(loc.x) < w / 2 && Math.abs(loc.y) < h / 2 && z > -0.04 && z < 0.06) { near = true; if (z < bestZ) { bestZ = z; best = bg; } }
+    else if (Math.abs(loc.x) < w && Math.abs(loc.y) < h * 2 && Math.abs(z) < 0.12) near = true;
+  }
+  if (best) hs.add(best);
+  const now = performance.now();
+  if (best && bestZ < 0.004 && st.armed && now > st.cool) {      // stlačenie: prst prešiel rovinou tlačidla
+    st.armed = false; st.cool = now + 400; ctx.lastAct = now; SND.click(); best.userData.click?.onClick?.();
+  }
+  if (!best || bestZ > 0.015) st.armed = true;                    // uvoľnenie: prst sa vzdialil
+  return near;
+}
+
 export function updateInput() {
   if (!ctx.renderer.xr.isPresenting) return;
-  const hs = new Set<THREE.Object3D>(); ctrls.forEach(c => updateCtrl(c, hs)); setHovered(hs);
+  const hs = new Set<THREE.Object3D>();
+  const handMode = INPUT.mode === 'hands';
+  setHudNear(handMode);
+  hands.forEach(h => { h.visible = handMode && !ctx.isAR; });
+  ctrls.forEach((c, i) => { const near = handMode ? updatePoke(hands[i], hs) : false; updateCtrl(c, hs, near); });
+  setHovered(hs);
   // ruky alebo ovládače?
   const ss = ctx.renderer.xr.getSession();
   if (ss) {

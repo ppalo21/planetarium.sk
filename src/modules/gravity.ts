@@ -3,6 +3,7 @@ import { ctx, ASSET } from '../core/context';
 import { T, en, dec } from '../core/i18n';
 import { setHud, keepHud } from '../core/ui3d';
 import { loadTex, textSprite, setSpriteH, disposeTree } from '../core/util';
+import { arReady, startPlacing, isPlacing } from '../core/ar';
 
 /** Gravitácia: loptičky padajú naraz na Mesiaci, Marse, Zemi a Jupiteri. */
 export const gravity: any = {
@@ -29,12 +30,13 @@ export const gravity: any = {
   drop() { keepHud(); if (this.running) { this.reset(); return; } this.running = true; this.cols.forEach((c: any) => { c.state = 'fall'; }); this.hud(); },
   hud() {
     setHud({ kicker: { sk: 'Gravitácia', en: 'Gravity' }, title: { sk: 'Na ktorom svete dopadne loptička prvá?', en: 'On which world does the ball land first?' },
-      body: { sk: `Všetky loptičky padajú z výšky ${dec(this.H, 1)} m. Na Mesiaci je gravitácia asi 6-krát slabšia ako na Zemi, na Jupiteri 2,5-krát silnejšia.`, en: `All balls fall from ${this.H} m. Gravity on the Moon is about 6 times weaker than on Earth, on Jupiter 2.5 times stronger.` },
-      rows: [[{ label: this.running ? T(ctx.content.ui.again) : (en() ? 'Drop the balls' : 'Pustiť loptičky'), onClick: () => this.drop(), primary: true }]] });
+      body: isPlacing() ? { sk: 'Pozrite sa na podlahu, objaví sa oranžový terčík. Štipnite a pokus sa postaví tam.', en: 'Look at the floor until an orange target appears, then pinch to set up the experiment there.' } : { sk: `Všetky loptičky padajú z výšky ${dec(this.H, 1)} m. Na Mesiaci je gravitácia asi 6-krát slabšia ako na Zemi, na Jupiteri 2,5-krát silnejšia.`, en: `All balls fall from ${this.H} m. Gravity on the Moon is about 6 times weaker than on Earth, on Jupiter 2.5 times stronger.` },
+      rows: [[...(arReady() ? [{ label: en() ? 'Place' : 'Umiestniť', active: isPlacing(), onClick: () => this.place() }] : []), { label: this.running ? T(ctx.content.ui.again) : (en() ? 'Drop the balls' : 'Pustiť loptičky'), onClick: () => this.drop(), primary: true }]] });
   },
-  onTap() { this.drop(); },
-  enter() { this.root.visible = true; this.reset(); },
-  exit() { this.root.visible = false; },
+  onTap() { if (!isPlacing()) this.drop(); },
+  enter() { this.root.visible = true; this.root.position.set(0, 0, 0); this.reset(); if (arReady()) this.place(); },
+  exit() { this.root.visible = false; this.root.position.set(0, 0, 0); },
+  place() { startPlacing(p => { const l = ctx.floor.worldToLocal(p.clone()); this.root.position.set(l.x, l.y, l.z + 1.4); keepHud(); this.hud(); }); this.hud(); },
   relabel() { if (this.built) { this.cols.forEach((c: any) => this.label(c)); if (ctx.current === 'gravity') this.hud(); } },
   update(dt: number) {
     if (!this.running) return; const R = 0.055;
