@@ -1,0 +1,358 @@
+{
+ "lonOffset": {
+  "mars": 0,
+  "moon": 0,
+  "earth": 0,
+  "mercury": 0
+ },
+ "places": {
+  "mars": [
+   {
+    "lat": 18.65,
+    "lon": -133.8,
+    "n": {
+     "sk": "Olympus Mons",
+     "en": "Olympus Mons"
+    },
+    "f": {
+     "sk": "najvyššia sopka, asi 22 km",
+     "en": "tallest volcano, about 22 km"
+    }
+   },
+   {
+    "lat": 1,
+    "lon": -112,
+    "n": {
+     "sk": "Sopky Tharsis",
+     "en": "Tharsis volcanoes"
+    },
+    "f": {
+     "sk": "tri obrie sopky v rade",
+     "en": "three giant volcanoes in a row"
+    }
+   },
+   {
+    "lat": -13.9,
+    "lon": -59.2,
+    "n": {
+     "sk": "Valles Marineris",
+     "en": "Valles Marineris"
+    },
+    "f": {
+     "sk": "kaňon dlhý vyše 4 000 km",
+     "en": "canyon over 4,000 km long"
+    }
+   },
+   {
+    "lat": -42.4,
+    "lon": 70.5,
+    "n": {
+     "sk": "Hellas Planitia",
+     "en": "Hellas Planitia"
+    },
+    "f": {
+     "sk": "obrovský kráter, 2 300 km",
+     "en": "huge crater, 2,300 km"
+    }
+   },
+   {
+    "lat": 18.4,
+    "lon": 77.5,
+    "n": {
+     "sk": "Jezero",
+     "en": "Jezero"
+    },
+    "f": {
+     "sk": "tu jazdí Perseverance",
+     "en": "Perseverance drives here"
+    }
+   },
+   {
+    "lat": -5.4,
+    "lon": 137.8,
+    "n": {
+     "sk": "Kráter Gale",
+     "en": "Gale Crater"
+    },
+    "f": {
+     "sk": "tu jazdí Curiosity",
+     "en": "Curiosity drives here"
+    }
+   },
+   {
+    "lat": 84,
+    "lon": 0,
+    "n": {
+     "sk": "Polárna čiapka",
+     "en": "Polar ice cap"
+    },
+    "f": {
+     "sk": "ľad z vody a suchého ľadu",
+     "en": "water ice and dry ice"
+    }
+   }
+  ],
+  "moon": [
+   {
+    "lat": 8.5,
+    "lon": 31.4,
+    "n": {
+     "sk": "More pokoja",
+     "en": "Sea of Tranquillity"
+    },
+    "f": {
+     "sk": "tu pristálo Apollo 11 (1969)",
+     "en": "Apollo 11 landed here (1969)"
+    }
+   },
+   {
+    "lat": 32.8,
+    "lon": -15.6,
+    "n": {
+     "sk": "More dažďov",
+     "en": "Sea of Showers"
+    },
+    "f": {
+     "sk": "Mare Imbrium",
+     "en": "Mare Imbrium"
+    }
+   },
+   {
+    "lat": 18.4,
+    "lon": -57.4,
+    "n": {
+     "sk": "Oceán búrok",
+     "en": "Ocean of Storms"
+    },
+    "f": {
+     "sk": "najväčšie lunárne „more“",
+     "en": "the largest lunar \"sea\""
+    }
+   },
+   {
+    "lat": 17,
+    "lon": 59.1,
+    "n": {
+     "sk": "Mare Crisium",
+     "en": "Mare Crisium"
+    },
+    "f": {
+     "sk": "samostatné okrúhle more",
+     "en": "an isolated round sea"
+    }
+   },
+   {
+    "lat": -43.3,
+    "lon": -11.2,
+    "n": {
+     "sk": "Kráter Tycho",
+     "en": "Tycho crater"
+    },
+    "f": {
+     "sk": "svetlé lúče cez pol Mesiaca",
+     "en": "bright rays across the Moon"
+    }
+   },
+   {
+    "lat": 9.6,
+    "lon": -20.1,
+    "n": {
+     "sk": "Kráter Kopernik",
+     "en": "Copernicus crater"
+    },
+    "f": {
+     "sk": "priemer 93 km",
+     "en": "93 km across"
+    }
+   },
+   {
+    "lat": -19.4,
+    "lon": -92.8,
+    "n": {
+     "sk": "Mare Orientale",
+     "en": "Mare Orientale"
+    },
+    "f": {
+     "sk": "terč z troch kruhov",
+     "en": "a three-ring bullseye"
+    }
+   },
+   {
+    "lat": -53,
+    "lon": -169,
+    "n": {
+     "sk": "Povodie South Pole–Aitken",
+     "en": "South Pole–Aitken basin"
+    },
+    "f": {
+     "sk": "najväčší kráter, asi 2 500 km",
+     "en": "largest crater, about 2,500 km"
+    }
+   },
+   {
+    "lat": 20,
+    "lon": 150,
+    "n": {
+     "sk": "Odvrátená strana",
+     "en": "Far side"
+    },
+    "f": {
+     "sk": "zo Zeme ju nikdy nevidíme",
+     "en": "never seen from Earth"
+    }
+   }
+  ],
+  "earth": [
+   {
+    "lat": 48.59,
+    "lon": 18.85,
+    "n": {
+     "sk": "Žiar nad Hronom",
+     "en": "Žiar nad Hronom"
+    },
+    "f": {
+     "sk": "tu ste!",
+     "en": "you are here!"
+    }
+   },
+   {
+    "lat": 27.99,
+    "lon": 86.93,
+    "n": {
+     "sk": "Mount Everest",
+     "en": "Mount Everest"
+    },
+    "f": {
+     "sk": "8 849 m",
+     "en": "8,849 m"
+    }
+   },
+   {
+    "lat": 11.35,
+    "lon": 142.2,
+    "n": {
+     "sk": "Mariánska priekopa",
+     "en": "Mariana Trench"
+    },
+    "f": {
+     "sk": "hĺbka asi 11 km",
+     "en": "about 11 km deep"
+    }
+   },
+   {
+    "lat": 23,
+    "lon": 13,
+    "n": {
+     "sk": "Sahara",
+     "en": "Sahara"
+    },
+    "f": {
+     "sk": "najväčšia horúca púšť",
+     "en": "largest hot desert"
+    }
+   },
+   {
+    "lat": -3,
+    "lon": -60,
+    "n": {
+     "sk": "Amazónia",
+     "en": "Amazon"
+    },
+    "f": {
+     "sk": "najväčší dažďový prales",
+     "en": "largest rainforest"
+    }
+   },
+   {
+    "lat": -18,
+    "lon": 147,
+    "n": {
+     "sk": "Veľká koralová bariéra",
+     "en": "Great Barrier Reef"
+    },
+    "f": {
+     "sk": "vidno ju aj z vesmíru",
+     "en": "visible from space"
+    }
+   },
+   {
+    "lat": -80,
+    "lon": 0,
+    "n": {
+     "sk": "Antarktída",
+     "en": "Antarctica"
+    },
+    "f": {
+     "sk": "ľad hrubý až 4 km",
+     "en": "ice up to 4 km thick"
+    }
+   }
+  ],
+  "sun": [
+   {
+    "lat": 14,
+    "lon": 20,
+    "n": {
+     "sk": "Slnečná škvrna",
+     "en": "Sunspot"
+    },
+    "f": {
+     "sk": "chladnejšie miesto, často väčšie ako Zem",
+     "en": "a cooler patch, often bigger than Earth"
+    }
+   },
+   {
+    "lat": 42,
+    "lon": -15,
+    "n": {
+     "sk": "Granulácia",
+     "en": "Granulation"
+    },
+    "f": {
+     "sk": "vriaca plazma, bunky asi 1 000 km",
+     "en": "boiling plasma, cells about 1,000 km"
+    }
+   },
+   {
+    "lat": -30,
+    "lon": 150,
+    "n": {
+     "sk": "Protuberancia",
+     "en": "Prominence"
+    },
+    "f": {
+     "sk": "najlepšie ju uvidíte cez H-alfa filter",
+     "en": "best seen through an H-alpha filter"
+    }
+   }
+  ],
+  "mercury": [
+   {
+    "lat": 30.5,
+    "lon": -170.2,
+    "n": {
+     "sk": "Caloris Planitia",
+     "en": "Caloris Planitia"
+    },
+    "f": {
+     "sk": "kráter s priemerom 1 550 km",
+     "en": "crater 1,550 km across"
+    }
+   }
+  ],
+  "saturn": [
+   {
+    "lat": 78,
+    "lon": 0,
+    "n": {
+     "sk": "Šesťuholník",
+     "en": "The hexagon"
+    },
+    "f": {
+     "sk": "búrka v tvare šesťuholníka",
+     "en": "a six-sided storm"
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,177 @@
+[
+ {
+  "q": {
+   "sk": "Ktorá planéta je najväčšia?",
+   "en": "Which planet is the largest?"
+  },
+  "o": [
+   {
+    "sk": "Saturn",
+    "en": "Saturn"
+   },
+   {
+    "sk": "Jupiter",
+    "en": "Jupiter"
+   },
+   {
+    "sk": "Zem",
+    "en": "Earth"
+   },
+   {
+    "sk": "Neptún",
+    "en": "Neptune"
+   }
+  ],
+  "a": 1
+ },
+ {
+  "q": {
+   "sk": "Ako dlho letí svetlo zo Slnka na Zem?",
+   "en": "How long does sunlight take to reach Earth?"
+  },
+  "o": [
+   {
+    "sk": "1 sekundu",
+    "en": "1 second"
+   },
+   {
+    "sk": "asi 8 minút",
+    "en": "about 8 minutes"
+   },
+   {
+    "sk": "1 deň",
+    "en": "1 day"
+   },
+   {
+    "sk": "1 rok",
+    "en": "1 year"
+   }
+  ],
+  "a": 1
+ },
+ {
+  "q": {
+   "sk": "Koľkokrát menšia je gravitácia na Mesiaci ako na Zemi?",
+   "en": "How much weaker is gravity on the Moon than on Earth?"
+  },
+  "o": [
+   {
+    "sk": "2-krát",
+    "en": "2 times"
+   },
+   {
+    "sk": "asi 6-krát",
+    "en": "about 6 times"
+   },
+   {
+    "sk": "100-krát",
+    "en": "100 times"
+   },
+   {
+    "sk": "je rovnaká",
+    "en": "it is the same"
+   }
+  ],
+  "a": 1
+ },
+ {
+  "q": {
+   "sk": "Ktorá z týchto hviezd Oriónu je nám najbližšie?",
+   "en": "Which of these stars of Orion is closest to us?"
+  },
+  "o": [
+   {
+    "sk": "Betelgeuse",
+    "en": "Betelgeuse"
+   },
+   {
+    "sk": "Rigel",
+    "en": "Rigel"
+   },
+   {
+    "sk": "Bellatrix",
+    "en": "Bellatrix"
+   },
+   {
+    "sk": "Alnilam",
+    "en": "Alnilam"
+   }
+  ],
+  "a": 2
+ },
+ {
+  "q": {
+   "sk": "Prečo je Mars červený?",
+   "en": "Why is Mars red?"
+  },
+  "o": [
+   {
+    "sk": "Je horúci",
+    "en": "It is hot"
+   },
+   {
+    "sk": "Má hrdzavý prach",
+    "en": "Rusty dust"
+   },
+   {
+    "sk": "Odráža Slnko",
+    "en": "It reflects the Sun"
+   },
+   {
+    "sk": "Má červené more",
+    "en": "A red sea"
+   }
+  ],
+  "a": 1
+ },
+ {
+  "q": {
+   "sk": "Ako sa volá rover, ktorý jazdí v kráteri Gale?",
+   "en": "Which rover drives in Gale Crater?"
+  },
+  "o": [
+   {
+    "sk": "Curiosity",
+    "en": "Curiosity"
+   },
+   {
+    "sk": "Lunochod",
+    "en": "Lunokhod"
+   },
+   {
+    "sk": "Voyager",
+    "en": "Voyager"
+   },
+   {
+    "sk": "Hubble",
+    "en": "Hubble"
+   }
+  ],
+  "a": 0
+ },
+ {
+  "q": {
+   "sk": "V ktorom roku boli ľudia naposledy na Mesiaci?",
+   "en": "When did people last walk on the Moon?"
+  },
+  "o": [
+   {
+    "sk": "1969",
+    "en": "1969"
+   },
+   {
+    "sk": "1972",
+    "en": "1972"
+   },
+   {
+    "sk": "1999",
+    "en": "1999"
+   },
+   {
+    "sk": "2020",
+    "en": "2020"
+   }
+  ],
+  "a": 1
+ }
+]

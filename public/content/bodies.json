@@ -1,0 +1,218 @@
+[
+ {
+  "id": "sun",
+  "tex": "2k_sun.jpg",
+  "d": 1392700,
+  "c": "#ffcc55",
+  "sun": true,
+  "name": {
+   "sk": "Slnko",
+   "en": "Sun"
+  },
+  "day": {
+   "sk": "asi 25 dní (rovník)",
+   "en": "about 25 days (equator)"
+  },
+  "year": null,
+  "fact": {
+   "sk": "Zmestilo by sa doň asi 1,3 milióna Zemí.",
+   "en": "About 1.3 million Earths would fit inside."
+  }
+ },
+ {
+  "id": "mercury",
+  "tex": "2k_mercury.jpg",
+  "d": 4879,
+  "c": "#9a9a9a",
+  "name": {
+   "sk": "Merkúr",
+   "en": "Mercury"
+  },
+  "day": {
+   "sk": "59 dní",
+   "en": "59 days"
+  },
+  "year": {
+   "sk": "88 dní",
+   "en": "88 days"
+  },
+  "fact": {
+   "sk": "Najmenšia planéta a najbližšie k Slnku.",
+   "en": "The smallest planet, closest to the Sun."
+  }
+ },
+ {
+  "id": "venus",
+  "tex": "2k_venus_atmosphere.jpg",
+  "d": 12104,
+  "c": "#e8c98e",
+  "name": {
+   "sk": "Venuša",
+   "en": "Venus"
+  },
+  "day": {
+   "sk": "243 dní",
+   "en": "243 days"
+  },
+  "year": {
+   "sk": "225 dní",
+   "en": "225 days"
+  },
+  "fact": {
+   "sk": "Najteplejšia planéta, okolo 465 °C. Deň je tam dlhší ako rok.",
+   "en": "The hottest planet, about 465 °C. A day is longer than its year."
+  }
+ },
+ {
+  "id": "earth",
+  "tex": "2k_earth_daymap.jpg",
+  "d": 12742,
+  "c": "#3b7bd6",
+  "name": {
+   "sk": "Zem",
+   "en": "Earth"
+  },
+  "day": {
+   "sk": "24 hodín",
+   "en": "24 hours"
+  },
+  "year": {
+   "sk": "365 dní",
+   "en": "365 days"
+  },
+  "fact": {
+   "sk": "Jediné známe miesto vo vesmíre so životom.",
+   "en": "The only known place in the universe with life."
+  }
+ },
+ {
+  "id": "moon",
+  "tex": "2k_moon.jpg",
+  "d": 3474,
+  "c": "#b8b8b8",
+  "name": {
+   "sk": "Mesiac",
+   "en": "Moon"
+  },
+  "day": {
+   "sk": "27,3 dňa",
+   "en": "27.3 days"
+  },
+  "year": null,
+  "fact": {
+   "sk": "K Zemi natáča stále tú istú stranu.",
+   "en": "It always shows the same side to Earth."
+  }
+ },
+ {
+  "id": "mars",
+  "tex": "2k_mars.jpg",
+  "d": 6779,
+  "c": "#c1440e",
+  "name": {
+   "sk": "Mars",
+   "en": "Mars"
+  },
+  "day": {
+   "sk": "24 h 37 min",
+   "en": "24 h 37 min"
+  },
+  "year": {
+   "sk": "687 dní",
+   "en": "687 days"
+  },
+  "fact": {
+   "sk": "Je tu najvyššia sopka Slnečnej sústavy, Olympus Mons.",
+   "en": "Home of the tallest volcano in the Solar System, Olympus Mons."
+  }
+ },
+ {
+  "id": "jupiter",
+  "tex": "2k_jupiter.jpg",
+  "d": 139820,
+  "c": "#d8b48a",
+  "name": {
+   "sk": "Jupiter",
+   "en": "Jupiter"
+  },
+  "day": {
+   "sk": "9 h 56 min",
+   "en": "9 h 56 min"
+  },
+  "year": {
+   "sk": "11,9 roka",
+   "en": "11.9 years"
+  },
+  "fact": {
+   "sk": "Veľká červená škvrna je búrka väčšia ako celá Zem.",
+   "en": "The Great Red Spot is a storm bigger than the whole Earth."
+  }
+ },
+ {
+  "id": "saturn",
+  "tex": "2k_saturn.jpg",
+  "ring": "2k_saturn_ring_alpha.png",
+  "d": 116460,
+  "c": "#e3d09a",
+  "name": {
+   "sk": "Saturn",
+   "en": "Saturn"
+  },
+  "day": {
+   "sk": "10 h 34 min",
+   "en": "10 h 34 min"
+  },
+  "year": {
+   "sk": "29,5 roka",
+   "en": "29.5 years"
+  },
+  "fact": {
+   "sk": "Prstence sú z ľadu a kameňov a sú väčšinou tenšie ako jeden kilometer.",
+   "en": "Its rings are ice and rock, mostly less than a kilometre thick."
+  }
+ },
+ {
+  "id": "uranus",
+  "tex": "2k_uranus.jpg",
+  "d": 50724,
+  "c": "#9fd8e0",
+  "name": {
+   "sk": "Urán",
+   "en": "Uranus"
+  },
+  "day": {
+   "sk": "17 h 14 min",
+   "en": "17 h 14 min"
+  },
+  "year": {
+   "sk": "84 rokov",
+   "en": "84 years"
+  },
+  "fact": {
+   "sk": "Leží na boku, jeho os je sklonená o 98°.",
+   "en": "It lies on its side, tilted by 98°."
+  }
+ },
+ {
+  "id": "neptune",
+  "tex": "2k_neptune.jpg",
+  "d": 49244,
+  "c": "#3f63d8",
+  "name": {
+   "sk": "Neptún",
+   "en": "Neptune"
+  },
+  "day": {
+   "sk": "16 h 6 min",
+   "en": "16 h 6 min"
+  },
+  "year": {
+   "sk": "165 rokov",
+   "en": "165 years"
+  },
+  "fact": {
+   "sk": "Fúkajú tu najrýchlejšie vetry, vyše 2 000 km/h.",
+   "en": "The fastest winds, over 2,000 km/h."
+  }
+ }
+]

@@ -1,0 +1,91 @@
+[
+ {
+  "id": "khap",
+  "file": "assets/pano/khap.jpg",
+  "optional": true,
+  "hfov": 360,
+  "yaw": 0,
+  "sky": "#0b1530",
+  "ground": "#1a1a1a",
+  "name": {
+   "sk": "Naša hvezdáreň",
+   "en": "Our observatory"
+  },
+  "info": {
+   "sk": "Krajská hvezdáreň a planetárium Maximiliána Hella v Žiari nad Hronom.",
+   "en": "The Maximilian Hell Regional Observatory and Planetarium in Žiar nad Hronom, Slovakia."
+  },
+  "credit": "KHaP MH"
+ },
+ {
+  "id": "mars",
+  "file": "assets/pano/mars-jezero.jpg",
+  "hfov": 360,
+  "yaw": 0,
+  "sky": "#b9886a",
+  "ground": "#6b4a33",
+  "name": {
+   "sk": "Mars: kráter Jezero",
+   "en": "Mars: Jezero Crater"
+  },
+  "info": {
+   "sk": "Prvá 360° panoráma kamery Mastcam-Z roveru Perseverance, zložená zo 142 snímok z 21. februára 2021. Pred miliardami rokov bolo v tomto kráteri jazero.",
+   "en": "The first 360° panorama from Perseverance’s Mastcam-Z, stitched from 142 images taken on 21 February 2021. Billions of years ago this crater held a lake."
+  },
+  "credit": "NASA/JPL-Caltech/MSSS/ASU"
+ },
+ {
+  "id": "moon",
+  "file": "assets/pano/apollo17.jpg",
+  "hfov": 360,
+  "yaw": 0,
+  "sky": "#000000",
+  "ground": "#5d5d5d",
+  "name": {
+   "sk": "Mesiac: Apollo 17",
+   "en": "Moon: Apollo 17"
+  },
+  "info": {
+   "sk": "Údolie Taurus-Littrow, december 1972. Zastávka 1 počas prvej vychádzky Apolla 17, poslednej misie, pri ktorej ľudia kráčali po Mesiaci.",
+   "en": "Taurus-Littrow valley, December 1972. Station 1 of the first moonwalk of Apollo 17, the last mission in which people walked on the Moon."
+  },
+  "credit": {
+   "sk": "NASA (snímky AS17-134-20408 až 20431), panoráma: Wikimedia Commons",
+   "en": "NASA (AS17-134-20408 to 20431), panorama: Wikimedia Commons"
+  }
+ },
+ {
+  "id": "paranal",
+  "file": "assets/pano/paranal.jpg",
+  "hfov": 360,
+  "yaw": 0,
+  "sky": "#05070f",
+  "ground": "#2a1a12",
+  "name": {
+   "sk": "Observatórium Paranal, Čile",
+   "en": "Paranal Observatory, Chile"
+  },
+  "info": {
+   "sk": "Púšť Atacama, jedno z najtmavších miest na Zemi. Štyri ďalekohľady VLT s 8,2 m zrkadlami pod Mliečnou cestou.",
+   "en": "The Atacama Desert, one of the darkest places on Earth. The four 8.2 m Very Large Telescopes under the Milky Way."
+  },
+  "credit": "ESO (CC BY 4.0)"
+ },
+ {
+  "id": "milky",
+  "file": "assets/pano/mliecna-cesta.jpg",
+  "hfov": 360,
+  "yaw": 0,
+  "sky": "#000000",
+  "ground": "#000000",
+  "name": {
+   "sk": "Celá Mliečna cesta",
+   "en": "The whole Milky Way"
+  },
+  "info": {
+   "sk": "Celá obloha z oboch pologúľ Zeme naraz, poskladaná z tisícov fotografií. Pás Mliečnej cesty je pohľad dovnútra našej Galaxie.",
+   "en": "The entire sky from both hemispheres at once, assembled from thousands of photos. The Milky Way band is the view into our own Galaxy."
+  },
+  "credit": "ESO/S. Brunier (CC BY 4.0)"
+ }
+]

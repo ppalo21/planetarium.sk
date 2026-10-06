@@ -1,0 +1,38 @@
+@font-face { font-family: Figtree; src: url('/fonts/Figtree-Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+@font-face { font-family: Figtree; src: url('/fonts/Figtree-SemiBold.ttf') format('truetype'); font-weight: 600; font-display: swap; }
+@font-face { font-family: Figtree; src: url('/fonts/Figtree-Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; }
+:root {
+  --sky: #070d24; --ink: #e9ecf7; --dim: #8a93b8; --betel: #ffb46b; --rigel: #9fc0ff; --panel: rgba(10,17,46,.86); --line: rgba(159,192,255,.22);
+  box-sizing: border-box; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+html, body { height: 100%; margin: 0; background: var(--sky); color: var(--ink); font-family: Figtree, system-ui, -apple-system, "Segoe UI", sans-serif; overflow: hidden; }
+canvas { display: block; touch-action: none; }
+#ui { position: fixed; left: 16px; top: calc(16px + env(safe-area-inset-top, 0px)); width: min(380px, calc(100% - 32px)); max-height: calc(100% - 32px); overflow: auto;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; backdrop-filter: blur(6px); box-sizing: border-box; }
+#ui.min > *:not(.keep) { display: none; }
+#ui.min { width: auto; padding: 10px; }
+.logo { display: block; width: 150px; height: auto; margin-bottom: .6rem; }
+h1 { font-weight: 700; font-size: 1.55rem; margin: 0; letter-spacing: .01em; }
+.sub { margin: .2rem 0 .9rem; color: var(--dim); font-size: .9rem; line-height: 1.45; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: .6rem; }
+button { font: 600 .92rem Figtree, system-ui, sans-serif; border-radius: 10px; padding: .6rem .95rem; cursor: pointer; border: 1px solid rgba(159,192,255,.35); background: transparent; color: var(--ink); }
+button.primary { background: var(--rigel); color: #071033; border-color: var(--rigel); }
+button.xr { border-color: var(--betel); color: var(--betel); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--betel); outline-offset: 2px; }
+button[hidden], .row[hidden] { display: none; }
+#msg { margin: .7rem 0 0; font-size: .85rem; color: var(--betel); line-height: 1.4; }
+.small { font-size: .78rem; color: var(--dim); line-height: 1.45; margin: .8rem 0 0; display: block; }
+#dipl { margin-top: .9rem; padding-top: .8rem; border-top: 1px solid var(--line); }
+#dipl input { font: 400 .95rem Figtree, system-ui, sans-serif; padding: .55rem .7rem; border-radius: 10px; border: 1px solid var(--line); background: rgba(255,255,255,.06); color: var(--ink); width: 100%; box-sizing: border-box; margin-top: .4rem; }
+#diploma { display: none; }
+@media print {
+  @page { size: A4 landscape; margin: 0; }
+  body { background: #fff; overflow: visible; }
+  body > * { display: none !important; }
+  #diploma { display: flex !important; flex-direction: column; align-items: center; justify-content: center; width: 297mm; height: 210mm; box-sizing: border-box; padding: 18mm; color: #09212f; text-align: center; border: 6mm solid #09212f; }
+  #diploma img { width: 70mm; margin-bottom: 10mm; }
+  #diploma h2 { font-size: 44pt; margin: 0 0 6mm; letter-spacing: .04em; }
+  #diploma .who { font-size: 30pt; font-weight: 700; margin: 6mm 0; border-bottom: 1px solid #09212f; min-width: 150mm; padding-bottom: 2mm; }
+  #diploma p { font-size: 15pt; margin: 2mm 0; max-width: 220mm; line-height: 1.4; }
+  #diploma .date { margin-top: 8mm; font-size: 12pt; }
+}

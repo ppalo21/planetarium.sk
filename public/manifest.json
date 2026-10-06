@@ -1,0 +1,14 @@
+{
+  "name": "Vesmír na dosah – KHaP MH",
+  "short_name": "Vesmír na dosah",
+  "description": "VR a AR zážitky Krajskej hvezdárne a planetária Maximiliána Hella",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#070d24",
+  "theme_color": "#070d24",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}

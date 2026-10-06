@@ -1,0 +1,16 @@
+[
+ {
+  "id": "curiosity",
+  "file": "assets/modely/curiosity.glb",
+  "length": 2.9,
+  "name": {
+   "sk": "Rover Curiosity",
+   "en": "Curiosity rover"
+  },
+  "info": {
+   "sk": "Na Marse jazdí od augusta 2012 v kráteri Gale. Je veľký ako auto, dlhý asi 2,9 m a váži 899 kg.",
+   "en": "Driving in Gale Crater on Mars since August 2012. Car-sized, about 2.9 m long, 899 kg."
+  },
+  "credit": "NASA/JPL-Caltech"
+ }
+]

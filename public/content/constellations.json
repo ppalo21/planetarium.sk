@@ -1,0 +1,569 @@
+[
+ {
+  "name": {
+   "sk": "Orión",
+   "en": "Orion"
+  },
+  "stars": [
+   {
+    "name": "Betelgeuse",
+    "ra": 88.7929,
+    "dec": 7.4071,
+    "ly": 550,
+    "mag": 0.5,
+    "color": "#ffb46b"
+   },
+   {
+    "name": "Rigel",
+    "ra": 78.6345,
+    "dec": -8.2016,
+    "ly": 860,
+    "mag": 0.13,
+    "color": "#cfe0ff"
+   },
+   {
+    "name": "Bellatrix",
+    "ra": 81.2828,
+    "dec": 6.3497,
+    "ly": 250,
+    "mag": 1.64,
+    "color": "#d6e4ff"
+   },
+   {
+    "name": "Mintaka",
+    "ra": 83.0017,
+    "dec": -0.2991,
+    "ly": 1200,
+    "mag": 2.2,
+    "color": "#cddcff"
+   },
+   {
+    "name": "Alnilam",
+    "ra": 84.0534,
+    "dec": -1.2019,
+    "ly": 2000,
+    "mag": 1.69,
+    "color": "#cddcff"
+   },
+   {
+    "name": "Alnitak",
+    "ra": 85.1897,
+    "dec": -1.9426,
+    "ly": 1260,
+    "mag": 1.77,
+    "color": "#cddcff"
+   },
+   {
+    "name": "Saiph",
+    "ra": 86.9391,
+    "dec": -9.6696,
+    "ly": 650,
+    "mag": 2.06,
+    "color": "#cddcff"
+   },
+   {
+    "name": "Meissa",
+    "ra": 83.7845,
+    "dec": 9.9342,
+    "ly": 1100,
+    "mag": 3.4,
+    "color": "#d8e4ff"
+   },
+   {
+    "name": "Tabit",
+    "ra": 72.46,
+    "dec": 6.9613,
+    "ly": 26,
+    "mag": 3.19,
+    "color": "#fff2dc"
+   },
+   {
+    "name": "M42",
+    "ra": 83.8221,
+    "dec": -5.3911,
+    "ly": 1340,
+    "mag": 3,
+    "color": "#ff9fc4",
+    "nebula": true
+   }
+  ],
+  "lines": [
+   [
+    "Meissa",
+    "Betelgeuse"
+   ],
+   [
+    "Meissa",
+    "Bellatrix"
+   ],
+   [
+    "Betelgeuse",
+    "Bellatrix"
+   ],
+   [
+    "Betelgeuse",
+    "Alnitak"
+   ],
+   [
+    "Bellatrix",
+    "Mintaka"
+   ],
+   [
+    "Mintaka",
+    "Alnilam"
+   ],
+   [
+    "Alnilam",
+    "Alnitak"
+   ],
+   [
+    "Alnitak",
+    "Saiph"
+   ],
+   [
+    "Mintaka",
+    "Rigel"
+   ],
+   [
+    "Rigel",
+    "Saiph"
+   ],
+   [
+    "Bellatrix",
+    "Tabit"
+   ]
+  ],
+  "phases": [
+   {
+    "title": {
+     "sk": "Orión, ako ho vidíme zo Zeme.",
+     "en": "Orion as seen from Earth."
+    },
+    "text": {
+     "sk": "Hviezdy sa zdajú byť na jednej ploche, presne ako na kupole planetária.",
+     "en": "The stars seem to lie on one surface, just like on a planetarium dome."
+    }
+   },
+   {
+    "title": {
+     "sk": "Každá hviezda je v inej vzdialenosti.",
+     "en": "Every star is at a different distance."
+    },
+    "text": {
+     "sk": "Z vášho miesta sa obrazec nezmenil. Urobte krok do strany alebo štipnite a potiahnite rukou.",
+     "en": "From where you stand nothing changed. Step aside, or pinch and drag."
+    }
+   },
+   {
+    "title": {
+     "sk": "Pohľad zboku: Orión neexistuje.",
+     "en": "Side view: Orion does not exist."
+    },
+    "text": {
+     "sk": "Tabit je 26 svetelných rokov od nás, Alnilam asi 2 000. Obrazec vidíme len z nášho miesta.",
+     "en": "Tabit is 26 light years away, Alnilam about 2,000. The figure exists only from our viewpoint."
+    }
+   }
+  ]
+ },
+ {
+  "name": {
+   "sk": "Veľký voz",
+   "en": "Big Dipper"
+  },
+  "stars": [
+   {
+    "name": "Dubhe",
+    "ra": 165.932,
+    "dec": 61.751,
+    "ly": 123,
+    "mag": 1.79,
+    "color": "#ffd29a"
+   },
+   {
+    "name": "Merak",
+    "ra": 165.4603,
+    "dec": 56.3824,
+    "ly": 80,
+    "mag": 2.37,
+    "color": "#e3ecff"
+   },
+   {
+    "name": "Phecda",
+    "ra": 178.4577,
+    "dec": 53.6948,
+    "ly": 83,
+    "mag": 2.44,
+    "color": "#e3ecff"
+   },
+   {
+    "name": "Megrez",
+    "ra": 183.8565,
+    "dec": 57.0326,
+    "ly": 81,
+    "mag": 3.31,
+    "color": "#e3ecff"
+   },
+   {
+    "name": "Alioth",
+    "ra": 193.5073,
+    "dec": 55.9598,
+    "ly": 83,
+    "mag": 1.77,
+    "color": "#e3ecff"
+   },
+   {
+    "name": "Mizar",
+    "ra": 200.9814,
+    "dec": 54.9254,
+    "ly": 83,
+    "mag": 2.23,
+    "color": "#e3ecff"
+   },
+   {
+    "name": "Alkaid",
+    "ra": 206.8852,
+    "dec": 49.3133,
+    "ly": 104,
+    "mag": 1.86,
+    "color": "#d4e2ff"
+   }
+  ],
+  "lines": [
+   [
+    "Dubhe",
+    "Merak"
+   ],
+   [
+    "Merak",
+    "Phecda"
+   ],
+   [
+    "Phecda",
+    "Megrez"
+   ],
+   [
+    "Megrez",
+    "Dubhe"
+   ],
+   [
+    "Megrez",
+    "Alioth"
+   ],
+   [
+    "Alioth",
+    "Mizar"
+   ],
+   [
+    "Mizar",
+    "Alkaid"
+   ]
+  ],
+  "phases": [
+   {
+    "title": {
+     "sk": "Veľký voz, ako ho vidíme zo Zeme.",
+     "en": "The Big Dipper as seen from Earth."
+    },
+    "text": {
+     "sk": "Sedem hviezd, ktoré pozná každý. Vyzerá to, že patria k sebe.",
+     "en": "Seven stars everyone knows. They look like they belong together."
+    }
+   },
+   {
+    "title": {
+     "sk": "Päť z nich naozaj patrí k sebe.",
+     "en": "Five of them really belong together."
+    },
+    "text": {
+     "sk": "Merak, Phecda, Megrez, Alioth a Mizar sú asi 80 svetelných rokov od nás a letia spolu. Dubhe a Alkaid sú tam len náhodou.",
+     "en": "Merak, Phecda, Megrez, Alioth and Mizar are about 80 light years away and travel together. Dubhe and Alkaid are there by chance."
+    }
+   },
+   {
+    "title": {
+     "sk": "Pohľad zboku: skupina a dvaja cudzinci.",
+     "en": "Side view: a group and two strangers."
+    },
+    "text": {
+     "sk": "O desiatky tisíc rokov bude mať Veľký voz iný tvar.",
+     "en": "In tens of thousands of years the Dipper will have a different shape."
+    }
+   }
+  ]
+ },
+ {
+  "name": {
+   "sk": "Kasiopeja",
+   "en": "Cassiopeia"
+  },
+  "stars": [
+   {
+    "name": "Caph",
+    "ra": 2.2945,
+    "dec": 59.1498,
+    "ly": 55,
+    "mag": 2.27,
+    "color": "#fff6e0"
+   },
+   {
+    "name": "Schedar",
+    "ra": 10.1268,
+    "dec": 56.5373,
+    "ly": 228,
+    "mag": 2.24,
+    "color": "#ffc98a"
+   },
+   {
+    "name": "Navi",
+    "ra": 14.1772,
+    "dec": 60.7167,
+    "ly": 550,
+    "mag": 2.15,
+    "color": "#cfe0ff"
+   },
+   {
+    "name": "Ruchbah",
+    "ra": 21.454,
+    "dec": 60.2353,
+    "ly": 99,
+    "mag": 2.68,
+    "color": "#eef2ff"
+   },
+   {
+    "name": "Segin",
+    "ra": 28.5989,
+    "dec": 63.6701,
+    "ly": 410,
+    "mag": 3.37,
+    "color": "#cfe0ff"
+   }
+  ],
+  "lines": [
+   [
+    "Caph",
+    "Schedar"
+   ],
+   [
+    "Schedar",
+    "Navi"
+   ],
+   [
+    "Navi",
+    "Ruchbah"
+   ],
+   [
+    "Ruchbah",
+    "Segin"
+   ]
+  ],
+  "phases": [
+   {
+    "title": {
+     "sk": "Kasiopeja, ako ju vidíme zo Zeme.",
+     "en": "Cassiopeia as seen from Earth."
+    },
+    "text": {
+     "sk": "Známe písmeno W na severnej oblohe.",
+     "en": "The famous W in the northern sky."
+    }
+   },
+   {
+    "title": {
+     "sk": "Každé rameno W je inde.",
+     "en": "Each arm of the W is elsewhere."
+    },
+    "text": {
+     "sk": "Caph je 55 svetelných rokov od nás, Navi desaťkrát ďalej.",
+     "en": "Caph is 55 light years away, Navi ten times farther."
+    }
+   },
+   {
+    "title": {
+     "sk": "Pohľad zboku: W je len náhoda.",
+     "en": "Side view: the W is a coincidence."
+    },
+    "text": {
+     "sk": "Z inej hviezdy by ste Kasiopeju nespoznali.",
+     "en": "From another star you would not recognise it."
+    }
+   }
+  ]
+ },
+ {
+  "name": {
+   "sk": "Labuť",
+   "en": "Cygnus"
+  },
+  "stars": [
+   {
+    "name": "Deneb",
+    "ra": 310.358,
+    "dec": 45.2803,
+    "ly": 2600,
+    "mag": 1.25,
+    "color": "#f2f5ff"
+   },
+   {
+    "name": "Sadr",
+    "ra": 305.5571,
+    "dec": 40.2567,
+    "ly": 1800,
+    "mag": 2.23,
+    "color": "#fff0d0"
+   },
+   {
+    "name": "Albireo",
+    "ra": 292.6803,
+    "dec": 27.9597,
+    "ly": 430,
+    "mag": 3.08,
+    "color": "#ffcf8a"
+   },
+   {
+    "name": "Gienah",
+    "ra": 311.5528,
+    "dec": 33.9703,
+    "ly": 72,
+    "mag": 2.48,
+    "color": "#ffd9a0"
+   },
+   {
+    "name": "Fawaris",
+    "ra": 296.2437,
+    "dec": 45.1308,
+    "ly": 165,
+    "mag": 2.87,
+    "color": "#dbe6ff"
+   }
+  ],
+  "lines": [
+   [
+    "Deneb",
+    "Sadr"
+   ],
+   [
+    "Sadr",
+    "Albireo"
+   ],
+   [
+    "Fawaris",
+    "Sadr"
+   ],
+   [
+    "Sadr",
+    "Gienah"
+   ]
+  ],
+  "phases": [
+   {
+    "title": {
+     "sk": "Labuť, ako ju vidíme zo Zeme.",
+     "en": "Cygnus as seen from Earth."
+    },
+    "text": {
+     "sk": "Veľký kríž letnej oblohy uprostred Mliečnej cesty.",
+     "en": "The great cross of the summer sky in the Milky Way."
+    }
+   },
+   {
+    "title": {
+     "sk": "Krídlo blízko, chvost ďaleko.",
+     "en": "Wing near, tail far."
+    },
+    "text": {
+     "sk": "Gienah je 72 svetelných rokov od nás, Deneb asi 2 600. Napriek tomu je Deneb najjasnejší, je to obrovská hviezda.",
+     "en": "Gienah is 72 light years away, Deneb about 2,600. Yet Deneb is brightest: it is a giant."
+    }
+   },
+   {
+    "title": {
+     "sk": "Pohľad zboku: vták rozletený po Galaxii.",
+     "en": "Side view: a bird spread across the Galaxy."
+    },
+    "text": {
+     "sk": "Svetlo Denebu, ktoré dnes vidíte, vyšlo v čase starovekého Grécka.",
+     "en": "The Deneb light you see today left in the time of ancient Greece."
+    }
+   }
+  ]
+ },
+ {
+  "name": {
+   "sk": "Letný trojuholník",
+   "en": "Summer Triangle"
+  },
+  "stars": [
+   {
+    "name": "Vega",
+    "ra": 279.2347,
+    "dec": 38.7837,
+    "ly": 25,
+    "mag": 0.03,
+    "color": "#e6eeff"
+   },
+   {
+    "name": "Altair",
+    "ra": 297.6958,
+    "dec": 8.8683,
+    "ly": 17,
+    "mag": 0.77,
+    "color": "#f4f6ff"
+   },
+   {
+    "name": "Deneb",
+    "ra": 310.358,
+    "dec": 45.2803,
+    "ly": 2600,
+    "mag": 1.25,
+    "color": "#f2f5ff"
+   }
+  ],
+  "lines": [
+   [
+    "Vega",
+    "Altair"
+   ],
+   [
+    "Altair",
+    "Deneb"
+   ],
+   [
+    "Deneb",
+    "Vega"
+   ]
+  ],
+  "phases": [
+   {
+    "title": {
+     "sk": "Letný trojuholník zo Zeme.",
+     "en": "The Summer Triangle from Earth."
+    },
+    "text": {
+     "sk": "Vega, Altair a Deneb vyzerajú ako rovnocenná trojica.",
+     "en": "Vega, Altair and Deneb look like equal partners."
+    }
+   },
+   {
+    "title": {
+     "sk": "Dve susedky a obor v diaľke.",
+     "en": "Two neighbours and a distant giant."
+    },
+    "text": {
+     "sk": "Altair je 17 a Vega 25 svetelných rokov od nás. Deneb je vyše stokrát ďalej.",
+     "en": "Altair is 17 and Vega 25 light years away. Deneb is over 100 times farther."
+    }
+   },
+   {
+    "title": {
+     "sk": "Pohľad zboku.",
+     "en": "Side view."
+    },
+    "text": {
+     "sk": "Vega a Altair sú tak blízko, že sa v tejto mierke ani nedajú správne zobraziť.",
+     "en": "Vega and Altair are so close they cannot be shown correctly at this scale."
+    }
+   }
+  ]
+ }
+]

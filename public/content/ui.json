@@ -1,0 +1,102 @@
+{
+ "title": {
+  "sk": "Vesmír na dosah",
+  "en": "Space Within Reach"
+ },
+ "sub": {
+  "sk": "Virtuálna a rozšírená realita Krajskej hvezdárne a planetária Maximiliána Hella. V okuliaroch Meta Quest spustite tlačidlom nižšie.",
+  "en": "Virtual and mixed reality by the Maximilian Hell Regional Observatory and Planetarium. On Meta Quest, start with the button below."
+ },
+ "vr": {
+  "sk": "Spustiť vo VR",
+  "en": "Start in VR"
+ },
+ "ar": {
+  "sk": "Spustiť v AR (miestnosť)",
+  "en": "Start in AR (room)"
+ },
+ "lang": {
+  "sk": "English",
+  "en": "Slovensky"
+ },
+ "offline": {
+  "sk": "Pripraviť offline",
+  "en": "Prepare offline"
+ },
+ "min": {
+  "sk": "Skryť panel",
+  "en": "Hide panel"
+ },
+ "max": {
+  "sk": "Zobraziť panel",
+  "en": "Show panel"
+ },
+ "home": {
+  "sk": "Domov",
+  "en": "Home"
+ },
+ "next": {
+  "sk": "Ďalej",
+  "en": "Next"
+ },
+ "prev": {
+  "sk": "Späť",
+  "en": "Back"
+ },
+ "recenter": {
+  "sk": "Vycentrovať",
+  "en": "Recenter"
+ },
+ "again": {
+  "sk": "Znova",
+  "en": "Again"
+ },
+ "loading": {
+  "sk": "Načítavam…",
+  "en": "Loading…"
+ },
+ "missing": {
+  "sk": "Súbor chýba. Spustite skript stiahni_obsah.py a nahrajte priečinok assets na GitHub.",
+  "en": "File missing. Run stiahni_obsah.py and upload the assets folder to GitHub."
+ },
+ "noxr": {
+  "sk": "Tento prehliadač nepodporuje WebXR. Na počítači si appku môžete prezrieť myšou: kliknutie = výber, ťahanie = rozhliadnutie.",
+  "en": "This browser does not support WebXR. On a computer, use the mouse: click to select, drag to look around."
+ },
+ "xrfail": {
+  "sk": "Režim sa nepodarilo spustiť. Otvorte appku priamo cez https:// adresu v prehliadači Meta Quest.",
+  "en": "Could not start. Open the app directly via its https:// address in Meta Quest Browser."
+ },
+ "note": {
+  "sk": "Ovládanie v okuliaroch: ukážte lúčom a štipnite prstami. Dlhé štipnutie (1,5 s) = návrat domov a vycentrovanie. Po 2 minútach nečinnosti sa appka vráti na úvod.",
+  "en": "In the headset: point and pinch. Long pinch (1.5 s) = home and recenter. After 2 minutes idle the app returns to the start."
+ },
+ "offOk": {
+  "sk": "Hotovo, uložené súbory: ",
+  "en": "Done, files saved: "
+ },
+ "offRun": {
+  "sk": "Ukladám do pamäte…",
+  "en": "Saving for offline…"
+ },
+ "dLabel": {
+  "sk": "Diplom z kvízu: meno dieťaťa",
+  "en": "Quiz certificate: child’s name"
+ },
+ "dPrint": {
+  "sk": "Vytlačiť diplom",
+  "en": "Print certificate"
+ },
+ "dT1": {
+  "sk": "Krajská hvezdáreň a planetárium Maximiliána Hella udeľuje",
+  "en": "The Maximilian Hell Regional Observatory and Planetarium awards"
+ },
+ "dT2": {
+  "sk": "za úspešné zvládnutie vesmírneho kvízu vo virtuálnej realite. Výsledok: ",
+  "en": "for completing the space quiz in virtual reality. Score: "
+ },
+ "dTitle": {
+  "sk": "DIPLOM",
+  "en": "CERTIFICATE"
+ }
+}

@@ -1,0 +1,41 @@
+{
+ "dropHeight": 1.5,
+ "worlds": [
+  {
+   "id": "moon",
+   "g": 1.62,
+   "c": "#b8b8b8",
+   "name": {
+    "sk": "Mesiac",
+    "en": "Moon"
+   }
+  },
+  {
+   "id": "mars",
+   "g": 3.71,
+   "c": "#c1440e",
+   "name": {
+    "sk": "Mars",
+    "en": "Mars"
+   }
+  },
+  {
+   "id": "earth",
+   "g": 9.81,
+   "c": "#3b7bd6",
+   "name": {
+    "sk": "Zem",
+    "en": "Earth"
+   }
+  },
+  {
+   "id": "jupiter",
+   "g": 24.79,
+   "c": "#d8b48a",
+   "name": {
+    "sk": "Jupiter",
+    "en": "Jupiter"
+   }
+  }
+ ]
+}
