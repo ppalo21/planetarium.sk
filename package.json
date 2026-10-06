@@ -1,0 +1,22 @@
+{
+  "name": "vesmir-na-dosah",
+  "private": true,
+  "version": "2.0.0",
+  "description": "WebXR VR/AR aplikácia Krajskej hvezdárne a planetária Maximiliána Hella",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host"
+  },
+  "dependencies": {
+    "three": "^0.186.1",
+    "troika-three-text": "^0.52.5"
+  },
+  "devDependencies": {
+    "@types/three": "^0.186.0",
+    "typescript": "^5.9.0",
+    "vite": "^8.0.0",
+    "@vitejs/plugin-basic-ssl": "^2.0.0"
+  }
+}
