@@ -150,8 +150,8 @@ export const quiz: any = {
     if (this.i >= Q.length) {
       const s = this.score, n = Q.length;
       setHud({ kicker: { sk: 'Kvíz', en: 'Quiz' }, title: { sk: `Výsledok: ${s} z ${n} hviezdičiek`, en: `Score: ${s} of ${n} stars` },
-        body: s === n ? { sk: 'Perfektné! Ste skutočný astronóm. O diplom požiadajte obsluhu.', en: 'Perfect! You are a real astronomer. Ask the staff for your certificate.' }
-          : { sk: 'Výborne! O diplom požiadajte obsluhu. Chcete to skúsiť znova? Otázky budú iné.', en: 'Well done! Ask the staff for your certificate. Try again? The questions will be different.' },
+        body: s === n ? { sk: 'Perfektné! Všetky hviezdičky sú vaše, ste skutočný astronóm.', en: 'Perfect! You collected every star, you are a real astronomer.' }
+          : { sk: 'Výborne! Chcete to skúsiť znova? Otázky budú iné.', en: 'Well done! Want to try again? The questions will be different.' },
         rows: [[{ label: T(UI.again), onClick: () => this.enter(), primary: true }]] });
       return;
     }

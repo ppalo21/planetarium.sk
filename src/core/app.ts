@@ -143,7 +143,7 @@ export function toggleLang() {
   if (!['trips', 'machines'].includes(ctx.current)) ctx.modules[ctx.current]?.hud?.();
 }
 export let lastScore: { s: number; n: number } | null = null;
-export function quizFinished(s: number, n: number) { lastScore = { s, n }; $('dipl').hidden = false; track('kvíz', { score: s, of: n }); }
+export function quizFinished(s: number, n: number) { lastScore = { s, n }; track('kvíz', { score: s, of: n }); }
 
 export function initDom() {
   const UI = ctx.content.ui;
