@@ -554,5 +554,206 @@
     ]
    }
   ]
+ },
+ {
+  "id": "saturn-v",
+  "file": "assets/modely/saturn-v.glb",
+  "size": 110.6,
+  "scaleBy": "height",
+  "tall": true,
+  "name": {
+   "sk": "Raketa Saturn V",
+   "en": "Saturn V rocket"
+  },
+  "info": {
+   "sk": "Najsilnejšia raketa, ktorá kedy vyniesla ľudí: posielala misie Apollo na Mesiac v rokoch 1967 až 1973. Je vysoká 110,6 m, viac ako 36-poschodový dom, a pri štarte vážila asi 2 900 ton. Pozrite sa hore!",
+   "en": "The most powerful rocket ever to carry people: it sent the Apollo missions to the Moon from 1967 to 1973. It is 110.6 m tall, taller than a 36-storey building, and weighed about 2,900 tonnes at launch. Look up!"
+  },
+  "credit": "NASA",
+  "parts": [
+   {
+    "n": {
+     "sk": "Záchranná veža",
+     "en": "Launch escape tower"
+    },
+    "f": {
+     "sk": "v núdzi odtiahne kabínu s posádkou do bezpečia",
+     "en": "in an emergency it pulls the crew cabin to safety"
+    },
+    "at": [
+     0.5,
+     0.995,
+     0.5
+    ]
+   },
+   {
+    "n": {
+     "sk": "Veliteľský modul",
+     "en": "Command module"
+    },
+    "f": {
+     "sk": "kabína pre 3 astronautov, jediná časť, ktorá sa vrátila na Zem",
+     "en": "cabin for 3 astronauts, the only part that came back to Earth"
+    },
+    "at": [
+     0.5,
+     0.955,
+     0.5
+    ]
+   },
+   {
+    "n": {
+     "sk": "Tretí stupeň S-IVB",
+     "en": "Third stage S-IVB"
+    },
+    "f": {
+     "sk": "poslal Apollo z obežnej dráhy k Mesiacu",
+     "en": "sent Apollo from orbit towards the Moon"
+    },
+    "at": [
+     0.5,
+     0.78,
+     0.5
+    ]
+   },
+   {
+    "n": {
+     "sk": "Druhý stupeň S-II",
+     "en": "Second stage S-II"
+    },
+    "f": {
+     "sk": "5 motorov J-2 na kvapalný vodík",
+     "en": "5 J-2 engines burning liquid hydrogen"
+    },
+    "at": [
+     0.5,
+     0.55,
+     0.5
+    ]
+   },
+   {
+    "n": {
+     "sk": "Prvý stupeň S-IC",
+     "en": "First stage S-IC"
+    },
+    "f": {
+     "sk": "za necelé 3 minúty spálil vyše 2 000 ton paliva",
+     "en": "burned over 2,000 tonnes of propellant in under 3 minutes"
+    },
+    "at": [
+     0.5,
+     0.22,
+     0.5
+    ]
+   },
+   {
+    "n": {
+     "sk": "Motory F-1",
+     "en": "F-1 engines"
+    },
+    "f": {
+     "sk": "5 najsilnejších jednokomorových raketových motorov na kvapalné palivo",
+     "en": "5 of the most powerful single-chamber liquid-fuel rocket engines"
+    },
+    "at": [
+     0.5,
+     0.0,
+     0.5
+    ]
+   }
+  ]
+ },
+ {
+  "id": "sls",
+  "file": "assets/modely/sls-artemis.glb",
+  "size": 98.1,
+  "scaleBy": "height",
+  "tall": true,
+  "name": {
+   "sk": "Raketa SLS (Artemis)",
+   "en": "SLS rocket (Artemis)"
+  },
+  "info": {
+   "sk": "Raketa programu Artemis, ktorý má vrátiť ľudí na Mesiac. Je vysoká 98 m a pri štarte má väčší ťah než Saturn V. V apríli 2026 vyniesla misiu Artemis II so štyrmi astronautmi, ktorí obleteli Mesiac.",
+   "en": "The rocket of the Artemis programme, which aims to return people to the Moon. It is 98 m tall and has more thrust at liftoff than Saturn V. In April 2026 it launched Artemis II with four astronauts who flew around the Moon."
+  },
+  "credit": "NASA",
+  "parts": [
+   {
+    "n": {
+     "sk": "Kabína Orion",
+     "en": "Orion capsule"
+    },
+    "f": {
+     "sk": "pre 4 astronautov, v apríli 2026 obletela Mesiac",
+     "en": "for 4 astronauts, flew around the Moon in April 2026"
+    },
+    "at": [
+     0.5,
+     0.93,
+     0.5
+    ]
+   },
+   {
+    "n": {
+     "sk": "Záchranný systém",
+     "en": "Launch abort system"
+    },
+    "f": {
+     "sk": "pri štarte chráni posádku",
+     "en": "protects the crew during launch"
+    },
+    "at": [
+     0.5,
+     0.995,
+     0.5
+    ]
+   },
+   {
+    "n": {
+     "sk": "Centrálny stupeň",
+     "en": "Core stage"
+    },
+    "f": {
+     "sk": "oranžová farba je od izolačnej peny, je vysoký 65 m",
+     "en": "the orange colour is insulating foam; it is 65 m tall"
+    },
+    "at": [
+     0.5,
+     0.5,
+     0.5
+    ]
+   },
+   {
+    "n": {
+     "sk": "Bočné rakety",
+     "en": "Solid rocket boosters"
+    },
+    "f": {
+     "sk": "2 rakety na tuhé palivo dávajú pri štarte vyše 75 % ťahu",
+     "en": "2 solid boosters give over 75 % of the thrust at liftoff"
+    },
+    "at": [
+     0.03,
+     0.4,
+     0.5
+    ]
+   },
+   {
+    "n": {
+     "sk": "Motory RS-25",
+     "en": "RS-25 engines"
+    },
+    "f": {
+     "sk": "4 motory, ktoré predtým lietali na raketoplánoch",
+     "en": "4 engines that previously flew on the Space Shuttle"
+    },
+    "at": [
+     0.5,
+     0.0,
+     0.5
+    ]
+   }
+  ]
  }
 ]
