@@ -22,7 +22,16 @@
     "en": "Neptune"
    }
   ],
-  "a": 1
+  "a": 1,
+  "reveal": {
+   "type": "planet",
+   "tex": "jupiter.jpg",
+   "compare": true
+  },
+  "e": {
+   "sk": "Jupiter je taký veľký, že by sa doň zmestilo vyše 1 300 Zemí.",
+   "en": "Jupiter is so big that more than 1,300 Earths would fit inside."
+  }
  },
  {
   "q": {
@@ -47,7 +56,14 @@
     "en": "1 year"
    }
   ],
-  "a": 1
+  "a": 1,
+  "reveal": {
+   "type": "light"
+  },
+  "e": {
+   "sk": "Svetlo letí 300 000 km za sekundu, a aj tak mu cesta zo Slnka trvá 8 minút a 20 sekúnd.",
+   "en": "Light travels 300,000 km per second, yet the trip from the Sun still takes 8 minutes 20 seconds."
+  }
  },
  {
   "q": {
@@ -72,7 +88,14 @@
     "en": "it is the same"
    }
   ],
-  "a": 1
+  "a": 1,
+  "reveal": {
+   "type": "gravity"
+  },
+  "e": {
+   "sk": "Na Mesiaci by ste vyskočili asi 6-krát vyššie. Astronauti Apolla tam skákali ako klokani.",
+   "en": "On the Moon you would jump about 6 times higher. Apollo astronauts hopped like kangaroos."
+  }
  },
  {
   "q": {
@@ -97,7 +120,14 @@
     "en": "Alnilam"
    }
   ],
-  "a": 2
+  "a": 2,
+  "reveal": {
+   "type": "stars"
+  },
+  "e": {
+   "sk": "Bellatrix je 250 svetelných rokov od nás, Alnilam až asi 2 000.",
+   "en": "Bellatrix is 250 light years away, Alnilam about 2,000."
+  }
  },
  {
   "q": {
@@ -122,7 +152,15 @@
     "en": "A red sea"
    }
   ],
-  "a": 1
+  "a": 1,
+  "reveal": {
+   "type": "planet",
+   "tex": "mars.jpg"
+  },
+  "e": {
+   "sk": "Povrch Marsu pokrýva prach s oxidmi železa, teda vlastne hrdzou.",
+   "en": "Mars is covered in dust full of iron oxides, which is basically rust."
+  }
  },
  {
   "q": {
@@ -147,7 +185,16 @@
     "en": "Hubble"
    }
   ],
-  "a": 0
+  "a": 0,
+  "reveal": {
+   "type": "model",
+   "file": "assets/modely/curiosity.glb",
+   "alt": "assets/modely/perseverance.glb"
+  },
+  "e": {
+   "sk": "Curiosity jazdí v kráteri Gale od augusta 2012.",
+   "en": "Curiosity has been driving in Gale Crater since August 2012."
+  }
  },
  {
   "q": {
@@ -172,6 +219,115 @@
     "en": "2020"
    }
   ],
-  "a": 1
+  "a": 1,
+  "reveal": {
+   "type": "model",
+   "file": "assets/modely/apollo-lm.glb"
+  },
+  "e": {
+   "sk": "Apollo 17 v decembri 1972. Poslední na Mesiaci boli Eugene Cernan a Harrison Schmitt.",
+   "en": "Apollo 17 in December 1972. The last moonwalkers were Eugene Cernan and Harrison Schmitt."
+  }
+ },
+ {
+  "q": {
+   "sk": "Koľko mesiacov má Mars?",
+   "en": "How many moons does Mars have?"
+  },
+  "o": [
+   {
+    "sk": "žiadny",
+    "en": "none"
+   },
+   {
+    "sk": "1",
+    "en": "1"
+   },
+   {
+    "sk": "2",
+    "en": "2"
+   },
+   {
+    "sk": "79",
+    "en": "79"
+   }
+  ],
+  "a": 2,
+  "reveal": {
+   "type": "planet",
+   "tex": "mars.jpg",
+   "moons": 2
+  },
+  "e": {
+   "sk": "Phobos a Deimos sú malé a nepravidelné, Phobos má len asi 22 km.",
+   "en": "Phobos and Deimos are small and lumpy; Phobos is only about 22 km across."
+  }
+ },
+ {
+  "q": {
+   "sk": "Ktorá raketa vyniesla v roku 2026 astronautov okolo Mesiaca?",
+   "en": "Which rocket sent astronauts around the Moon in 2026?"
+  },
+  "o": [
+   {
+    "sk": "Saturn V",
+    "en": "Saturn V"
+   },
+   {
+    "sk": "SLS",
+    "en": "SLS"
+   },
+   {
+    "sk": "Falcon 9",
+    "en": "Falcon 9"
+   },
+   {
+    "sk": "Sojuz",
+    "en": "Soyuz"
+   }
+  ],
+  "a": 1,
+  "reveal": {
+   "type": "model",
+   "file": "assets/modely/sls-artemis.glb"
+  },
+  "e": {
+   "sk": "Misia Artemis II v apríli 2026 so štyrmi astronautmi na palube.",
+   "en": "The Artemis II mission in April 2026 with four astronauts on board."
+  }
+ },
+ {
+  "q": {
+   "sk": "Čo je polárna žiara?",
+   "en": "What is an aurora?"
+  },
+  "o": [
+   {
+    "sk": "odraz Mesiaca na ľade",
+    "en": "moonlight reflected on ice"
+   },
+   {
+    "sk": "vzduch rozžiarený časticami zo Slnka",
+    "en": "air glowing from particles from the Sun"
+   },
+   {
+    "sk": "hviezdy pri póle",
+    "en": "stars near the pole"
+   },
+   {
+    "sk": "svetlo miest",
+    "en": "city lights"
+   }
+  ],
+  "a": 1,
+  "reveal": {
+   "type": "planet",
+   "tex": "earth_daymap.jpg",
+   "aurora": true
+  },
+  "e": {
+   "sk": "Častice slnečného vetra rozžiaria kyslík a dusík 100 až 300 km nad pólmi.",
+   "en": "Solar wind particles make oxygen and nitrogen glow 100 to 300 km above the poles."
+  }
  }
 ]

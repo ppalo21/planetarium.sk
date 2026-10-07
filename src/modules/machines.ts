@@ -10,7 +10,7 @@ import { arReady, startPlacing, isPlacing } from '../core/ar';
 
 /** Modely NASA sú často komprimované (Draco) – dekodér je priamo v appke (public/draco), funguje offline. */
 let loader: GLTFLoader | null = null;
-function gltfLoader() {
+export function gltfLoader() {
   if (!loader) {
     const draco = new DRACOLoader(); draco.setDecoderPath(url('draco/'));
     loader = new GLTFLoader(); loader.setDRACOLoader(draco); loader.setMeshoptDecoder(MeshoptDecoder);
