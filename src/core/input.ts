@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { ctx } from './context';
+import { ctx, url } from './context';
 import { XRHandModelFactory } from 'three/addons/webxr/XRHandModelFactory.js';
 import { clickables, isVisible, hudButtons, setHudNear, hud } from './ui3d';
 import { tryPlace, isPlacing, stopPlacing } from './ar';
@@ -25,10 +25,14 @@ function setHovered(set: Set<THREE.Object3D>) {
 export function initInput(modeChanged: () => void) {
   onModeChange = modeChanged;
   const { renderer, scene } = ctx;
-  const handFactory = new XRHandModelFactory();
+  // realistické ruky (model z WebXR Input Profiles, uložený v appke → funguje offline)
+  const handFactory = new XRHandModelFactory(null, (model: THREE.Object3D) => {
+    model.traverse((o: any) => { if (o.isMesh) { o.material = new THREE.MeshStandardMaterial({ color: '#d9ab8f', roughness: 0.55, metalness: 0, transparent: true, opacity: 0.96 }); o.frustumCulled = false; } });
+  });
+  handFactory.setPath(url('hands/'));
   for (let i = 0; i < 2; i++) {
     // viditeľné ruky (kĺby prstov) – kreslia sa len vo VR, v AR vidno skutočné ruky
-    const hand = renderer.xr.getHand(i); hand.add(handFactory.createHandModel(hand, 'spheres')); scene.add(hand); hands.push(hand);
+    const hand = renderer.xr.getHand(i); hand.add(handFactory.createHandModel(hand, 'mesh')); scene.add(hand); hands.push(hand);
     hand.userData.poke = { btn: null as THREE.Object3D | null, armed: false, cool: 0, prevZ: 1 };
     const c = renderer.xr.getController(i); scene.add(c); ctrls.push(c);
     const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3(0, 0, -1)]),

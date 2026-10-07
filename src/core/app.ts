@@ -20,7 +20,7 @@ export function initScene() {
   renderer.xr.setFoveation(1);              // foveated rendering: okraje obrazu v nižšom rozlíšení = viac výkonu
   document.body.prepend(renderer.domElement);
   const scene = new THREE.Scene(); scene.background = SKY;
-  const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.02, 200); camera.rotation.order = 'YXZ';
+  const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.02, 3e6);   // ďaleká hranica pre let Slnečnou sústavou camera.rotation.order = 'YXZ';
   const anchor = new THREE.Group(), floor = new THREE.Group(); scene.add(anchor, floor);
   anchor.position.set(0, 1.6, 0); camera.position.set(0, 1.6, 0);
   // fyzikálne svetlá (od three r155 sú intenzity v jednotkách × π)

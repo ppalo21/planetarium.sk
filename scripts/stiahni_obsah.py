@@ -39,6 +39,18 @@ ITEMS = [
     ("assets/modely/curiosity.glb", [
         "https://assets.science.nasa.gov/content/dam/science/psd/solar/2023/09/c/Curiosity_static.glb"], "raw"),
 ] + [
+    # Zem: noc, oblaky, odlesk oceánov (2k)
+    ("assets/planety/2k_earth_nightmap.jpg", [SSS + "2k_earth_nightmap.jpg"], "tex"),
+    ("assets/planety/2k_earth_clouds.jpg", [SSS + "2k_earth_clouds.jpg"], "tex"),
+    ("assets/planety/2k_earth_specular_map.jpg", [SSS + "2k_earth_specular_map.tif"], "tex"),
+] + [
+    # najlepšie textúry pre Let Slnečnou sústavou: 8k zo Solar System Scope zmenšené na 4k (pre Quest)
+    (f"assets/planety/4k_{dst}", [SSS + src], "tex4k") for src, dst in [
+        ("8k_mercury.jpg", "mercury.jpg"), ("4k_venus_atmosphere.jpg", "venus_atmosphere.jpg"),
+        ("8k_earth_daymap.jpg", "earth_daymap.jpg"), ("8k_earth_nightmap.jpg", "earth_nightmap.jpg"),
+        ("8k_earth_clouds.jpg", "earth_clouds.jpg"), ("8k_moon.jpg", "moon.jpg"), ("8k_mars.jpg", "mars.jpg"),
+        ("8k_jupiter.jpg", "jupiter.jpg"), ("8k_saturn.jpg", "saturn.jpg"), ("8k_stars_milky_way.jpg", "stars_milky_way.jpg")]
+] + [
     (f"assets/planety/{n}", [SSS + n], "tex") for n in [
         "2k_sun.jpg", "2k_mercury.jpg", "2k_venus_atmosphere.jpg", "2k_earth_daymap.jpg",
         "2k_moon.jpg", "2k_mars.jpg", "2k_jupiter.jpg", "2k_saturn.jpg",
@@ -55,6 +67,8 @@ def save_image(data, dest, kind):
     w, h = im.size
     if kind == "pano":
         scale = min(1.0, PANO_MAXW / w, (PANO_BUDGET / (w * h)) ** 0.5)
+    elif kind == "tex4k":
+        scale = min(1.0, 4096 / w)
     else:
         scale = min(1.0, 2048 / w)
     if scale < 1.0:

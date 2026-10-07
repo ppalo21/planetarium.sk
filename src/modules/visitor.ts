@@ -82,7 +82,7 @@ export const operator: any = {
   enter() { this.root.visible = true; this.hud(); },
   exit() { this.root.visible = false; },
   hud() {
-    const MN: Record<string, any> = { trips: { sk: 'Výlety', en: 'Trips' }, depth: { sk: 'Hĺbka', en: 'Depth' }, planets: { sk: 'Planéty', en: 'Planets' }, phases: { sk: 'Fázy', en: 'Phases' }, gravity: { sk: 'Gravitácia', en: 'Gravity' }, machines: { sk: 'Stroje', en: 'Machines' }, quiz: { sk: 'Kvíz', en: 'Quiz' } };
+    const MN: Record<string, any> = { solar: { sk: 'Let', en: 'Flight' }, aurora: { sk: 'Žiara', en: 'Aurora' }, trips: { sk: 'Výlety', en: 'Trips' }, depth: { sk: 'Hĺbka', en: 'Depth' }, planets: { sk: 'Planéty', en: 'Planets' }, phases: { sk: 'Fázy', en: 'Phases' }, gravity: { sk: 'Gravitácia', en: 'Gravity' }, machines: { sk: 'Stroje', en: 'Machines' }, quiz: { sk: 'Kvíz', en: 'Quiz' } };
     const tog = (k: string) => ({ label: T(MN[k]), active: SET.mods[k], onClick: () => { SET.mods[k] = !SET.mods[k]; if (!Object.values(SET.mods).some(Boolean)) SET.mods[k] = true; saveSet(); this.hud(); } });
     const lim = (s: number) => ({ label: s ? (s / 60) + ' min' : (en() ? 'No limit' : 'Bez limitu'), active: SET.limit === s, onClick: () => { SET.limit = s; saveSet(); this.hud(); } });
     const onoff = (v: boolean) => v ? (en() ? 'on' : 'zap') : (en() ? 'off' : 'vyp');
@@ -91,6 +91,7 @@ export const operator: any = {
       rows: [Object.keys(MN).map(tog), [lim(0), lim(120), lim(180), lim(300)],
         [{ label: (en() ? 'Intro: ' : 'Úvod: ') + onoff(SET.tutorial), active: SET.tutorial, onClick: () => { SET.tutorial = !SET.tutorial; saveSet(); this.hud(); } },
          { label: (en() ? 'Sound: ' : 'Zvuk: ') + onoff(SET.sound), active: SET.sound, onClick: () => { SET.sound = !SET.sound; saveSet(); SND.ambient(SET.sound && ctx.renderer.xr.isPresenting); this.hud(); } },
+         { label: (en() ? 'Voice: ' : 'Hlas: ') + onoff(SET.voice), active: SET.voice, onClick: () => { SET.voice = !SET.voice; saveSet(); this.hud(); } },
          { label: en() ? 'Slovensky' : 'English', onClick: toggleLang }],
         [{ label: en() ? 'Done, new visitor ›' : 'Hotovo, nový návštevník ›', primary: true, onClick: startVisitor }]], home: false, sticky: true });
   },

@@ -9,6 +9,8 @@ import { toggleLang } from '../core/app';
 
 /** Úvodná scéna s logom a „portálmi“ do jednotlivých zážitkov. */
 const ITEMS = [
+  { id: 'solar', label: { sk: 'Let Slnečnou sústavou', en: 'Solar System flight' }, tex: '2k_sun.jpg', c: '#ffb347' },
+  { id: 'aurora', label: { sk: 'Polárna žiara', en: 'Aurora' }, icon: 'aurora' },
   { id: 'trips', label: { sk: 'Výlety v 360°', en: '360° trips' }, tex: '2k_mars.jpg', c: '#c1440e' },
   { id: 'depth', label: { sk: 'Hĺbka oblohy', en: 'Depth of the sky' }, icon: 'stars' },
   { id: 'planets', label: { sk: 'Planéty v ruke', en: 'Planets in hand' }, tex: '2k_jupiter.jpg', c: '#d8b48a' },
@@ -24,7 +26,11 @@ function logoTap() { // 5× rýchlo ťuknúť na logo = režim obsluhy
 }
 function iconTex(kind: string) {
   const c = document.createElement('canvas'); c.width = 512; c.height = 256; const g = c.getContext('2d')!;
-  if (kind === 'phases') {   // polovica osvetlená, polovica v tieni
+  if (kind === 'aurora') {   // zelené závesy na nočnej oblohe
+    g.fillStyle = '#040a14'; g.fillRect(0, 0, 512, 256);
+    for (let x = 0; x < 512; x += 2) { const h = 60 + 40 * Math.sin(x * 0.03) + 25 * Math.sin(x * 0.11); const gr = g.createLinearGradient(0, 200 - h, 0, 200);
+      gr.addColorStop(0, 'rgba(255,60,90,0)'); gr.addColorStop(0.5, 'rgba(60,255,140,0.5)'); gr.addColorStop(1, 'rgba(120,255,170,0.9)'); g.fillStyle = gr; g.fillRect(x, 200 - h, 2, h); }
+  } else if (kind === 'phases') {   // polovica osvetlená, polovica v tieni
     g.fillStyle = '#0d0f18'; g.fillRect(0, 0, 512, 256);
     const gr = g.createLinearGradient(0, 0, 512, 0); gr.addColorStop(0, '#d9d6cf'); gr.addColorStop(0.45, '#bdb9b0'); gr.addColorStop(0.5, '#15171f'); gr.addColorStop(1, '#0d0f18');
     g.fillStyle = gr; g.fillRect(0, 0, 512, 256);
@@ -49,7 +55,7 @@ export const lobby: any = {
     loadTex(url('logo-white.png')).then(t => {
       if (!t) return; const img = t.image as HTMLImageElement, a = img.width / img.height, w = 2.6;
       const p = new THREE.Mesh(new THREE.PlaneGeometry(w, w / a), new THREE.MeshBasicMaterial({ map: t, transparent: true, depthWrite: false }));
-      p.position.set(0, 1.25, -6.0); p.lookAt(0, 0, 0); r.add(p); makeClickable(p, { onClick: logoTap });
+      p.position.set(0, 1.95, -6.0); p.lookAt(0, 0, 0); r.add(p); makeClickable(p, { onClick: logoTap });
     });
     loadTex(ASSET.milky).then(t => {
       if (!t) return;
@@ -71,9 +77,14 @@ export const lobby: any = {
     });
   },
   layout() {
-    const on = this.portals.filter(p => SET.mods[p.userData.it.id]), n = on.length, span = Math.min(110, 24 * (n - 1));
-    this.portals.forEach(p => { p.visible = on.includes(p); });
-    on.forEach((g, i) => { const ang = (n > 1 ? -span / 2 + span * i / (n - 1) : 0) * D2R, R = 1.75; g.position.set(Math.sin(ang) * R, -0.02, -Math.cos(ang) * R); });
+    const on = this.portals.filter((p: any) => SET.mods[p.userData.it.id]);
+    this.portals.forEach((p: any) => { p.visible = on.includes(p); });
+    // viac ako 6 zážitkov: dva rady nad sebou, aby sa guľe a mená neprekrývali
+    const rows = on.length > 6 ? [on.slice(0, Math.ceil(on.length / 2)), on.slice(Math.ceil(on.length / 2))] : [on];
+    rows.forEach((row: any[], ri: number) => {
+      const n = row.length, span = Math.min(100, 22 * (n - 1)), y = rows.length > 1 ? (ri === 0 ? 0.1 : -0.3) : -0.02;
+      row.forEach((g, i) => { const ang = (n > 1 ? -span / 2 + span * i / (n - 1) : 0) * D2R, R = 1.9; g.position.set(Math.sin(ang) * R, y, -Math.cos(ang) * R); g.userData.y0 = y; });
+    });
   },
   relabel() {
     this.portals.forEach(p => { p.remove(p.userData.lab); disposeTree(p.userData.lab); const l = textSprite(T(p.userData.it.label), '#e9ecf7', 60); setSpriteH(l, 0.065); l.position.y = -0.25; p.add(l); p.userData.lab = l; });
@@ -91,7 +102,7 @@ export const lobby: any = {
       const u = p.userData; u.s.rotation.y += dt * 0.25;
       const k = u.hover ? 1.3 : 1; p.scale.lerp(new THREE.Vector3(k, k, k), Math.min(1, dt * 10));
       u.halo.material.opacity += ((u.hover ? 0.9 : 0) - u.halo.material.opacity) * Math.min(1, dt * 10);
-      u.halo.lookAt(head); p.position.y = -0.02 + Math.sin(t * 0.9 + i) * 0.012;
+      u.halo.lookAt(head); p.position.y = (u.y0 ?? -0.02) + Math.sin(t * 0.9 + i) * 0.012;
     });
     if (this.milky) this.milky.visible = !ctx.isAR;
   }

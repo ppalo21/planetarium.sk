@@ -4,8 +4,9 @@ export interface Settings {
   limit: number;      // sekundy na návštevníka, 0 = bez limitu
   tutorial: boolean;
   sound: boolean;
+  voice: boolean;
 }
-const DEF: Settings = { mods: { trips: true, depth: true, planets: true, phases: true, gravity: true, machines: true, quiz: true }, limit: 0, tutorial: true, sound: true };
+const DEF: Settings = { mods: { solar: true, aurora: true, trips: true, depth: true, planets: true, phases: true, gravity: true, machines: true, quiz: true }, limit: 0, tutorial: true, sound: true, voice: true };
 
 function load(): Settings {
   try {
