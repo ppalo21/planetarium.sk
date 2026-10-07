@@ -26,3 +26,7 @@ TEXTÚRY PLANÉT
 - NASA Photojournal: https://photojournal.jpl.nasa.gov/
 
 Logo: Krajská hvezdáreň a planetárium Maximiliána Hella.
+- Raketa Saturn V – NASA 3D Resources (Saturn V.glb)
+- Raketa SLS Block 1 (Artemis) – NASA 3D Resources, model pre 3D tlač (Space Launch System (SLS) Block 1.stl),
+  farby častí doplnené pre appku (oranžový centrálny stupeň, biele bočné rakety, Orion)
+- Realistické ruky – WebXR Input Profiles (generic-hand), MIT licencia
