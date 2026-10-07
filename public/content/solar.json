@@ -1,0 +1,272 @@
+{
+ "bodies": {
+  "sun": {
+   "r": 696340,
+   "a": 0,
+   "name": {
+    "sk": "Slnko",
+    "en": "Sun"
+   }
+  },
+  "mercury": {
+   "r": 2439.7,
+   "a": 0.387,
+   "P": 87.969,
+   "L0": 252.25,
+   "tilt": 0.03,
+   "tex": "mercury.jpg",
+   "color": "#9a9a9a",
+   "name": {
+    "sk": "Merkúr",
+    "en": "Mercury"
+   }
+  },
+  "venus": {
+   "r": 6051.8,
+   "a": 0.723,
+   "P": 224.701,
+   "L0": 181.98,
+   "tilt": 177.4,
+   "tex": "venus_atmosphere.jpg",
+   "color": "#e8c98e",
+   "atmo": "#ffd9a0",
+   "atmoStr": 0.6,
+   "name": {
+    "sk": "Venuša",
+    "en": "Venus"
+   }
+  },
+  "earth": {
+   "r": 6371,
+   "a": 1.0,
+   "P": 365.256,
+   "L0": 100.46,
+   "tilt": 23.44,
+   "name": {
+    "sk": "Zem",
+    "en": "Earth"
+   }
+  },
+  "mars": {
+   "r": 3389.5,
+   "a": 1.524,
+   "P": 686.98,
+   "L0": 355.45,
+   "tilt": 25.19,
+   "tex": "mars.jpg",
+   "color": "#c1440e",
+   "atmo": "#ffb38a",
+   "atmoStr": 0.25,
+   "name": {
+    "sk": "Mars",
+    "en": "Mars"
+   }
+  },
+  "jupiter": {
+   "r": 69911,
+   "a": 5.203,
+   "P": 4332.59,
+   "L0": 34.4,
+   "tilt": 3.13,
+   "tex": "jupiter.jpg",
+   "color": "#d8b48a",
+   "atmo": "#ffe2bd",
+   "atmoStr": 0.3,
+   "name": {
+    "sk": "Jupiter",
+    "en": "Jupiter"
+   }
+  },
+  "saturn": {
+   "r": 58232,
+   "a": 9.537,
+   "P": 10759.22,
+   "L0": 49.94,
+   "tilt": 26.73,
+   "tex": "saturn.jpg",
+   "color": "#e3d09a",
+   "atmo": "#ffeec8",
+   "atmoStr": 0.25,
+   "ring": true,
+   "name": {
+    "sk": "Saturn",
+    "en": "Saturn"
+   }
+  },
+  "uranus": {
+   "r": 25362,
+   "a": 19.19,
+   "P": 30688.5,
+   "L0": 313.23,
+   "tilt": 97.77,
+   "tex": "uranus.jpg",
+   "color": "#9fd8e0",
+   "atmo": "#c9f3ff",
+   "atmoStr": 0.4,
+   "name": {
+    "sk": "Urán",
+    "en": "Uranus"
+   }
+  },
+  "neptune": {
+   "r": 24622,
+   "a": 30.07,
+   "P": 60182,
+   "L0": 304.88,
+   "tilt": 28.32,
+   "tex": "neptune.jpg",
+   "color": "#3f63d8",
+   "atmo": "#8fb0ff",
+   "atmoStr": 0.45,
+   "name": {
+    "sk": "Neptún",
+    "en": "Neptune"
+   }
+  }
+ },
+ "steps": [
+  {
+   "target": "sun",
+   "view": "close",
+   "audio": "solar-01.mp3",
+   "title": {
+    "sk": "Let Slnečnou sústavou",
+    "en": "A flight through the Solar System"
+   },
+   "text": {
+    "sk": "Vitajte pri Slnku. Je to hviezda, do ktorej by sa zmestilo 1,3 milióna Zemí. Všetko v tejto sústave je v skutočnej mierke vzdialeností: Slnko tu má priemer jeden meter. Poďme letieť!",
+    "en": "Welcome to the Sun, a star that could hold 1.3 million Earths. Everything here is at true scale of distance: the Sun is one metre across. Let's fly!"
+   }
+  },
+  {
+   "target": "mercury",
+   "view": "close",
+   "audio": "solar-02.mp3",
+   "title": {
+    "sk": "Merkúr",
+    "en": "Mercury"
+   },
+   "text": {
+    "sk": "Najbližšia planéta k Slnku, 58 miliónov km. Svetlo sem letí 3 minúty. Cez deň je tu 430 °C, v noci −180 °C a jeden deň od východu po východ Slnka trvá 176 našich dní.",
+    "en": "Closest to the Sun, 58 million km away; light takes 3 minutes. Days reach 430 °C, nights −180 °C, and one day from sunrise to sunrise lasts 176 Earth days."
+   }
+  },
+  {
+   "target": "venus",
+   "view": "close",
+   "audio": "solar-03.mp3",
+   "title": {
+    "sk": "Venuša",
+    "en": "Venus"
+   },
+   "text": {
+    "sk": "Najteplejšia planéta: 465 °C pod hustými oblakmi oxidu uhličitého. Otáča sa opačne ako Zem, takže tam Slnko vychádza na západe.",
+    "en": "The hottest planet: 465 °C under thick clouds of carbon dioxide. It spins the other way, so the Sun rises in the west."
+   }
+  },
+  {
+   "target": "earth",
+   "view": "close",
+   "audio": "solar-04.mp3",
+   "title": {
+    "sk": "Zem",
+    "en": "Earth"
+   },
+   "text": {
+    "sk": "Náš domov, 150 miliónov km od Slnka. Svetlo k nám letí 8 minút a 20 sekúnd. Na nočnej strane svietia mestá a vedľa vidno Mesiac, ktorý je 384 400 km ďaleko.",
+    "en": "Our home, 150 million km from the Sun; light takes 8 minutes 20 seconds. City lights glow on the night side, and nearby is the Moon, 384,400 km away."
+   }
+  },
+  {
+   "target": "earth",
+   "view": "real",
+   "audio": "solar-05.mp3",
+   "title": {
+    "sk": "Aké je to naozaj veľké?",
+    "en": "How big is it really?"
+   },
+   "text": {
+    "sk": "Toto je skutočná mierka. Ak by Slnko bolo lopta s priemerom 1 meter, Zem by bola zrnko hrachu 9 mm vo vzdialenosti 107 metrov. Mesiac by bol 2,5 mm a Neptún 3,2 km ďaleko!",
+    "en": "This is true scale. If the Sun were a 1 m ball, Earth would be a 9 mm pea 107 metres away. The Moon would be 2.5 mm and Neptune 3.2 km away!"
+   }
+  },
+  {
+   "target": "mars",
+   "view": "close",
+   "audio": "solar-06.mp3",
+   "title": {
+    "sk": "Mars",
+    "en": "Mars"
+   },
+   "text": {
+    "sk": "Červená planéta, 228 miliónov km od Slnka, svetlo sem letí 12 a pol minúty. Je tu najvyššia sopka Olympus Mons a dva malé mesiace, Phobos a Deimos.",
+    "en": "The red planet, 228 million km from the Sun; light takes 12 and a half minutes. It has the tallest volcano, Olympus Mons, and two small moons, Phobos and Deimos."
+   }
+  },
+  {
+   "target": "jupiter",
+   "view": "close",
+   "audio": "solar-07.mp3",
+   "title": {
+    "sk": "Jupiter",
+    "en": "Jupiter"
+   },
+   "text": {
+    "sk": "Obor zo plynu, 778 miliónov km od Slnka, svetlo sem letí 43 minút. Vedľa seba by sa doň zmestilo 11 Zemí. Veľká červená škvrna je búrka väčšia ako celá Zem.",
+    "en": "A gas giant 778 million km from the Sun; light takes 43 minutes. Eleven Earths would fit across it. The Great Red Spot is a storm bigger than Earth."
+   }
+  },
+  {
+   "target": "saturn",
+   "view": "close",
+   "audio": "solar-08.mp3",
+   "title": {
+    "sk": "Saturn",
+    "en": "Saturn"
+   },
+   "text": {
+    "sk": "Pán prstencov, 1,4 miliardy km od Slnka, svetlo sem letí vyše hodiny. Prstence majú priemer asi 270 000 km, ale hrubé sú väčšinou len desiatky metrov. Saturn má menšiu hustotu ako voda.",
+    "en": "Lord of the rings, 1.4 billion km from the Sun; light takes over an hour. The rings are about 270,000 km across but mostly only tens of metres thick. Saturn is less dense than water."
+   }
+  },
+  {
+   "target": "uranus",
+   "view": "close",
+   "audio": "solar-09.mp3",
+   "title": {
+    "sk": "Urán",
+    "en": "Uranus"
+   },
+   "text": {
+    "sk": "Ľadový obor, 2,9 miliardy km od Slnka, svetlo sem letí 2 hodiny a 40 minút. Leží na boku, jeho os je sklonená o 98 stupňov.",
+    "en": "An ice giant 2.9 billion km from the Sun; light takes 2 hours 40 minutes. It lies on its side, tilted by 98 degrees."
+   }
+  },
+  {
+   "target": "neptune",
+   "view": "close",
+   "audio": "solar-10.mp3",
+   "title": {
+    "sk": "Neptún",
+    "en": "Neptune"
+   },
+   "text": {
+    "sk": "Posledná planéta, 4,5 miliardy km od Slnka. Svetlo sem letí 4 hodiny a 10 minút. Fúkajú tu najrýchlejšie vetry, vyše 2 000 km/h. Jedinou sondou, ktorá ho navštívila, bol Voyager 2 v roku 1989.",
+    "en": "The last planet, 4.5 billion km from the Sun; light takes 4 hours 10 minutes. Its winds blow over 2,000 km/h. The only visitor was Voyager 2 in 1989."
+   }
+  },
+  {
+   "target": "neptune",
+   "view": "back",
+   "audio": "solar-11.mp3",
+   "title": {
+    "sk": "Pohľad späť",
+    "en": "Looking back"
+   },
+   "text": {
+    "sk": "Odtiaľto je Slnko už len najjasnejšia hviezda na oblohe. A najbližšia hviezda, Proxima Centauri? V našej mierke s metrovým Slnkom by bola 29 000 km ďaleko!",
+    "en": "From here the Sun is just the brightest star in the sky. And the nearest star, Proxima Centauri? At our scale with a one-metre Sun, it would be 29,000 km away!"
+   }
+  }
+ ]
+}

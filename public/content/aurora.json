@@ -1,0 +1,76 @@
+{
+ "steps": [
+  {
+   "scene": "wind",
+   "audio": "aurora-01.mp3",
+   "title": {
+    "sk": "Slnečný vietor",
+    "en": "The solar wind"
+   },
+   "text": {
+    "sk": "Slnko nevysiela len svetlo. Neustále z neho prúdia nabité častice, slnečný vietor. Letia rýchlosťou 400 až 800 km za sekundu a k Zemi doletia za 2 až 4 dni.",
+    "en": "The Sun sends out more than light. A constant stream of charged particles, the solar wind, flows from it at 400 to 800 km per second and reaches Earth in 2 to 4 days."
+   }
+  },
+  {
+   "scene": "field",
+   "audio": "aurora-02.mp3",
+   "title": {
+    "sk": "Magnetosféra: neviditeľný štít",
+    "en": "The magnetosphere: an invisible shield"
+   },
+   "text": {
+    "sk": "Zem je obrovský magnet. Jej magnetické pole odkláňa slnečný vietor okolo planéty. Na dennej strane ho vietor stláča, na nočnej strane sa naťahuje do dlhého chvosta.",
+    "en": "Earth is a giant magnet. Its magnetic field steers the solar wind around the planet. The wind squeezes it on the day side and stretches it into a long tail on the night side."
+   }
+  },
+  {
+   "scene": "poles",
+   "audio": "aurora-03.mp3",
+   "title": {
+    "sk": "Cesta k pólom",
+    "en": "The way to the poles"
+   },
+   "text": {
+    "sk": "Niektoré častice sa dostanú dovnútra a pozdĺž siločiar sa rútia k severnému a južnému pólu. Tam narazia do atmosféry a rozžiaria ju. Vzniká prstenec polárnej žiary okolo pólov.",
+    "en": "Some particles get inside and race along the field lines to the north and south poles. There they hit the atmosphere and make it glow, forming a ring of aurora around each pole."
+   }
+  },
+  {
+   "scene": "sky",
+   "audio": "aurora-04.mp3",
+   "title": {
+    "sk": "Polárna žiara zo Zeme",
+    "en": "The aurora from the ground"
+   },
+   "text": {
+    "sk": "Takto vyzerá polárna žiara zo zeme, napríklad v Nórsku alebo na Islande. Svetelné závesy sa vlnia a menia tvar každú sekundu. Pozrite sa nahor!",
+    "en": "This is the aurora seen from the ground, for example in Norway or Iceland. The curtains of light ripple and change shape every second. Look up!"
+   }
+  },
+  {
+   "scene": "colors",
+   "audio": "aurora-05.mp3",
+   "title": {
+    "sk": "Prečo má farby?",
+    "en": "Why the colours?"
+   },
+   "text": {
+    "sk": "Farbu určuje plyn a výška. Zelenú svieti kyslík vo výške asi 100 až 250 km, červenú kyslík ešte vyššie a fialovoružový spodný okraj dusík okolo 100 km.",
+    "en": "The colour depends on the gas and the height. Oxygen glows green at about 100 to 250 km, red even higher, and nitrogen gives the purple-pink lower edge near 100 km."
+   }
+  },
+  {
+   "scene": "slovakia",
+   "audio": "aurora-06.mp3",
+   "title": {
+    "sk": "Polárna žiara nad Slovenskom",
+    "en": "The aurora over Slovakia"
+   },
+   "text": {
+    "sk": "Pri silných geomagnetických búrkach ju uvidíme aj u nás, najčastejšie ako červenú žiaru nízko nad severným obzorom. Naposledy veľmi výrazne napríklad v máji 2024.",
+    "en": "During strong geomagnetic storms we can see it here too, usually as a red glow low above the northern horizon, most spectacularly for example in May 2024."
+   }
+  }
+ ]
+}
