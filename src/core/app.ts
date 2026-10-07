@@ -93,7 +93,7 @@ function visitTick() {
   const txt = left <= 30 ? (en() ? `${left} s left` : `zostáva ${left} s`) : '';
   if (txt !== timerTxt) {
     timerTxt = txt; if (timerSprite) { hud.remove(timerSprite); disposeTree(timerSprite); timerSprite = null; }
-    if (txt) { const s = textSprite(txt, '#ffb46b', 64); setSpriteH(s, 0.05); s.material.depthTest = false; s.renderOrder = 25; s.position.set(0.5, 0.34, 0.01); hud.add(s); timerSprite = s; }
+    if (txt) { const s = textSprite(txt, '#ffb46b', 64); setSpriteH(s, 0.05); s.material.depthTest = false; s.renderOrder = 25; s.position.set(0.45, 0.5, 0.01); hud.add(s); timerSprite = s; }
   }
   if (timerSprite) timerSprite.visible = true;
 }

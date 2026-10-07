@@ -42,11 +42,7 @@ export const machines: any = {
 
   /** AR: 1:1 na podlahu, model do ruky na stôl. */
   place() {
-    if (this.mini) {
-      startPlacing(p => { if (this.grabbedBy) this.release(); this.model.position.copy(this.root.worldToLocal(p.clone())); this.model.rotation.set(0, this.model.rotation.y, 0); this.spin = false; this.hud2(this.lastBody); });
-    } else {
-      startPlacing(p => { const l = ctx.floor.worldToLocal(p.clone()); this.root.position.set(l.x, l.y, l.z + this.dist); this.hud2(this.lastBody); });
-    }
+    startPlacing(p => { const l = ctx.floor.worldToLocal(p.clone()); this.root.position.set(l.x, l.y, l.z + this.dist); this.hud2(this.lastBody); });
     this.hud2(this.lastBody);
   },
   async load(i: number) {
@@ -70,7 +66,7 @@ export const machines: any = {
     // neviditeľný „úchop“ okolo celého modelu – naň sa mieri lúčom a chytá
     const proxy = new THREE.Mesh(new THREE.BoxGeometry(s2.x, s2.y, s2.z), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }));
     proxy.position.y = s2.y / 2; holder.add(proxy); this.proxy = proxy;
-    makeClickable(proxy, { onHover: v => { this.hover = v; }, grab: { start: cc => this.grab(cc), end: () => this.release() } });
+    makeClickable(proxy, { onClick: () => { this.spin = !this.spin; }, onHover: v => { this.hover = v; }, grab: { start: cc => this.grab(cc), end: () => this.release() } });
     proxy.userData.click.enabled = false;
     this.model = holder; this.root.add(holder);
     this.buildParts(mc, obj, holder);
@@ -124,7 +120,7 @@ export const machines: any = {
       this.person.position.set(-Math.min(radius + 0.5, 4), 0, -Math.min(this.dist, 2.6 + radius * 0.3)); this.person.visible = true;
     }
   },
-  setMini(v: boolean) { if (this.grabbedBy) this.release(); this.mini = v; this.zoomF = 1; this.layoutView(); keepHud(); this.hud2(ctx.content.machines[this.i].info); },
+  setMini(v: boolean) { if (this.grabbedBy) this.release(); this.mini = v; this.zoomF = 1; this.layoutView(); this.hud2(ctx.content.machines[this.i].info); },
   zoom(f: number) { this.zoomF = THREE.MathUtils.clamp(this.zoomF * f, 0.4, 4); },
   grab(c: THREE.Object3D) { if (!this.mini) return; this.grabbedBy = c; this.spin = false; c.attach(this.model); },
   release() { const c = this.grabbedBy; this.grabbedBy = null; this.zoomPinch = null; if (c && this.model) this.root.attach(this.model); },
@@ -135,22 +131,17 @@ export const machines: any = {
     this.zoomPinch = { c, d0: Math.max(0.05, a.distanceTo(b)), z0: this.zoomF };
   },
   onPinchEnd(c: THREE.Object3D) { if (this.zoomPinch?.c === c) this.zoomPinch = null; },
+  hud() { this.hud2(this.lastBody); },
   hud2(body: any) {
     const list = ctx.content.machines, mc = list[this.i]; this.lastBody = body;
-    let hint: string | null = null;
-    if (isPlacing()) hint = this.mini ? T({ sk: 'Pozrite sa na stôl, objaví sa oranžový terčík. Štipnite a model sa tam postaví.', en: 'Look at a table until an orange target appears, then pinch to put the model there.' })
-      : T({ sk: 'Pozrite sa na podlahu, objaví sa oranžový terčík. Štipnite a stroj sa postaví tam.', en: 'Look at the floor until an orange target appears, then pinch to place it there.' });
-    else if (this.mini && body === mc.info) hint = T(body) + ' ' + T({ sk: 'Chyťte model štipnutím a otáčajte ním, ukážu sa popisy dielov. Druhou rukou štipnite do vzduchu a roztiahnite ruky: model sa zväčší.', en: 'Grab the model with a pinch and turn it to see the parts. Pinch the air with your other hand and spread your hands to enlarge it.' });
-    const rows: any[] = [[
-      { label: en() ? 'Life size' : 'Skutočná veľkosť', active: !this.mini, onClick: () => this.setMini(false) },
-      { label: en() ? 'Model in hand' : 'Model do ruky', active: this.mini, onClick: () => this.setMini(true) },
-      ...(this.mini ? [{ label: '−', onClick: () => { this.zoom(1 / 1.4); keepHud(); this.hud2(this.lastBody); } }, { label: '+', onClick: () => { this.zoom(1.4); keepHud(); this.hud2(this.lastBody); } }] : [])],
-    [...(arReady() ? [{ label: this.mini ? (en() ? 'Put on a table' : 'Položiť na stôl') : (en() ? 'Place' : 'Umiestniť'), active: isPlacing(), onClick: () => this.place() }] : []),
-      { label: this.spin ? (en() ? 'Stop turning' : 'Zastaviť otáčanie') : (en() ? 'Turn' : 'Otáčať'), onClick: () => { this.spin = !this.spin; keepHud(); this.hud2(this.lastBody); } },
-      ...(list.length > 1 ? [{ label: '‹ ' + T(ctx.content.ui.prev), onClick: () => this.load((this.i - 1 + list.length) % list.length) },
-                             { label: T(ctx.content.ui.next) + ' ›', primary: true, onClick: () => this.load((this.i + 1) % list.length) }] : [])]];
+    let text: any = body;
+    if (isPlacing()) text = { sk: 'Pozrite sa na podlahu, objaví sa oranžový terčík. Štipnite a stroj sa postaví tam. Bez terčíka štipnite kdekoľvek a ostane tu.', en: 'Look at the floor until an orange target appears, then pinch to place it there. Without a target, pinch anywhere to keep it here.' };
+    else if (this.mini && body === mc.info) text = { sk: 'Chyťte model rukou (alebo lúčom a štipnutím), otáčajte ním a ukážu sa popisy dielov. Pustite ho a ostane, kde ste ho nechali, aj na stole. Druhou rukou štipnite do vzduchu a roztiahnite ruky: model sa zväčší.', en: 'Grab the model with your hand (or point and pinch) and turn it to see the parts. Let go and it stays where you left it, even on a table. Pinch the air with your other hand and spread your hands to enlarge it.' };
     setHud({ kicker: { sk: `${this.mini ? 'Model do ruky' : 'V skutočnej veľkosti'}   ${this.i + 1} / ${list.length}`, en: `${this.mini ? 'Model in hand' : 'Life size'}   ${this.i + 1} / ${list.length}` },
-      title: mc.name, body: hint ?? body, credit: mc.credit, rows });
+      title: mc.name, body: text, credit: mc.credit,
+      actions: [{ label: this.mini ? (en() ? 'Life size' : 'Skutočná veľkosť') : (en() ? 'Model in hand' : 'Model do ruky'), onClick: () => this.setMini(!this.mini) }],
+      prev: list.length > 1 ? () => this.load((this.i - 1 + list.length) % list.length) : undefined,
+      next: list.length > 1 ? () => this.load((this.i + 1) % list.length) : undefined });
   },
   onDrag(dx: number, start: number) { if (this.grabbedBy) return; this.spin = false; this.yaw = start + dx * 4; },
   dragStart() { return this.yaw; },

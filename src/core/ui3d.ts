@@ -45,7 +45,7 @@ export function makeButton(b: BtnCfg, w: number, h: number) {
   const mat = new THREE.MeshBasicMaterial({ transparent: true, depthTest: false, depthWrite: false });
   const bg = new THREE.Mesh(geo.fill, mat); bg.renderOrder = 21; g.add(bg);
   const ol = new THREE.LineLoop(geo.line, new THREE.LineBasicMaterial({ transparent: true, depthTest: false })); ol.renderOrder = 21; g.add(ol);
-  const fs = Math.min(h * 0.42, (w * 0.86) / Math.max(4, b.label.length * 0.52));
+  const fs = b.label.length <= 2 ? h * 0.55 : Math.min(h * 0.42, (w * 0.86) / Math.max(4, b.label.length * 0.52));
   const tx = makeText(b.label, { size: fs, font: FONT.semibold, anchorX: 'center', anchorY: 'middle', order: 23 }); tx.position.z = 0.001; g.add(tx);
   let hover = false;
   const paint = () => {
@@ -64,95 +64,117 @@ export function makeButton(b: BtnCfg, w: number, h: number) {
   return g;
 }
 
-/* ---------------- informačná tabuľa (HUD) ---------------- */
-export interface HudCfg { kicker?: Txt; title: Txt; body?: Txt; credit?: Txt | null; rows?: BtnCfg[][]; home?: boolean; autoHide?: boolean }
-export const HUD_W = 1.3, HUD_H = 0.36;
+/* ---------------- ovládací panel: lišta tlačidiel + krátky popis nad ňou ----------------
+   Lišta je vždy dole a má najviac pár veľkých tlačidiel: ‹  [voľby modulu]  Domov  ›
+   Popis (nadpis + 1–3 vety) sa ukáže pri zmene a po pár sekundách sám zmizne; tlačidlo Info ho vráti. */
+export interface HudCfg {
+  kicker?: Txt; title: Txt; body?: Txt; credit?: Txt | null;
+  /** voľby modulu v lište (najviac 2–3) */
+  actions?: BtnCfg[];
+  prev?: () => void; next?: () => void;
+  /** viac riadkov tlačidiel (kvíz, obsluha) – popis vtedy nezmizne */
+  rows?: BtnCfg[][];
+  home?: boolean;
+  /** popis nikdy nezmizne */
+  sticky?: boolean;
+}
+export const HUD_W = 1.2, HUD_H = 0.34;
+const BTN_H = 0.075, GAP = 0.016;
 export const hudYaw = new THREE.Group();
 export const hud = new THREE.Group();
 let panel: THREE.Group, tKicker: Text, tTitle: Text, tBody: Text, tCredit: Text, panelBg: THREE.Mesh, panelOl: THREE.LineLoop;
-const PANEL_TOP = 0.13 + HUD_H / 2;
-let cfg: HudCfg | null = null, mode: 'full' | 'mini' = 'full', timer = 0, keep = false, yawTarget = 0;
+let cfg: HudCfg | null = null, captionOn = true, timer = 0, keep = false, yawTarget = 0, barTop = BTN_H / 2;
 let buttons: THREE.Group[] = [];
-const AUTOHIDE = 9;
+const CAPTION_S = 8;
 
 export function initHud() {
   ctx.anchor.add(hudYaw); hudYaw.add(hud);
-  hud.position.set(0, -0.56, -1.0); hud.rotation.x = -Math.atan(0.56 / 1.0);   // natočené kolmo k očiam
-  panel = new THREE.Group(); panel.position.y = 0.13; hud.add(panel);
+  near = true; setHudNear(false);
+  panel = new THREE.Group(); hud.add(panel);
   const geo = rrGeo(HUD_W, HUD_H, 0.035);
-  const bg = panelBg = new THREE.Mesh(geo.fill, new THREE.MeshBasicMaterial({ color: '#080e28', transparent: true, opacity: 0.93, depthTest: false, depthWrite: false })); bg.renderOrder = 20; panel.add(bg);
+  const bg = panelBg = new THREE.Mesh(geo.fill, new THREE.MeshBasicMaterial({ color: '#080e28', transparent: true, opacity: 0.9, depthTest: false, depthWrite: false })); bg.renderOrder = 20; panel.add(bg);
   const ol = panelOl = new THREE.LineLoop(geo.line, new THREE.LineBasicMaterial({ color: '#2b3a6b', transparent: true, depthTest: false })); ol.renderOrder = 20; panel.add(ol);
-  const x0 = -HUD_W / 2 + 0.045, top = HUD_H / 2 - 0.03;
-  tKicker = makeText('', { size: 0.022, color: '#8a93b8', font: FONT.semibold }); tKicker.position.set(x0, top, 0.001);
-  tTitle = makeText('', { size: 0.042, color: '#ffb46b', font: FONT.bold }); tTitle.position.set(x0, top - 0.04, 0.001);
-  tBody = makeText('', { size: 0.029, maxWidth: HUD_W - 0.09, lineHeight: 1.3 }); tBody.position.set(x0, top - 0.1, 0.001);
-  (tBody as any).clipRect = [-0.01, -(HUD_H - 0.14), HUD_W, 0.01];
-  tCredit = makeText('', { size: 0.017, color: '#8a93b8' }); tCredit.position.set(x0, -HUD_H / 2 + 0.035, 0.001);
+  tKicker = makeText('', { size: 0.021, color: '#8a93b8', font: FONT.semibold });
+  tTitle = makeText('', { size: 0.04, color: '#ffb46b', font: FONT.bold });
+  tBody = makeText('', { size: 0.028, maxWidth: HUD_W - 0.09, lineHeight: 1.3 });
+  tCredit = makeText('', { size: 0.016, color: '#8a93b8' });
   panel.add(tKicker, tTitle, tBody, tCredit);
 }
-function autoOK() { return !!cfg && cfg.autoHide !== false && !['lobby', 'quiz', 'intro', 'thanks', 'operator'].includes(ctx.current); }
+function stickyNow() { return !cfg || cfg.sticky || !!cfg.rows || ['lobby', 'intro', 'thanks', 'operator'].includes(ctx.current); }
 
-export function setHud(c: HudCfg) { cfg = c; if (!keep) mode = 'full'; keep = false; timer = 0; buildHud(); }
-/** Ďalšie setHud nezmení zbalenie tabule (napr. pri prepnutí prepínača). */
+export function setHud(c: HudCfg) { cfg = c; if (!keep) captionOn = true; keep = false; timer = 0; buildHud(); }
+/** Ďalšie setHud nechá popis tak, ako je (skrytý zostane skrytý) – pri prepínačoch. */
 export function keepHud() { keep = true; }
 export function hudCfg() { return cfg; }
-export function setHudMode(m: 'full' | 'mini') { mode = m; timer = 0; buildHud(); }
+/** Zmení len text popisu (bez prestavby tlačidiel) – pre priebežne sa meniace údaje. */
+export function setCaption(c: { kicker?: Txt; title?: Txt; body?: Txt }) {
+  if (!cfg) return; Object.assign(cfg, c);
+  if (c.kicker !== undefined) { tKicker.text = T(c.kicker); tKicker.sync(); }
+  if (c.title !== undefined) { const s = T(c.title); tTitle.text = s; tTitle.fontSize = Math.min(0.04, (HUD_W - 0.09) / Math.max(1, s.length * 0.5)); tTitle.sync(); }
+  if (c.body !== undefined) { tBody.text = T(c.body); tBody.sync(() => relayout()); }
+}
+function toggleCaption() { captionOn = !captionOn; timer = 0; buildHud(); }
+
 export function buildHud() {
   if (!cfg) return;
   buttons.forEach(b => { hud.remove(b); b.userData.dispose(); }); buttons = [];
-  const gap = 0.014, h = 0.072;
   const wrap = (fn: () => void) => () => { timer = 0; ctx.lastAct = performance.now(); fn(); };
+  const home = cfg.home !== false && ctx.current !== 'lobby';
   let rows: BtnCfg[][];
-  const mini = mode === 'mini' && autoOK();
-  panel.visible = !mini;
-  if (mini) {
-    const last = cfg.rows?.length ? cfg.rows[cfg.rows.length - 1] : [];
-    rows = [[{ label: 'Info', onClick: () => setHudMode('full') }, ...last, ...(cfg.home !== false ? [{ label: T({ sk: 'Domov', en: 'Home' }), onClick: ctx.goHome }] : [])]];
+  if (cfg.rows) {
+    rows = cfg.rows.map(r => r.slice());
+    if (home) rows.push([{ label: T({ sk: 'Domov', en: 'Home' }), onClick: ctx.goHome }]);
   } else {
-    tKicker.text = T(cfg.kicker); const title = T(cfg.title);
-    tTitle.text = title; tTitle.fontSize = Math.min(0.042, (HUD_W - 0.09) / Math.max(1, title.length * 0.5));
-    tBody.text = T(cfg.body); tCredit.text = cfg.credit ? '© ' + T(cfg.credit) : '';
-    [tKicker, tTitle, tCredit].forEach(t => t.sync());
-    tBody.sync(() => relayout());
-    rows = (cfg.rows || []).map(r => r.slice());
-    const extra: BtnCfg[] = [];
-    if (autoOK()) extra.push({ label: en() ? 'Hide ↓' : 'Skryť ↓', onClick: () => setHudMode('mini') });
-    if (cfg.home !== false && ctx.current !== 'lobby') extra.push({ label: T({ sk: 'Domov', en: 'Home' }), onClick: ctx.goHome });
-    if (extra.length) rows.push(extra);
+    const bar: BtnCfg[] = [];
+    if (!stickyNow()) bar.push({ label: 'Info', onClick: toggleCaption, active: captionOn });
+    if (cfg.prev) bar.push({ label: '‹', onClick: cfg.prev });
+    bar.push(...(cfg.actions || []));
+    if (home) bar.push({ label: T({ sk: 'Domov', en: 'Home' }), onClick: ctx.goHome });
+    if (cfg.next) bar.push({ label: '›', onClick: cfg.next, primary: true });
+    rows = [bar];
   }
-  rowsTop = mini ? -0.02 : -0.115;
+  // riadky odspodu nahor: posledný riadok je pri y = 0
   rows.forEach((row, ri) => {
-    const n = row.length, w = Math.min(n > 3 ? (HUD_W - gap * (n - 1)) / n : 0.34, (HUD_W - gap * (n - 1)) / n), total = n * w + (n - 1) * gap;
+    const fromBottom = rows.length - 1 - ri;
+    const widths = row.map(b => (b.label.length <= 1 ? 0.11 : b.label === 'Info' ? 0.16 : Math.min(0.34, Math.max(0.2, 0.035 + b.label.length * 0.017))));
+    const sum = widths.reduce((a, b) => a + b, 0) + GAP * (row.length - 1), k = sum > HUD_W ? HUD_W / sum : 1;
+    let x = -sum * k / 2;
     row.forEach((b, i) => {
-      const m = makeButton({ ...b, onClick: wrap(b.onClick) }, w, h);
-      m.position.set(-total / 2 + w / 2 + i * (w + gap), rowsTop - ri * (h + 0.016), 0.002); m.userData.row = ri;
+      const w = widths[i] * k, m = makeButton({ ...b, onClick: wrap(b.onClick) }, w, BTN_H);
+      m.position.set(x + w / 2, fromBottom * (BTN_H + GAP), 0.002); x += w + GAP * k;
       m.userData.bg.userData.isHud = true; hud.add(m); buttons.push(m);
     });
   });
+  barTop = (rows.length - 1) * (BTN_H + GAP) + BTN_H / 2;
+  panel.visible = captionOn || stickyNow();
+  if (panel.visible) {
+    tKicker.text = T(cfg.kicker); const title = T(cfg.title);
+    tTitle.text = title; tTitle.fontSize = Math.min(0.04, (HUD_W - 0.09) / Math.max(1, title.length * 0.5));
+    tBody.text = T(cfg.body); tCredit.text = cfg.credit ? '© ' + T(cfg.credit) : '';
+    [tKicker, tTitle, tCredit].forEach(t => t.sync());
+    tBody.sync(() => relayout());
+  }
 }
-let rowsTop = -0.115;
-/** Výška tabule podľa dĺžky textu: bez prázdneho miesta dole, tlačidlá hneď pod textom. */
+/** Popis nad lištou: výška podľa dĺžky textu. */
 function relayout() {
   if (!panel.visible) return;
   const info = (tBody as any).textRenderInfo; if (!info) return;
-  const bodyH = Math.min(info.blockBounds[3] - info.blockBounds[1], HUD_H - 0.14);
-  const h = Math.max(0.2, Math.min(HUD_H, 0.13 + bodyH + (tCredit.text ? 0.045 : 0.025)));
-  const geo = rrGeo(HUD_W, h, 0.035);
+  const bodyH = Math.min(info.blockBounds[3] - info.blockBounds[1], HUD_H - 0.12);
+  const h = Math.max(0.12, 0.1 + (tBody.text ? bodyH + 0.015 : 0) + (tCredit.text ? 0.03 : 0));
+  const geo = rrGeo(HUD_W, h, 0.03);
   panelBg.geometry.dispose(); panelBg.geometry = geo.fill; panelOl.geometry.dispose(); panelOl.geometry = geo.line;
-  panel.position.y = PANEL_TOP - h / 2;
-  const top = h / 2 - 0.03, x0 = -HUD_W / 2 + 0.045;
-  tKicker.position.set(x0, top, 0.001); tTitle.position.set(x0, top - 0.04, 0.001); tBody.position.set(x0, top - 0.1, 0.001);
-  tCredit.position.set(x0, -h / 2 + 0.035, 0.001);
-  rowsTop = PANEL_TOP - h - 0.05;
-  buttons.forEach(b => { b.position.y = rowsTop - b.userData.row * (0.072 + 0.016); });
+  panel.position.y = barTop + 0.025 + h / 2;
+  const top = h / 2 - 0.025, x0 = -HUD_W / 2 + 0.045;
+  tKicker.position.set(x0, top, 0.001); tTitle.position.set(x0, top - 0.032, 0.001); tBody.position.set(x0, top - 0.088, 0.001);
+  tCredit.position.set(x0, -h / 2 + 0.03, 0.001);
 }
 export function hudTick(dt: number, hovered: Set<THREE.Object3D>) {
-  // automatické zbalenie tabule
-  if (mode === 'full' && autoOK()) {
+  // popis po pár sekundách sám zmizne (ostane len lišta tlačidiel)
+  if (captionOn && !stickyNow() && panel.visible) {
     let looking = false; hovered.forEach(o => { if (o.userData.isHud) looking = true; });
-    if (looking) timer = 0; else { timer += dt; if (timer > AUTOHIDE) setHudMode('mini'); }
+    if (looking) timer = 0; else { timer += dt; if (timer > CAPTION_S) { captionOn = false; buildHud(); } }
   }
-  // menu pomaly nasleduje pohľad, keď sa otočíte o viac ako 40°
+  // lišta pomaly nasleduje pohľad, keď sa otočíte o viac ako 40°
   const q = new THREE.Quaternion();
   (ctx.renderer.xr.isPresenting ? ctx.renderer.xr.getCamera() : ctx.camera).getWorldQuaternion(q);
   const e = new THREE.Euler().setFromQuaternion(q, 'YXZ');
@@ -161,12 +183,12 @@ export function hudTick(dt: number, hovered: Set<THREE.Object3D>) {
   hudYaw.rotation.y += wrapA(yawTarget - hudYaw.rotation.y) * Math.min(1, dt * 3);
 }
 export function resetHudYaw() { yawTarget = 0; hudYaw.rotation.y = 0; }
-/** Pri rukách je tabuľa blízko (na dosah prsta), pri ovládačoch ďalej (lúč). */
+/** Pri rukách je lišta blízko a nízko (na dosah prsta), pri ovládačoch ďalej (lúč). Vždy pod obsahom. */
 let near = false;
 export function setHudNear(v: boolean) {
   if (v === near) return; near = v;
-  if (v) { hud.position.set(0, -0.3, -0.5); hud.rotation.x = -Math.atan(0.3 / 0.5); hud.scale.setScalar(0.56); }
-  else { hud.position.set(0, -0.56, -1.0); hud.rotation.x = -Math.atan(0.56 / 1.0); hud.scale.setScalar(1); }
+  if (v) { hud.position.set(0, -0.4, -0.42); hud.rotation.x = -Math.atan(0.4 / 0.42); hud.scale.setScalar(0.5); }
+  else { hud.position.set(0, -0.62, -1.0); hud.rotation.x = -Math.atan(0.62 / 1.0); hud.scale.setScalar(1); }
 }
 export function hudButtons() { return buttons; }
 export { L, SND };

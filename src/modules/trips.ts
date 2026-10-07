@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { ctx, D2R } from '../core/context';
 import { setHud } from '../core/ui3d';
-import { T } from '../core/i18n';
 import { loadTex, freeTex, disposeTree, gradTex } from '../core/util';
 
 /** 360° výlety: panorámy z NASA a ESO (aj čiastočné pásy, zvislý rozsah sa dopočíta). */
@@ -36,8 +35,7 @@ export const trips: any = {
   hud2(tr: any, body: any) {
     setHud({ kicker: { sk: `Výlety v 360°   ${this.i + 1} / ${this.list.length}`, en: `360° trips   ${this.i + 1} / ${this.list.length}` },
       title: tr.name, body, credit: body === tr.info ? tr.credit : null,
-      rows: [[{ label: '‹ ' + T(ctx.content.ui.prev), onClick: () => this.show(this.i - 1) },
-              { label: T(ctx.content.ui.next) + ' ›', onClick: () => this.show(this.i + 1), primary: true }]] });
+      prev: () => this.show(this.i - 1), next: () => this.show(this.i + 1) });
   },
   onTap() { this.show(this.i + 1); },
   relabel() { if (ctx.current === 'trips') this.show(this.i); }

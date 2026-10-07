@@ -82,7 +82,7 @@ export const lobby: any = {
   hud() {
     setHud({ kicker: 'KHaP MH', title: ctx.content.ui.title,
       body: { sk: 'Vyberte si zážitok: ukážte lúčom na guľu a štipnite prstami. Domov sa vrátite tlačidlom Domov alebo dlhým štipnutím.', en: 'Choose an experience: point at a sphere and pinch. Return with the Home button or a long pinch.' },
-      rows: [[{ label: T(ctx.content.ui.lang), onClick: toggleLang }, { label: T(ctx.content.ui.recenter), onClick: ctx.recenter }]] });
+      actions: [{ label: T(ctx.content.ui.lang), onClick: toggleLang }, { label: T(ctx.content.ui.recenter), onClick: ctx.recenter }] });
   },
   exit() { this.root.visible = false; },
   update(dt, t) {

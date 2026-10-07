@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { ctx, D2R, ASSET } from '../core/context';
 import { T, en } from '../core/i18n';
-import { setHud, keepHud, makeClickable } from '../core/ui3d';
+import { setHud, keepHud, makeClickable, setCaption } from '../core/ui3d';
 import { loadTex, textSprite, setSpriteH, disposeTree, camWorld, canvasTex } from '../core/util';
 import { sunMaterial, SUN_U } from './sun';
 import { arReady, startPlacing, isPlacing } from '../core/ar';
@@ -81,20 +81,18 @@ export const phases: any = {
     keepHud(); this.hud();
   },
   hud() {
-    const rows: any[] = [[
-      { label: en() ? 'Moon orbits' : 'Mesiac obieha', active: this.mode === 'auto', onClick: () => { if (this.grabbed) this.release(); this.mode = 'auto'; keepHud(); this.hud(); } },
-      { label: en() ? 'Moon in my hand' : 'Mesiac v ruke', active: this.mode === 'hand', onClick: () => { this.mode = 'hand'; keepHud(); this.hud(); } },
-      { label: en() ? 'Labels' : 'Popisky', active: this.showLabels, onClick: () => { this.showLabels = !this.showLabels; keepHud(); this.hud(); } }]];
-    if (arReady()) rows[0].unshift({ label: en() ? 'Place the Sun' : 'Umiestniť Slnko', active: isPlacing(), onClick: () => this.placeSun() });
-    const name = this.cur ? T(this.cur.name) : '';
+    const actions: any[] = [{ label: this.mode === 'auto' ? (en() ? 'Moon in my hand' : 'Mesiac do ruky') : (en() ? 'Moon orbits' : 'Mesiac obieha'),
+      onClick: () => { if (this.mode === 'auto') this.mode = 'hand'; else { if (this.grabbed) this.release(); this.mode = 'auto'; } keepHud(); this.hud(); } }];
+    if (arReady()) actions.push({ label: en() ? 'Place the Sun' : 'Umiestniť Slnko', active: isPlacing(), onClick: () => this.placeSun() });
     const body = isPlacing()
-      ? { sk: 'Pozrite sa na stôl, poličku alebo stenu, kde má svietiť Slnko, a štipnite.', en: 'Look at a table, shelf or wall where the Sun should shine, then pinch.' }
+      ? { sk: 'Pozrite sa na stôl, poličku alebo stenu, kde má svietiť Slnko, a štipnite. Bez terčíka štipnite kdekoľvek a Slnko ostane, kde je.', en: 'Look at a table, shelf or wall where the Sun should shine, then pinch. Without a target, pinch anywhere to keep the Sun where it is.' }
       : this.mode === 'hand'
-        ? { sk: 'Vaša hlava je Zem. Chyťte Mesiac štipnutím, natiahnite ruku pred seba a pomaly sa otáčajte dokola. Sledujte, ako sa mení osvetlená časť.', en: 'Your head is the Earth. Grab the Moon with a pinch, stretch your arm out and slowly turn around. Watch the lit part change.' }
-        : { sk: 'Vaša hlava je Zem, lampa je Slnko. Mesiac je vždy z polovice osvetlený, ale podľa toho, kde na dráhe je, vidíme z osvetlenej časti viac alebo menej.', en: 'Your head is the Earth, the lamp is the Sun. The Moon is always half lit, but depending on where it is, we see more or less of the lit half.' };
-    setHud({ kicker: { sk: 'Fázy Mesiaca' + (name ? '   ' + this.pct + ' % osvetlené' : ''), en: 'Moon phases' + (name ? '   ' + this.pct + ' % lit' : '') },
-      title: name || { sk: 'Fázy Mesiaca', en: 'Moon phases' }, body, credit: { sk: 'Textúra Mesiaca: Solar System Scope (CC BY 4.0)', en: 'Moon texture: Solar System Scope (CC BY 4.0)' }, rows });
+        ? { sk: 'Vaša hlava je Zem. Chyťte Mesiac, natiahnite ruku a pomaly sa otáčajte dokola. Sledujte, ako sa mení osvetlená časť.', en: 'Your head is the Earth. Grab the Moon, stretch your arm out and slowly turn around. Watch the lit part change.' }
+        : { sk: 'Vaša hlava je Zem, lampa je Slnko. Mesiac je vždy z polovice osvetlený, ale podľa toho, kde je, vidíme z osvetlenej časti viac alebo menej.', en: 'Your head is the Earth, the lamp is the Sun. The Moon is always half lit, but depending on where it is, we see more or less of the lit half.' };
+    setHud({ kicker: this.kicker(), title: this.cur ? this.cur.name : { sk: 'Fázy Mesiaca', en: 'Moon phases' }, body,
+      credit: { sk: 'Textúra Mesiaca: Solar System Scope (CC BY 4.0)', en: 'Moon texture: Solar System Scope (CC BY 4.0)' }, actions });
   },
+  kicker() { return { sk: `Fázy Mesiaca   ${this.pct ?? 0} % osvetlené`, en: `Moon phases   ${this.pct ?? 0} % lit` }; },
   relabel() {
     if (!this.built) return; this.buildMarks();
     this.sun.remove(this.sunLbl); disposeTree(this.sunLbl); this.sunLbl = textSprite(en() ? 'Sun (lamp)' : 'Slnko (lampa)', '#ffd9a0', 56); setSpriteH(this.sunLbl, 0.06); this.sunLbl.position.y = -0.27; this.sun.add(this.sunLbl);
@@ -127,10 +125,10 @@ export const phases: any = {
     this.mu.uEclipse.value = THREE.MathUtils.clamp((umbra - ang) / (umbra * 0.6), 0, 1);
     const nm = this.mu.uEclipse.value > 0.5 ? { sk: 'Zatmenie Mesiaca!', en: 'Lunar eclipse!' } : phaseName(elong, waxing);
     this.cur = { name: nm };
-    const key = T(nm) + '|' + Math.round(this.pct / 10);
-    if (key !== this.lastName) { this.lastName = key; keepHud(); this.hud(); }
+    const key = T(nm) + '|' + this.pct;
+    if (key !== this.lastName) { this.lastName = key; setCaption({ kicker: this.kicker(), title: nm }); }   // len text, tlačidlá ostanú
     // popisky fáz okolo hlavy
-    this.orbit.visible = this.showLabels && this.mode === 'auto';
+    this.orbit.visible = this.mode === 'auto';
     this.orbit.position.copy(this.root.worldToLocal(head.clone()));
     this.marks.children.forEach((s: any) => { const d = S.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), s.userData.deg * D2R).multiplyScalar(ORBIT_R + 0.08); s.position.set(d.x, -0.06, d.z); });
     const k = this.hover ? 1.15 : 1; this.moonMesh.scale.setScalar(MOON_R * k);

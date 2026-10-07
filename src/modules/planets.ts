@@ -4,7 +4,6 @@ import { T, fmt, en } from '../core/i18n';
 import { setHud, keepHud, makeClickable } from '../core/ui3d';
 import { loadTex, textSprite, setSpriteH, disposeTree, camWorld, sphereDir } from '../core/util';
 import { sunMaterial, buildSunExtras, SUN_U } from './sun';
-import { arReady, startPlacing, isPlacing } from '../core/ar';
 
 /** Planéty v ruke: chytiť, priblížiť, otáčať; popisy miest na povrchu sa ukazujú len na strane k divákovi. */
 export const planets: any = {
@@ -49,32 +48,27 @@ export const planets: any = {
   },
   layout() {
     const its = this.items;
-    if (!this.real) { const n = its.length; its.forEach((it: any, i: number) => { const a = (-60 + 120 * i / (n - 1)) * D2R, R = 1.15; it.slot.set(Math.sin(a) * R, -0.22, -Math.cos(a) * R); it.size = 0.065; }); }
+    if (!this.real) { const n = its.length; its.forEach((it: any, i: number) => { const a = (-60 + 120 * i / (n - 1)) * D2R, R = 1.3; it.slot.set(Math.sin(a) * R, -0.06, -Math.cos(a) * R); it.size = 0.065; }); }
     else {
       const k = 0.2 / (139820 / 2); let x = 0; const xs: number[] = [], pl = its.filter((it: any) => !it.b.sun);
       pl.forEach((it: any, i: number) => { const rad = it.b.d / 2 * k, ext = it.b.ring ? rad * 2.3 : rad; if (i > 0) x += ext; xs.push(x); x += ext + 0.06; });
-      const off = x / 2; pl.forEach((it: any, i: number) => { it.slot.set(xs[i] - off + 0.03, -0.15, -1.7); it.size = Math.max(it.b.d / 2 * k, 0.004); });
+      const off = x / 2; pl.forEach((it: any, i: number) => { it.slot.set(xs[i] - off + 0.03, -0.02, -1.7); it.size = Math.max(it.b.d / 2 * k, 0.004); });
       const sun = its.find((it: any) => it.b.sun); sun.size = sun.b.d / 2 * k; sun.slot.set(0, 0.4, -1.7 - sun.size - 2.0);
     }
   },
   select(it: any) {
-    if (!ctx.renderer.xr.isPresenting) { this.items.forEach((o: any) => { if (o !== it) o.inspect = false; }); it.inspect = !it.inspect; } // na PC: priblížiť pred oči
+    this.items.forEach((o: any) => { if (o !== it) o.inspect = false; }); it.inspect = !it.inspect;   // ťuknutie: planéta priletí pred oči
     this.sel = it; this.hud();
   },
   grab(it: any, c: THREE.Object3D) { this.items.forEach((o: any) => (o.inspect = false)); this.sel = it; this.hud(); it.grabbed = c; c.attach(it.holder); it.holder.position.set(0, 0, -0.24); it.holder.rotation.set(0, 0, 0); it.holdScale = 0.1; },
   release(it: any) { it.grabbed = null; this.root.attach(it.holder); it.holder.rotation.set(0, 0, 0); },
   enter() { this.root.visible = true; this.root.position.set(0, 0, 0); this.hud(); },
-  /** AR: planéty sa položia na skutočný stôl (alebo podlahu). */
-  place() {
-    startPlacing(p => { const l = ctx.anchor.worldToLocal(p.clone()); this.real = false; this.layout(); this.root.position.set(l.x, l.y + 0.3, l.z + 1.15); keepHud(); this.hud(); });
-    this.hud();
-  },
   exit() { this.items.forEach((it: any) => { if (it.grabbed) this.release(it); it.inspect = false; }); this.root.visible = false; this.root.position.set(0, 0, 0); },
   hud() {
     const s = this.sel; let title: any, body: any;
     if (!s) {
       title = { sk: 'Planéty v ruke', en: 'Planets in hand' };
-      body = { sk: 'Ukážte na planétu a štipnite: chytíte ju a môžete si ju priblížiť. Prepnite na skutočné pomery veľkostí a uvidíte, aké veľké je Slnko.', en: 'Point at a planet and pinch to grab it and bring it close. Switch to true sizes to see how big the Sun is.' };
+      body = { sk: 'Ukážte na planétu a krátko štipnite: priletí k vám. Ak ju podržíte, môžete ju vziať do ruky a otáčať.', en: 'Point at a planet and pinch briefly: it flies to you. Hold the pinch to take it in your hand and turn it.' };
     } else {
       const b = s.b; title = b.name;
       const parts = [(en() ? 'Diameter ' : 'Priemer ') + fmt(b.d) + ' km'];
@@ -85,15 +79,9 @@ export const planets: any = {
         : T({ sk: 'Biele svetlo: fotosféra s teplotou asi 5 500 °C. Zrnitý povrch je granulácia, bunky horúcej plazmy veľké asi 1 000 km. Tmavé miesta sú slnečné škvrny.', en: 'White light: the photosphere at about 5,500 °C. The grainy surface is granulation, cells of hot plasma about 1,000 km across. Dark patches are sunspots.' });
       if (ctx.content.features.places[b.id]) body += T({ sk: ' Otáčajte ňou v ruke a objavte zaujímavé miesta.', en: ' Turn it in your hand to discover famous places.' });
     }
-    const rows: any[] = [[
-      { label: en() ? 'Same size' : 'Rovnaká veľkosť', active: !this.real, onClick: () => { this.real = false; this.layout(); keepHud(); this.hud(); } },
-      { label: en() ? 'True sizes' : 'Skutočné pomery', active: this.real, onClick: () => { this.real = true; this.layout(); keepHud(); this.hud(); } }]];
-    if (arReady()) rows[0].push({ label: en() ? 'Put on a table' : 'Položiť na stôl', active: isPlacing(), onClick: () => this.place() });
-    if (isPlacing()) body = T({ sk: 'Pozrite sa na stôl alebo podlahu, objaví sa oranžový terčík. Štipnite a planéty sa tam položia.', en: 'Look at a table or the floor until an orange target appears, then pinch to put the planets there.' });
-    if (s?.b.sun) rows.push([
-      { label: en() ? 'White light' : 'Biele svetlo', active: !this.ha, onClick: () => { this.ha = false; this.hud(); } },
-      { label: en() ? 'H-alpha filter' : 'H-alfa filter', active: !!this.ha, onClick: () => { this.ha = true; this.hud(); } }]);
-    setHud({ kicker: { sk: 'Planéty v ruke', en: 'Planets in hand' }, title, body, credit: { sk: 'Textúry: Solar System Scope (CC BY 4.0)', en: 'Textures: Solar System Scope (CC BY 4.0)' }, rows });
+    const actions: any[] = [{ label: this.real ? (en() ? 'Same size' : 'Rovnaká veľkosť') : (en() ? 'True sizes' : 'Skutočné veľkosti'), onClick: () => { this.real = !this.real; this.layout(); keepHud(); this.hud(); } }];
+    if (s?.b.sun) actions.push({ label: this.ha ? (en() ? 'White light' : 'Biele svetlo') : (en() ? 'H-alpha filter' : 'H-alfa filter'), onClick: () => { this.ha = !this.ha; this.hud(); } });
+    setHud({ kicker: { sk: 'Planéty v ruke', en: 'Planets in hand' }, title, body, credit: { sk: 'Textúry: Solar System Scope (CC BY 4.0)', en: 'Textures: Solar System Scope (CC BY 4.0)' }, actions });
   },
   relabel() {
     this.items.forEach((it: any) => { it.holder.remove(it.lab); disposeTree(it.lab); it.lab = textSprite(T(it.b.name), '#e9ecf7', 56); it.holder.add(it.lab); this.buildMarks(it); });

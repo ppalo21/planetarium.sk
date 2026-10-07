@@ -45,7 +45,7 @@ export const intro: any = {
       title: c ? { sk: 'Spúšť stlačíte ukazovákom', en: 'Press the trigger with your index finger' } : { sk: 'Spojte palec a ukazovák ako pinzetu', en: 'Touch your thumb and index finger' },
       body: c ? { sk: 'Namierte modrým lúčom z ovládača na Zem a stlačte spúšť pod ukazovákom. Podržaním spúšte na 1,5 s sa kedykoľvek vrátite domov. Ovládače môžete odložiť, appka funguje aj s rukami.', en: 'Point the blue ray from the controller at the Earth and press the trigger under your index finger. Hold the trigger for 1.5 s to go home at any time. You can also put the controllers down and use your hands.' }
         : { sk: 'Na vzdialené veci namierte lúčom z ruky a krátko spojte palec s ukazovákom. Tlačidlá na tabuli pod vami stačí ťuknúť prstom ako na mobile. Dlhé štipnutie (1,5 s) vás vráti domov.', en: 'For things far away, point the ray from your hand and briefly touch thumb and index finger. The buttons on the panel below you can be tapped with a finger like a phone. A long pinch (1.5 s) takes you home.' },
-      rows: [[{ label: 'Slovensky', active: !en(), onClick: () => setLang('sk') }, { label: 'English', active: en(), onClick: () => setLang('en') }]], home: false, autoHide: false });
+      rows: [[{ label: 'Slovensky', active: !en(), onClick: () => setLang('sk') }, { label: 'English', active: en(), onClick: () => setLang('en') }]], home: false, sticky: true });
   },
   done() { SND.good(); VISIT.start = performance.now(); VISIT.warned = false; ctx.goTo('lobby'); },
   relabel() { if (ctx.current === 'intro') { this.label(); this.hud(); } },
@@ -70,7 +70,7 @@ export const thanks: any = {
     this.lab = textSprite([en() ? 'Thank you!' : 'Ďakujeme!', en() ? 'Please hand the headset to the next visitor' : 'Prosím, odovzdajte okuliare ďalšiemu návštevníkovi'], ['#ffb46b', '#e9ecf7'], 80);
     setSpriteH(this.lab, 0.26); this.lab.position.set(0, 0.2, -1.6); this.root.add(this.lab);
     setHud({ kicker: 'KHaP MH', title: { sk: 'Čas na návštevu vypršal', en: 'Your time is up' }, body: { sk: 'Dúfame, že sa vám vesmír páčil. Príďte sa pozrieť aj do Hviezdnej sály!', en: 'We hope you enjoyed space. Come and visit our planetarium dome too!' },
-      rows: [[{ label: en() ? 'Next visitor ›' : 'Ďalší návštevník ›', onClick: startVisitor, primary: true }]], home: false, autoHide: false });
+      rows: [[{ label: en() ? 'Next visitor ›' : 'Ďalší návštevník ›', onClick: startVisitor, primary: true }]], home: false, sticky: true });
   },
   exit() { this.root.visible = false; }
 };
@@ -92,7 +92,7 @@ export const operator: any = {
         [{ label: (en() ? 'Intro: ' : 'Úvod: ') + onoff(SET.tutorial), active: SET.tutorial, onClick: () => { SET.tutorial = !SET.tutorial; saveSet(); this.hud(); } },
          { label: (en() ? 'Sound: ' : 'Zvuk: ') + onoff(SET.sound), active: SET.sound, onClick: () => { SET.sound = !SET.sound; saveSet(); SND.ambient(SET.sound && ctx.renderer.xr.isPresenting); this.hud(); } },
          { label: en() ? 'Slovensky' : 'English', onClick: toggleLang }],
-        [{ label: en() ? 'Done, new visitor ›' : 'Hotovo, nový návštevník ›', primary: true, onClick: startVisitor }]], home: false, autoHide: false });
+        [{ label: en() ? 'Done, new visitor ›' : 'Hotovo, nový návštevník ›', primary: true, onClick: startVisitor }]], home: false, sticky: true });
   },
   relabel() { if (ctx.current === 'operator') this.hud(); }
 };

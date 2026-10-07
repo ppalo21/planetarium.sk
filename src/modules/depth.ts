@@ -54,8 +54,8 @@ export const depth: any = {
     const cs = ctx.content.constellations, cd = cs[this.ci], ph = cd.phases[this.phase], sc = fmt(Math.round(1 / this.K));
     setHud({ kicker: { sk: `Hĺbka oblohy   ${T(cd.name)}   ${this.phase + 1} / 3   (1 m = ${sc} ly)`, en: `Depth of the sky   ${T(cd.name)}   ${this.phase + 1} / 3   (1 m = ${sc} ly)` },
       title: ph.title, body: ph.text,
-      rows: [cs.map((c: any, i: number) => ({ label: T(c.name), onClick: () => this.load(i), active: i === this.ci })),
-        [{ label: '‹ ' + T(ctx.content.ui.prev), onClick: () => this.setPhase((this.phase + 2) % 3) }, { label: T(ctx.content.ui.next) + ' ›', onClick: () => this.setPhase((this.phase + 1) % 3), primary: true }]] });
+      actions: [{ label: (en() ? 'Next constellation' : 'Iné súhvezdie'), onClick: () => this.load((this.ci + 1) % cs.length) }],
+      prev: () => this.setPhase((this.phase + 2) % 3), next: () => this.setPhase((this.phase + 1) % 3) });
   },
   onTap() { this.setPhase((this.phase + 1) % 3); },
   onDrag(dx: number, start: number) { if (this.phase > 0) this.yaw = start + dx * 3; },
