@@ -114,10 +114,10 @@ export const machines: any = {
       this.person.visible = false;
     } else {
       const radius = Math.hypot(this.size.x, this.size.z) / 2, mc = ctx.content.machines[this.i];
-      this.dist = Math.max(2.6, radius + 1.2);
+      this.dist = Math.max(2.6, radius + 1.2, mc.tall ? this.size.y * 0.16 : 0);   // rakety: dosť blízko, aby sa bolo treba pozrieť hore
       m.scale.setScalar(1); m.rotation.set(0, this.yaw, 0);
       m.position.set(0, mc.float ? Math.max(0.3, 1.7 - this.size.y / 2) : 0, -this.dist);
-      this.person.position.set(-Math.min(radius + 0.5, 4), 0, -Math.min(this.dist, 2.6 + radius * 0.3)); this.person.visible = true;
+      this.person.position.set(mc.tall ? -(radius + 1.2) : -Math.min(radius + 0.5, 4), 0, mc.tall ? -this.dist : -Math.min(this.dist, 2.6 + radius * 0.3)); this.person.visible = true;
     }
   },
   setMini(v: boolean) { if (this.grabbedBy) this.release(); this.mini = v; this.zoomF = 1; this.layoutView(); this.hud2(ctx.content.machines[this.i].info); },
