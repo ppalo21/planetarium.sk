@@ -16,7 +16,7 @@ import { solar } from './modules/solar';
 import { aurora } from './modules/aurora';
 import { cosmos } from './modules/cosmos';
 import { intro, thanks, operator } from './modules/visitor';
-import { introVideo, credits, prepIntro, domIntro } from './modules/brand';
+import { introVideo, credits, prepIntro, introOnce } from './modules/brand';
 
 /** Obsah appky (texty, panorámy, planéty, kvíz…) je v public/content/*.json. */
 const FILES = ['ui', 'trips', 'bodies', 'features', 'gravity', 'machines', 'quiz', 'constellations', 'stats', 'solar', 'aurora', 'cosmos', 'credits'];
@@ -51,13 +51,12 @@ async function main() {
   ctx.modules = { lobby, cosmos, solar, aurora, trips, depth, planets, phases, gravity, machines, quiz, intro, thanks, operator, introVideo, credits };
   ctx.goTo = goTo; ctx.goHome = () => goTo('lobby'); ctx.recenter = recenter; ctx.startVisitor = startVisitor; ctx.afterIntro = afterIntro;
   initScene(); initDom(); startLoop(); initStats();
-  goTo('lobby');
+  // logo planetária: v okuliaroch sa prehrá po spustení VR (so zvukom), na počítači a v telefóne hneď (raz za návštevu)
+  prepIntro();
+  const vr = navigator.xr ? await navigator.xr.isSessionSupported('immersive-vr').catch(() => false) : false;
+  goTo(!vr && introOnce() ? 'introVideo' : 'lobby');
   document.getElementById('ui')!.hidden = false; bootDone();
   (window as any).VND = { goTo, ctx, look, hudButtons };   // pre ladenie v konzole
   if ('serviceWorker' in navigator && location.protocol === 'https:' && !/claude|localhost/.test(location.hostname)) navigator.serviceWorker.register('sw.js').catch(() => {});
-  // logo planetária: v okuliaroch sa prehrá až vo VR (so zvukom), inde hneď na stránke
-  prepIntro();
-  const vr = navigator.xr ? await navigator.xr.isSessionSupported('immersive-vr').catch(() => false) : false;
-  if (!vr) domIntro();
 }
 main().catch(bootError);

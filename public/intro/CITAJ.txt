@@ -1,13 +1,14 @@
 ÚVODNÉ VIDEO S LOGOM
 ====================
-Sem nahrajte video, ktoré sa má prehrať pri spustení appky:
+intro.mp4 = logo planetária, ktoré sa prehrá pri spustení appky (16 s, bez zvuku).
 
-  intro.mp4     (odporúčané: H.264 + zvuk AAC, 1920×1080, 5–15 sekúnd, do 25 MB)
+Video je „dvojposchodové“: hore je obraz, dole čiernobiela maska. Appka podľa masky
+zobrazí len logo a zábery a okolie nechá priehľadné, takže sa vznášajú medzi hviezdami.
+(Na počítači v prehrávači preto uvidíte dva obrázky nad sebou – to je správne.)
 
-Appka si ho nájde sama. Ak tu súbor nie je, úvod sa preskočí.
-- V okuliaroch sa video prehrá vo VR na veľkom plátne so zvukom, pred každým návštevníkom.
-  Vypnúť sa dá v nastaveniach obsluhy (Znelka: vyp).
-- Na počítači a v telefóne sa prehrá raz pri otvorení stránky, bez zvuku.
-- Návštevník ho preskočí štipnutím alebo tlačidlom Preskočiť.
+- V okuliaroch sa prehrá vo VR pred každým návštevníkom (vypnúť: režim obsluhy → Znelka: vyp).
+- Na počítači a v telefóne sa prehrá raz pri otvorení stránky.
+- Preskočiť sa dá štipnutím, tlačidlom Preskočiť alebo kliknutím.
 
-Názov súboru musí byť presne intro.mp4 (malými písmenami). Náhradne funguje aj intro.webm.
+Nové video: pošlite ho Claudovi na úpravu, alebo sem dajte obyčajné intro.mp4
+(H.264, 1920×1080, do 25 MB) – appka ho zobrazí s mäkkými okrajmi. Ak súbor chýba, úvod sa preskočí.

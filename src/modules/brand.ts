@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { Text } from 'troika-three-text';
-import { ctx, url } from '../core/context';
+import { ctx, url, ASSET } from '../core/context';
 import { T, en } from '../core/i18n';
 import { SET } from '../core/settings';
 import { SND } from '../core/sound';
@@ -9,14 +9,16 @@ import { loadTex } from '../core/util';
 
 /* =====================================================================
    INTRO VIDEO – logo planetária pri spustení
-   Súbor: public/intro/intro.mp4 (H.264 + AAC) alebo public/intro/intro.webm.
-   Vo VR sa prehrá na veľkom plátne so zvukom, na počítači pri načítaní stránky (bez zvuku).
+   Súbor: public/intro/intro.mp4 (H.264), náhradne public/intro/intro.webm.
+   Video je „dvojposchodové“: hore obraz, dole maska priehľadnosti (biela = vidieť, čierna = priehľadné).
+   Vďaka tomu sa logo a zábery vznášajú priamo medzi hviezdami appky, bez obdĺžnika okolo.
+   Obyčajné video (bez masky) funguje tiež – zobrazí sa s mäkkými okrajmi.
    Ak súbor chýba, appka úvod jednoducho preskočí.
    ===================================================================== */
 const INTRO_FILES: [string, string][] = [['intro/intro.mp4', 'video/mp4'], ['intro/intro.webm', 'video/webm']];
 let video: HTMLVideoElement | null = null, ready: Promise<boolean> | null = null;
 
-/** Jedno video pre stránku aj VR. Vráti true, ak sa súbor našiel a dá sa prehrať. */
+/** Jedno video pre celú appku. Vráti true, ak sa súbor našiel a dá sa prehrať. */
 export function prepIntro(): Promise<boolean> {
   if (ready) return ready;
   const v = video = document.createElement('video');
@@ -35,29 +37,57 @@ export function prepIntro(): Promise<boolean> {
 }
 export const introUrls = () => INTRO_FILES.map(f => f[0]);
 
+const INTRO_VS = `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
+const INTRO_FS = `uniform sampler2D uMap; uniform float uStacked; uniform float uFade; varying vec2 vUv;
+void main(){
+  vec4 c; float a;
+  if (uStacked > 0.5) {
+    c = texture2D(uMap, vec2(vUv.x, 0.5 + vUv.y * 0.5));                       // horná polovica: obraz
+    a = pow(texture2D(uMap, vec2(vUv.x, vUv.y * 0.5)).g, 0.4545);              // dolná polovica: maska
+  } else {
+    c = texture2D(uMap, vUv);
+    vec2 d = abs(vUv - 0.5) * 2.0; a = (1.0 - smoothstep(0.8, 1.0, d.x)) * (1.0 - smoothstep(0.75, 1.0, d.y));   // mäkké okraje
+  }
+  a *= smoothstep(0.012, 0.08, max(c.r, max(c.g, c.b)));                     // tmavý závoj okolo loga zmizne
+  gl_FragColor = vec4(c.rgb, a * uFade);
+  #include <colorspace_fragment>
+}`;
+
 export const introVideo: any = {
-  stars: false, bg: new THREE.Color(0x000000),
+  stars: true,
   build() {
     const r = this.root = new THREE.Group(); ctx.anchor.add(r);
-    // mierne zakrivené plátno ako v kine: 3,4 m široké vo vzdialenosti 3,4 m
-    const W = 3.4, R = 3.4, ang = W / R;
+    // rovnaké pozadie ako v ponuke: hviezdy + Mliečna cesta
+    loadTex(ASSET.milky).then(t => {
+      if (!t) return;
+      const s = new THREE.Mesh(new THREE.SphereGeometry(55, 64, 32), new THREE.MeshBasicMaterial({ map: t, color: 0x777777, depthWrite: false }));
+      s.geometry.scale(-1, 1, 1); s.renderOrder = -15; r.add(s); this.milky = s;
+    });
+    // mierne zakrivená plocha 5,4 m široká vo vzdialenosti 3,4 m – obraz sa vznáša medzi hviezdami (okraje sú priehľadné)
+    const W = 5.4, R = 3.4, ang = W / R;
     const geo = new THREE.CylinderGeometry(R, R, 1, 64, 1, true, Math.PI - ang / 2, ang); geo.scale(-1, 1, 1);
     this.W = W;
-    this.screen = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.FrontSide, toneMapped: false }));
-    this.screen.position.set(0, 0.05, 0); this.screen.scale.y = W * 9 / 16; r.add(this.screen);
+    this.mat = new THREE.ShaderMaterial({ vertexShader: INTRO_VS, fragmentShader: INTRO_FS, transparent: true, depthWrite: false,
+      uniforms: { uMap: { value: null }, uStacked: { value: 0 }, uFade: { value: 0 } } });
+    this.screen = new THREE.Mesh(geo, this.mat); this.screen.visible = false;
+    this.screen.position.set(0, 0.1, 0); this.screen.scale.y = W * 9 / 16; r.add(this.screen);
   },
   async enter() {
     this.root.visible = true; this.finished = false; this.fade = 0; this.out = 0;
-    const mat = this.screen.material as THREE.MeshBasicMaterial; mat.color.setScalar(0);
+    if (this.milky) this.milky.visible = !ctx.isAR;
     setHud({ title: '', sticky: true, bare: true, home: false, actions: [{ label: en() ? 'Skip ›' : 'Preskočiť ›', onClick: () => this.done() }] });
     if (!(await prepIntro()) || ctx.current !== 'introVideo') { this.done(); return; }
-    const v = video!;
-    if (!mat.map) {
-      const tex = new THREE.VideoTexture(v); tex.colorSpace = THREE.SRGBColorSpace; mat.map = tex; mat.needsUpdate = true;
+    const v = video!, u = this.mat.uniforms;
+    if (!u.uMap.value) {
+      const tex = new THREE.VideoTexture(v); tex.colorSpace = THREE.SRGBColorSpace; u.uMap.value = tex;
       v.addEventListener('ended', () => { if (ctx.current === 'introVideo') this.out = 0.001; });
       v.addEventListener('error', () => this.done());
     }
-    this.screen.scale.y = this.W * v.videoHeight / v.videoWidth;
+    // obraz s maskou pod sebou je vyšší ako široký → zobrazí sa len horná polovica
+    const stacked = v.videoHeight > v.videoWidth * 0.75;
+    u.uStacked.value = stacked ? 1 : 0;
+    this.screen.scale.y = this.W * (stacked ? v.videoHeight / 2 : v.videoHeight) / v.videoWidth;
+    this.screen.visible = true;
     v.loop = false; v.muted = !SET.sound; v.volume = 1;
     try { v.currentTime = 0; } catch { /* */ }
     SND.ambient(false);
@@ -73,33 +103,21 @@ export const introVideo: any = {
   },
   onTap() { this.done(); },
   onVisibility(v: boolean) { if (this.finished || !video) return; if (v) video.play().catch(() => this.done()); else video.pause(); },
-  exit() { this.root.visible = false; this.finished = true; try { video?.pause(); } catch { /* */ } },
+  exit() { this.root.visible = false; this.screen.visible = false; this.finished = true; try { video?.pause(); } catch { /* */ } },
   update(dt: number) {
     if (this.finished) return;
     this.fade = Math.min(1, this.fade + dt * 1.5);
     if (this.out) { this.out += dt * 2; if (this.out >= 1) { this.done(); return; } }
-    const mat = this.screen.material as THREE.MeshBasicMaterial;
-    mat.color.setScalar(this.fade * (1 - Math.min(1, this.out)));
+    const u = this.mat.uniforms; u.uFade.value = this.fade * (1 - Math.min(1, this.out));
     // poistka pre okuliare: obraz videa sa obnoví v každej snímke, aj keby prehliadač vo VR neohlásil novú snímku videa
-    if (mat.map && video && video.readyState >= 2 && ctx.renderer.xr.isPresenting) mat.map.needsUpdate = true;
+    if (u.uMap.value && video && video.readyState >= 2 && ctx.renderer.xr.isPresenting) u.uMap.value.needsUpdate = true;
   }
 };
 
-/** Na počítači a v telefóne: logo cez celú obrazovku pri načítaní stránky (bez zvuku, ťuknutím sa preskočí). */
-export async function domIntro() {
-  let seen = false; try { seen = !!sessionStorage.getItem('vnd-intro'); } catch { /* */ }
-  if (seen || !(await prepIntro())) return;
-  try { sessionStorage.setItem('vnd-intro', '1'); } catch { /* */ }
-  const v = video!, wrap = document.createElement('div'); wrap.id = 'splash';
-  const hint = document.createElement('div'); hint.className = 'hint'; hint.textContent = en() ? 'Tap to skip' : 'Ťuknutím preskočíte';
-  v.muted = true; wrap.append(v, hint); document.body.append(wrap);
-  let closed = false;
-  const close = () => {
-    if (closed) return; closed = true; wrap.classList.add('out');
-    setTimeout(() => { try { v.pause(); } catch { /* */ } v.remove(); wrap.remove(); }, 650);
-  };
-  wrap.onclick = close; v.addEventListener('ended', close, { once: true }); v.addEventListener('error', close, { once: true });
-  v.play().catch(close);
+/** Na počítači a v telefóne: úvod sa raz za návštevu stránky prehrá v 3D scéne (rovnako ako v okuliaroch). */
+export function introOnce(): boolean {
+  let seen = false; try { seen = !!sessionStorage.getItem('vnd-intro'); sessionStorage.setItem('vnd-intro', '1'); } catch { /* */ }
+  return !seen;
 }
 
 /* =====================================================================
