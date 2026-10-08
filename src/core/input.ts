@@ -13,10 +13,15 @@ export const ctrls: THREE.XRTargetRaySpace[] = [];
 export const hands: THREE.XRHandSpace[] = [];
 let onModeChange: () => void = () => {};
 
-function pick(origin: THREE.Vector3, dir: THREE.Vector3) {
-  raycaster.set(origin, dir); raycaster.far = 60; raycaster.camera = ctx.camera;
-  return raycaster.intersectObjects([...clickables].filter(o => isVisible(o) && o.userData.click?.enabled !== false), false)[0] || null;
+const targets: THREE.Object3D[] = [], hits: THREE.Intersection[] = [];
+/** Najbližší klikateľný objekt v smere lúča (bez vytvárania nových polí v každej snímke). */
+function cast() {
+  targets.length = 0; hits.length = 0; raycaster.far = 60;
+  for (const o of clickables) if (o.userData.click?.enabled !== false && isVisible(o)) targets.push(o);
+  raycaster.intersectObjects(targets, false, hits);
+  return hits[0] || null;
 }
+function pick(origin: THREE.Vector3, dir: THREE.Vector3) { raycaster.set(origin, dir); raycaster.camera = ctx.camera; return cast(); }
 function setHovered(set: Set<THREE.Object3D>) {
   hovered.forEach(o => { if (!set.has(o)) { hovered.delete(o); o.userData.click?.onHover?.(false); } });
   set.forEach(o => { if (!hovered.has(o)) { hovered.add(o); SND.hover(); o.userData.click?.onHover?.(true); } });
@@ -74,7 +79,7 @@ export function initInput(modeChanged: () => void) {
   initMouse();
 }
 
-const tmpV = new THREE.Vector3(), tmpQ = new THREE.Quaternion(), right = new THREE.Vector3();
+const tmpV = new THREE.Vector3(), tmpD = new THREE.Vector3(), tmpQ = new THREE.Quaternion(), right = new THREE.Vector3();
 /** Objekt, ktorý sa dá chytiť a ruka (ovládač) je pri ňom do ~10 cm. */
 function nearGrabbable(i: number): THREE.Object3D | null {
   const p = new THREE.Vector3();
@@ -91,8 +96,8 @@ function nearGrabbable(i: number): THREE.Object3D | null {
 }
 function updateCtrl(c: THREE.XRTargetRaySpace, hs: Set<THREE.Object3D>, rayOff: boolean) {
   c.getWorldPosition(tmpV); c.getWorldQuaternion(tmpQ);
-  const dir = new THREE.Vector3(0, 0, -1).applyQuaternion(tmpQ);
-  const h = c.userData.grabbing || rayOff ? null : pick(tmpV.clone(), dir); c.userData.hit = h;
+  tmpD.set(0, 0, -1).applyQuaternion(tmpQ);
+  const h = c.userData.grabbing || rayOff ? null : pick(tmpV, tmpD); c.userData.hit = h;
   c.userData.line.visible = !rayOff;
   c.userData.line.scale.z = h ? h.distance : 0.4; c.userData.dot.visible = !!h; if (h) c.userData.dot.position.copy(h.point);
   if (h) hs.add(h.object);
@@ -100,7 +105,8 @@ function updateCtrl(c: THREE.XRTargetRaySpace, hs: Set<THREE.Object3D>, rayOff: 
   const hd = c.userData.hold; if (!hd) return;
   const d = c.position.clone().sub(hd.p); if (d.length() > 0.04) hd.moved = true;
   if (hd.moved) { right.set(1, 0, 0).applyQuaternion(ctx.anchor.quaternion); ctx.modules[ctx.current]?.onDrag?.(d.dot(right), hd.start); ctx.lastAct = performance.now(); }
-  if (!hd.moved && !hd.done && performance.now() - hd.t > 1400) { hd.done = true; ctx.goHome(); ctx.recenter(); }
+  // dlhé podržanie jednou rukou = domov (pri geste dvoma rukami, napr. zoom, sa neuplatní)
+  if (!hd.moved && !hd.done && performance.now() - hd.t > 1400 && !ctrls.some(o => o !== c && o.userData.hold)) { hd.done = true; ctx.goHome(); ctx.recenter(); }
 }
 /* ---------------- dotyk prstom (ťuknutie na tlačidlo ako na mobile) ---------------- */
 const tip = new THREE.Vector3(), loc = new THREE.Vector3(), wsc = new THREE.Vector3();
@@ -159,8 +165,8 @@ function initMouse() {
   let down: any = null;
   const ray = (e: PointerEvent) => {
     mouse.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
-    raycaster.setFromCamera(mouse, ctx.camera); raycaster.far = 60;
-    return raycaster.intersectObjects([...clickables].filter(o => isVisible(o) && o.userData.click?.enabled !== false), false)[0] || null;
+    raycaster.setFromCamera(mouse, ctx.camera);
+    return cast();
   };
   el.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, yaw: look.yaw, pitch: look.pitch, drag: false }; el.setPointerCapture(e.pointerId); ctx.lastAct = performance.now(); });
   el.addEventListener('pointermove', e => {

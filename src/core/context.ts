@@ -4,6 +4,8 @@ import * as THREE from 'three';
 export interface Module {
   /** zobraziť hviezdne pozadie vo VR */
   stars?: boolean;
+  /** vlastná farba pozadia vo VR (inak tmavomodrá obloha) */
+  bg?: THREE.Color;
   /** zobraziť podlahovú mriežku vo VR */
   floor?: boolean;
   built?: boolean;
@@ -16,6 +18,8 @@ export interface Module {
   onTap?(): void;
   onDrag?(dx: number, start: number): void;
   dragStart?(): number;
+  /** okuliare zložené z hlavy / znova nasadené */
+  onVisibility?(visible: boolean): void;
 }
 
 export type Txt = string | { sk: string; en?: string };
@@ -37,7 +41,9 @@ export const ctx = {
   goTo: (_id: string, _arg?: unknown) => {},
   goHome: () => {},
   recenter: () => {},
-  startVisitor: () => {}
+  startVisitor: () => {},
+  /** kam sa pokračuje po úvodnom videu */
+  afterIntro: () => {}
 };
 
 export const D2R = Math.PI / 180;

@@ -4,12 +4,39 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Vesmír na dosah | KHaP MH</title>
+<meta name="description" content="Vesmír na dosah: virtuálna a rozšírená realita Krajskej hvezdárne a planetária Maximiliána Hella v Žiari nad Hronom. Pre okuliare Meta Quest.">
 <meta name="theme-color" content="#070d24">
+<meta name="color-scheme" content="dark">
+<meta property="og:title" content="Vesmír na dosah | KHaP MH">
+<meta property="og:description" content="Virtuálna a rozšírená realita Krajskej hvezdárne a planetária Maximiliána Hella.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="icon-512.png">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  /* úvodná obrazovka, kým sa appka načíta (štýl je priamo tu, aby sa ukázala okamžite) */
+  html, body { margin: 0; height: 100%; background: #070d24; }
+  #boot { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; background: #070d24; color: #8a93b8; font: 600 15px system-ui, -apple-system, "Segoe UI", sans-serif; text-align: center; padding: 24px; box-sizing: border-box; transition: opacity .5s; }
+  #boot.out { opacity: 0; pointer-events: none; }
+  #boot img { width: min(260px, 60vw); }
+  #boot .spin { width: 28px; height: 28px; border-radius: 50%; border: 3px solid rgba(159,192,255,.22); border-top-color: #ffb46b; animation: spin 1s linear infinite; }
+  #boot.err .spin { display: none; }
+  #boot button { font: inherit; color: #071033; background: #9fc0ff; border: 0; border-radius: 10px; padding: .6rem 1rem; cursor: pointer; }
+  #boot button[hidden] { display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { #boot .spin { animation-duration: 3s; } }
+</style>
 </head>
 <body>
-<div id="ui">
+<div id="boot" role="status">
+  <img alt="Krajská hvezdáreň a planetárium Maximiliána Hella" src="logo-white.png">
+  <div class="spin"></div>
+  <div id="bootMsg">Načítavam…</div>
+  <button id="bootRetry" hidden onclick="location.reload()">Skúsiť znova</button>
+  <noscript>Aplikácia potrebuje zapnutý JavaScript.</noscript>
+</div>
+<div id="ui" hidden>
   <img class="logo" alt="KHaP MH" src="logo-white.png">
   <h1 id="appTitle">Vesmír na dosah</h1>
   <p class="sub" id="appSub"></p>
@@ -20,16 +47,18 @@
   <div class="row more">
     <button id="btnLang"></button>
     <button id="btnOffline"></button>
+    <button id="btnCredits"></button>
     <button id="btnOper"></button>
   </div>
   <div class="row keep"><button id="btnMin"></button></div>
-  <p id="msg" hidden></p>
+  <p id="msg" role="status" hidden></p>
   <div id="dipl" class="more" hidden>
     <label for="dname" id="dlabel" class="small"></label>
     <input id="dname" autocomplete="off">
     <div class="row"><button id="btnPrint" class="primary"></button></div>
   </div>
   <p class="small more" id="note"></p>
+  <p class="small more" id="ver"></p>
 </div>
 <div id="diploma">
   <img alt="" src="logo-navy.png">

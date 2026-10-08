@@ -1,0 +1,153 @@
+{
+ "title": {
+  "sk": "Vesmír na dosah",
+  "en": "Space Within Reach"
+ },
+ "intro": {
+  "sk": "Virtuálna a rozšírená realita Krajskej hvezdárne a planetária Maximiliána Hella v Žiari nad Hronom",
+  "en": "Virtual and mixed reality by the Maximilian Hell Regional Observatory and Planetarium in Žiar nad Hronom, Slovakia"
+ },
+ "sections": [
+  {
+   "h": {
+    "sk": "Koncepcia, obsah a realizácia",
+    "en": "Concept, content and production"
+   },
+   "items": [
+    {
+     "sk": "Krajská hvezdáreň a planetárium Maximiliána Hella v Žiari nad Hronom",
+     "en": "Maximilian Hell Regional Observatory and Planetarium, Žiar nad Hronom"
+    },
+    {
+     "sk": "zriaďovateľ: Banskobystrický samosprávny kraj",
+     "en": "founded by the Banská Bystrica Self-Governing Region"
+    }
+   ]
+  },
+  {
+   "h": {
+    "sk": "Panorámy a fotografie",
+    "en": "Panoramas and photographs"
+   },
+   "items": [
+    {
+     "sk": "Mars, kráter Jezero: NASA/JPL-Caltech/MSSS/ASU (PIA24264)",
+     "en": "Mars, Jezero Crater: NASA/JPL-Caltech/MSSS/ASU (PIA24264)"
+    },
+    {
+     "sk": "Mesiac, Apollo 17: NASA, snímky AS17-134-20408 až 20431, panoráma Wikimedia Commons",
+     "en": "Moon, Apollo 17: NASA, frames AS17-134-20408 to 20431, panorama via Wikimedia Commons"
+    },
+    {
+     "sk": "Observatórium Paranal: ESO (CC BY 4.0)",
+     "en": "Paranal Observatory: ESO (CC BY 4.0)"
+    },
+    {
+     "sk": "Mliečna cesta: ESO/S. Brunier (CC BY 4.0)",
+     "en": "Milky Way: ESO/S. Brunier (CC BY 4.0)"
+    }
+   ]
+  },
+  {
+   "h": {
+    "sk": "Textúry planét a Mesiaca",
+    "en": "Planet and Moon textures"
+   },
+   "items": [
+    {
+     "sk": "Solar System Scope / INOVE (CC BY 4.0), na základe údajov NASA",
+     "en": "Solar System Scope / INOVE (CC BY 4.0), based on NASA data"
+    }
+   ]
+  },
+  {
+   "h": {
+    "sk": "3D modely",
+    "en": "3D models"
+   },
+   "items": [
+    {
+     "sk": "NASA 3D Resources: Curiosity, Perseverance, Ingenuity, lunárny modul Apollo, astronaut, Hubblov ďalekohľad, Ďalekohľad Jamesa Webba, Saturn V, SLS Block 1",
+     "en": "NASA 3D Resources: Curiosity, Perseverance, Ingenuity, Apollo Lunar Module, astronaut, Hubble Space Telescope, James Webb Space Telescope, Saturn V, SLS Block 1"
+    },
+    {
+     "sk": "Model SLS upravený pre appku: odstránený podstavec, doplnené farby častí",
+     "en": "SLS model adapted for this app: stand removed, part colours added"
+    },
+    {
+     "sk": "Realistické ruky: WebXR Input Profiles, Immersive Web Community Group (MIT)",
+     "en": "Hand models: WebXR Input Profiles, Immersive Web Community Group (MIT)"
+    }
+   ]
+  },
+  {
+   "h": {
+    "sk": "Údaje",
+    "en": "Data"
+   },
+   "items": [
+    {
+     "sk": "Hviezdy: HYG Database v4.1, David Nash / astronexus (CC BY-SA 4.0)",
+     "en": "Stars: HYG Database v4.1, David Nash / astronexus (CC BY-SA 4.0)"
+    },
+    {
+     "sk": "Polohy planét: stredné dráhové elementy J2000",
+     "en": "Planet positions: J2000 mean orbital elements"
+    },
+    {
+     "sk": "Galaxie v module Od Zeme po galaxie: procedurálne modely podľa skutočných rozmerov a polôh; kopy galaxií v Panne, Peci, Perzeovi a vo Vlasoch Bereniky sú na skutočných miestach, ostatná kozmická sieť je ilustračná",
+     "en": "Galaxies in Earth to galaxies: procedural models based on real sizes and positions; the Virgo, Fornax, Perseus and Coma clusters are at their real positions, the rest of the cosmic web is illustrative"
+    },
+    {
+     "sk": "Fakty a čísla: NASA, ESA, ESO",
+     "en": "Facts and figures: NASA, ESA, ESO"
+    }
+   ]
+  },
+  {
+   "h": {
+    "sk": "Zvuk",
+    "en": "Sound"
+   },
+   "items": [
+    {
+     "sk": "Zvuky a hudobné pozadie vznikajú priamo v appke (WebAudio), bez prevzatých nahrávok",
+     "en": "Sound effects and ambience are synthesised in the app (WebAudio); no third-party recordings"
+    }
+   ]
+  },
+  {
+   "h": {
+    "sk": "Technológie a písmo",
+    "en": "Technology and typeface"
+   },
+   "items": [
+    "three.js (MIT)",
+    "troika-three-text (MIT)",
+    "Vite (MIT)",
+    "Draco, Google (Apache 2.0)",
+    "meshoptimizer (MIT)",
+    {
+     "sk": "Písmo Figtree, Erik Kennedy (SIL Open Font License 1.1)",
+     "en": "Figtree typeface, Erik Kennedy (SIL Open Font License 1.1)"
+    }
+   ]
+  },
+  {
+   "h": {
+    "sk": "Poznámka",
+    "en": "Note"
+   },
+   "items": [
+    {
+     "sk": "Materiály NASA nie sú v USA chránené autorským právom. Ich použitie neznamená podporu NASA.",
+     "en": "NASA material is not protected by copyright in the United States. Its use does not imply endorsement by NASA."
+    },
+    {
+     "sk": "Obsah s licenciou CC BY a CC BY-SA je uvedený s menom autora podľa podmienok licencie.",
+     "en": "Content under CC BY and CC BY-SA licences is credited to its authors as the licences require."
+    }
+   ]
+  }
+ ]
+}

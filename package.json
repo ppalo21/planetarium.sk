@@ -1,7 +1,7 @@
 {
   "name": "vesmir-na-dosah",
   "private": true,
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "WebXR VR/AR aplikácia Krajskej hvezdárne a planetária Maximiliána Hella",
   "type": "module",
   "scripts": {

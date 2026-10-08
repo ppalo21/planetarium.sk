@@ -1,11 +1,15 @@
 Vesmír na dosah – zdroje a licencie
 ====================================
-Všetky použité materiály sú voľne dostupné. Pri verejnom použití ponechajte uvedenie zdroja (v appke sa zobrazuje automaticky).
+Všetky použité materiály sú voľne dostupné. Zoznam sa zobrazuje aj priamo v appke
+(tlačidlo Zdroje v ponuke aj na úvodnej stránke); upravuje sa v public/content/credits.json.
+
+KONCEPCIA, OBSAH A REALIZÁCIA
+- Krajská hvezdáreň a planetárium Maximiliána Hella v Žiari nad Hronom
+- Logo a úvodné video: KHaP MH
 
 PANORÁMY 360°
 - Mars, kráter Jezero – NASA/JPL-Caltech/MSSS/ASU, PIA24264 (Mastcam-Z, 21. 2. 2021)
   https://science.nasa.gov/photojournal/mastcam-zs-first-360-degree-panorama/
-  Materiály NASA spravidla nie sú chránené autorským právom (NASA Images and Media Usage Guidelines).
 - Mesiac, Apollo 17, zastávka 1 – NASA, snímky AS17-134-20408 až 20431; panoráma z Wikimedia Commons (public domain)
   https://commons.wikimedia.org/wiki/File:Apollo_17_Moon_Panorama.jpg
 - Observatórium Paranal – ESO, CC BY 4.0
@@ -13,20 +17,44 @@ PANORÁMY 360°
 - Celá Mliečna cesta – ESO/S. Brunier, CC BY 4.0
   https://www.eso.org/public/images/eso0932a/
 
-TEXTÚRY PLANÉT
-- Solar System Scope, CC BY 4.0 – https://www.solarsystemscope.com/textures/
+TEXTÚRY PLANÉT, MESIACA A HVIEZDNEJ OBLOHY
+- Solar System Scope / INOVE, CC BY 4.0 (na základe údajov NASA)
+  https://www.solarsystemscope.com/textures/
 
 3D MODELY
-- Rover Curiosity – NASA/JPL-Caltech, NASA 3D Resources
-  https://science.nasa.gov/resource/curiosity-3d-model/
+- NASA 3D Resources – https://science.nasa.gov/3d-resources/
+  Curiosity, Perseverance, Ingenuity, lunárny modul Apollo, astronaut, Hubblov ďalekohľad,
+  Ďalekohľad Jamesa Webba, Saturn V, SLS Block 1
+- SLS Block 1 (Artemis): model NASA pre 3D tlač, pre appku odstránený podstavec a doplnené farby častí
+- Realistické ruky – WebXR Input Profiles (generic-hand), Immersive Web Community Group, licencia MIT
+  https://github.com/immersive-web/webxr-input-profiles
+
+ÚDAJE
+- Hviezdy (modul Od Zeme po galaxie): HYG Database v4.1, David Nash / astronexus, CC BY-SA 4.0
+  https://github.com/astronexus/HYG-Database
+  Z katalógu je vybraných asi 10 000 hviezd (do 6,5 mag alebo do 20 parsekov) → public/data/stars.bin
+- Polohy planét: stredné dráhové elementy J2000 (približné polohy na dnešný deň)
+- Mliečna cesta, galaxie Miestnej skupiny a vzdialené galaxie: procedurálne modely
+  podľa skutočných rozmerov, vzdialeností a polôh na oblohe (nie sú to fotografie)
+  Kopy galaxií v Panne, Peci, Perzeovi a vo Vlasoch Bereniky sú na skutočných miestach,
+  ostatná „kozmická sieť“ vzdialených galaxií je ilustračná (náhodne vygenerovaná)
+- Fakty a čísla: NASA, ESA, ESO
+
+ZVUK
+- Zvuky a hudobné pozadie vznikajú priamo v appke (WebAudio), bez prevzatých nahrávok
+- Hlasový komentár: vlastné nahrávky KHaP MH (pozri NAHRAVKY.md)
+
+TECHNOLÓGIE A PÍSMO
+- three.js (MIT), troika-three-text (MIT), Vite (MIT), Draco – Google (Apache 2.0), meshoptimizer (MIT)
+- Písmo Figtree – Erik Kennedy, SIL Open Font License 1.1
+
+POZNÁMKY K LICENCIÁM
+- Materiály NASA spravidla nie sú chránené autorským právom (NASA Images and Media Usage Guidelines).
+  Ich použitie neznamená podporu NASA.
+- CC BY 4.0 (ESO, Solar System Scope): treba uviesť autora – v appke je uvedený pri každom zážitku aj v Zdrojoch.
+- CC BY-SA 4.0 (HYG): treba uviesť autora; odvodený súbor stars.bin sa šíri pod rovnakou licenciou.
 
 ĎALŠIE ZDROJE NA ROZŠÍRENIE
 - NASA 3D Resources (modely .glb): https://science.nasa.gov/3d-resources/
 - ESO 360° panorámy: https://www.eso.org/public/images/archive/category/360pano/
 - NASA Photojournal: https://photojournal.jpl.nasa.gov/
-
-Logo: Krajská hvezdáreň a planetárium Maximiliána Hella.
-- Raketa Saturn V – NASA 3D Resources (Saturn V.glb)
-- Raketa SLS Block 1 (Artemis) – NASA 3D Resources, model pre 3D tlač (Space Launch System (SLS) Block 1.stl),
-  farby častí doplnené pre appku (oranžový centrálny stupeň, biele bočné rakety, Orion)
-- Realistické ruky – WebXR Input Profiles (generic-hand), MIT licencia

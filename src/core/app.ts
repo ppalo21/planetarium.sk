@@ -8,6 +8,8 @@ import { initInput, updateInput, hovered, look, clearCtrlVisuals } from './input
 import { textSprite, setSpriteH, disposeTree } from './util';
 import { initAR, startARSession, updateAR, stopPlacing } from './ar';
 import { track, newVisitor, moduleChange, flush } from './stats';
+import { stopVoice } from './narration';
+import { domCredits, prepIntro, introUrls } from '../modules/brand';
 
 /* =====================================================================
    SCÉNA
@@ -20,7 +22,8 @@ export function initScene() {
   renderer.xr.setFoveation(1);              // foveated rendering: okraje obrazu v nižšom rozlíšení = viac výkonu
   document.body.prepend(renderer.domElement);
   const scene = new THREE.Scene(); scene.background = SKY;
-  const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.02, 3e6);   // ďaleká hranica pre let Slnečnou sústavou camera.rotation.order = 'YXZ';
+  const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.02, 3e6);   // ďaleká hranica pre let Slnečnou sústavou
+  camera.rotation.order = 'YXZ';
   const anchor = new THREE.Group(), floor = new THREE.Group(); scene.add(anchor, floor);
   anchor.position.set(0, 1.6, 0); camera.position.set(0, 1.6, 0);
   // fyzikálne svetlá (od three r155 sú intenzity v jednotkách × π)
@@ -39,7 +42,7 @@ export function initScene() {
     else if (m?.hud && ctx.current !== 'trips' && ctx.current !== 'machines') m.hud();
     else if (hudCfg()) buildHud();
   });
-  addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+  addEventListener('resize', () => { if (renderer.xr.isPresenting) return; camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
 }
 const SKY = new THREE.Color('#070d24');
 let starBg: THREE.Points, floorGrid: THREE.PolarGridHelper;
@@ -58,7 +61,7 @@ export function applyEnv() {
   const m = ctx.modules[ctx.current];
   starBg.visible = !ctx.isAR && !!m?.stars;
   floorGrid.visible = !ctx.isAR && !!m?.floor;
-  ctx.scene.background = ctx.isAR ? null : SKY;
+  ctx.scene.background = ctx.isAR ? null : (m?.bg ?? SKY);
 }
 
 /* =====================================================================
@@ -79,13 +82,19 @@ export function recenter() { needAnchor = true; anchorFrames = 0; resetHudYaw();
 export const VISIT = { start: 0, warned: false };
 export function startVisitor() {
   VISIT.start = 0; VISIT.warned = false; recenter();
-  if (ctx.renderer.xr.isPresenting) { newVisitor(); flush(); }
-  if (SET.tutorial && ctx.renderer.xr.isPresenting) goTo('intro');
-  else { goTo('lobby'); if (ctx.renderer.xr.isPresenting) VISIT.start = performance.now(); }
+  const xr = ctx.renderer.xr.isPresenting;
+  if (xr) { newVisitor(); flush(); }
+  if (xr && SET.introVideo && !ctx.isAR) goTo('introVideo'); else afterIntro();
+}
+/** Po úvodnom videu: krátky návod pre návštevníka, potom ponuka zážitkov. */
+export function afterIntro() {
+  const xr = ctx.renderer.xr.isPresenting;
+  if (SET.tutorial && xr) goTo('intro');
+  else { goTo('lobby'); if (xr) VISIT.start = performance.now(); }
 }
 let timerSprite: THREE.Sprite | null = null, timerTxt = '';
 function visitTick() {
-  const show = ctx.renderer.xr.isPresenting && SET.limit > 0 && VISIT.start && !['intro', 'thanks', 'operator'].includes(ctx.current);
+  const show = ctx.renderer.xr.isPresenting && SET.limit > 0 && VISIT.start && !['introVideo', 'intro', 'thanks', 'operator'].includes(ctx.current);
   if (!show) { if (timerSprite) timerSprite.visible = false; return; }
   const left = Math.ceil(SET.limit - (performance.now() - VISIT.start) / 1000);
   if (left <= 30 && !VISIT.warned) { VISIT.warned = true; SND.chime(); }
@@ -114,9 +123,14 @@ async function startXR(mode: XRSessionMode) {
     ctx.isAR = mode === 'immersive-ar'; ctx.camera.position.set(0, 0, 0); ctx.camera.rotation.set(0, 0, 0);
     if (ctx.isAR) await startARSession(s);
     needAnchor = true; anchorFrames = 0; SND.ambient(true); startVisitor();
+    // okuliare zložené z hlavy: zvuk a video počkajú (po 2 minútach sa appka vráti na začiatok pre ďalšieho návštevníka)
+    s.addEventListener('visibilitychange', () => {
+      const vis = s.visibilityState !== 'hidden'; SND.pause(!vis); if (!vis) stopVoice();
+      ctx.modules[ctx.current]?.onVisibility?.(vis);
+    });
     s.addEventListener('end', () => {
       ctx.isAR = false; ctx.anchor.position.set(0, 1.6, 0); ctx.anchor.rotation.set(0, 0, 0); ctx.floor.position.set(0, 0, 0); ctx.floor.rotation.set(0, 0, 0);
-      ctx.camera.position.set(0, 1.6, 0); clearCtrlVisuals(); SND.ambient(false); VISIT.start = 0; ctx.goHome(); flush();
+      ctx.camera.position.set(0, 1.6, 0); clearCtrlVisuals(); SND.pause(false); SND.ambient(false); stopVoice(); VISIT.start = 0; ctx.goHome(); flush();
     });
   } catch (err: any) { showMsg(T(ctx.content.ui.xrfail) + ' (' + err.name + ')'); }
 }
@@ -134,6 +148,8 @@ export function domTexts() {
   $('btnOffline').textContent = T(UI.offline); $('btnMin').textContent = T($('ui').classList.contains('min') ? UI.max : UI.min);
   $('note').textContent = T(UI.note); $('dlabel').textContent = T(UI.dLabel); $('btnPrint').textContent = T(UI.dPrint);
   $('btnOper').textContent = en() ? 'Staff settings' : 'Nastavenia obsluhy';
+  $('ver').textContent = (en() ? 'Version ' : 'Verzia ') + __APP_VERSION__;
+  $('btnCredits').textContent = T(UI.credits);
   if (!navigator.xr) showMsg(T(UI.noxr));
 }
 export function setLang(l: 'sk' | 'en') { if (L.lang !== l) toggleLang(); else ctx.modules[ctx.current]?.hud?.(); }
@@ -149,6 +165,7 @@ export function initDom() {
   const UI = ctx.content.ui;
   $('btnLang').onclick = toggleLang;
   $('btnOper').onclick = () => { SND.init(); goTo('operator'); };
+  $('btnCredits').onclick = domCredits;
   $('btnMin').onclick = () => { $('ui').classList.toggle('min'); domTexts(); };
   if (navigator.xr) {
     navigator.xr.isSessionSupported('immersive-vr').then(ok => { if (ok) { $('btnVR').hidden = false; $('xrrow').hidden = false; } }).catch(() => {});
@@ -156,12 +173,28 @@ export function initDom() {
   }
   $('btnVR').onclick = () => startXR('immersive-vr'); $('btnAR').onclick = () => startXR('immersive-ar');
   $('btnOffline').onclick = async () => {
-    const c = ctx.content;
-    const urls = new Set<string>([ASSET.milky, ...c.trips.map((t: any) => t.file), ...c.bodies.map((b: any) => ASSET.planets + b.tex),
-      ASSET.planets + '2k_saturn_ring_alpha.png', ...c.machines.map((m: any) => m.file)]);
-    showMsg(T(UI.offRun)); let ok = 0;
-    for (const u of urls) { try { const r = await fetch(u); if (r.ok) { await r.arrayBuffer(); ok++; } } catch { /* */ } }
-    showMsg(T(UI.offOk) + ok + ' / ' + urls.size);
+    const btn = $('btnOffline') as HTMLButtonElement; if (btn.disabled) return;
+    btn.disabled = true; showMsg(T(UI.offRun));
+    const list = await offlineUrls(), missing: string[] = []; let ok = 0, done = 0, failed = 0;
+    // súbory sa ukladajú priamo do pamäte, z ktorej číta offline režim (sw.js) – funguje aj pri prvom otvorení
+    const cache = 'caches' in window ? await caches.open(CACHE).catch(() => null) : null;
+    const one = async ({ u, optional }: { u: string; optional: boolean }) => {
+      try {
+        const hit = cache ? await cache.match(u) : null;
+        // uložený súbor sa stiahne znova len vtedy, keď sa na serveri zmenil
+        if (hit && !(await changed(u, hit))) { ok++; return; }
+        const r = await fetch(u, { cache: 'reload' });
+        if (r.status === 200) { if (cache) await cache.put(u, r.clone()); await r.arrayBuffer(); ok++; }
+        else if (hit) ok++;
+        else if (r.status === 404) { if (!optional) missing.push(u.replace(new URL('.', document.baseURI).href, '')); }
+        else failed++;
+      } catch { failed++; }                               // výpadok siete – pokračuje sa ďalej
+      finally { showMsg(T(UI.offRun) + ` ${++done} / ${list.length}`); }
+    };
+    const todo = list.slice(), worker = async () => { while (todo.length) await one(todo.shift()!); };
+    await Promise.all([worker(), worker(), worker()]);
+    showMsg(T(UI.offOk) + ok + '. ' + (failed ? T(UI.offFail) + failed + '. ' : '') + (missing.length ? T(UI.offMissing) + missing.join(', ') : '') + (!failed && !missing.length ? T(UI.offReady) : ''));
+    btn.disabled = false;
   };
   $('btnPrint').onclick = () => {
     $('dTitle').textContent = T(UI.dTitle); $('dText1').textContent = T(UI.dT1);
@@ -173,13 +206,45 @@ export function initDom() {
   domTexts();
 }
 
+/** Názov pamäte musí byť rovnaký ako v public/sw.js. */
+const CACHE = 'vesmir-na-dosah-v2';
+const stamp = (r: Response) => r.headers.get('last-modified') || (r.headers.get('etag') || '').replace(/^W\//, '').replace(/-gzip/, '');
+/** Zmenil sa súbor na serveri oproti uloženej verzii? (bez internetu: nie) */
+async function changed(u: string, hit: Response) {
+  if (/\/js\/[^/]+-[\w-]{8}\.\w+$/.test(u)) return false;   // súbory zostavenej appky majú v názve odtlačok obsahu
+  try { const h = await fetch(u, { method: 'HEAD', cache: 'no-store' }); return h.ok && !!stamp(h) && stamp(h) !== stamp(hit); } catch { return false; }
+}
+/** Všetko, čo appka potrebuje bez internetu: stránka, skripty, písma, textúry, panorámy, modely, hlas, úvodné video. */
+async function offlineUrls(): Promise<{ u: string; optional: boolean }[]> {
+  const c = ctx.content, P = ASSET.planets, need = new Set<string>(['./', 'index.html', 'manifest.json', 'logo-white.png', 'logo-navy.png', 'icon-192.png', 'icon-512.png']), opt = new Set<string>();
+  // čo si stránka už načítala (skripty s premenlivým názvom, štýly, písma, dekodér modelov)
+  for (const e of performance.getEntriesByType('resource')) { try { const u = new URL(e.name); if (u.origin === location.origin) opt.add(u.href); } catch { /* */ } }
+  document.querySelectorAll<HTMLScriptElement | HTMLLinkElement>('script[src], link[rel=stylesheet]').forEach(e => need.add((e as any).src || (e as any).href));
+  ['Regular', 'SemiBold', 'Bold'].forEach(f => need.add(`fonts/Figtree-${f}.ttf`));
+  ['draco_decoder.js', 'draco_decoder.wasm', 'draco_wasm_wrapper.js'].forEach(f => need.add('draco/' + f));
+  ['left.glb', 'right.glb'].forEach(f => need.add('hands/' + f));
+  ['stars.bin', 'star-names.json'].forEach(f => need.add('data/' + f));
+  Object.keys(c).forEach(f => need.add(`content/${f}.json`));
+  need.add(ASSET.milky); c.trips.forEach((t: any) => (t.optional ? opt : need).add(t.file)); c.machines.forEach((m: any) => need.add(m.file));
+  c.bodies.forEach((b: any) => { need.add(P + b.tex); if (b.ring) need.add(P + b.ring); });
+  ['earth_nightmap.jpg', 'earth_clouds.jpg', 'earth_specular_map.jpg'].forEach(f => need.add(P + '2k_' + f));
+  // nepovinné: textúry 4k, hlasový komentár, úvodné video
+  ['mercury.jpg', 'venus_atmosphere.jpg', 'earth_daymap.jpg', 'earth_nightmap.jpg', 'earth_clouds.jpg', 'moon.jpg', 'mars.jpg', 'jupiter.jpg', 'saturn.jpg', 'stars_milky_way.jpg'].forEach(f => opt.add(P + '4k_' + f));
+  JSON.stringify(c, (k, v) => { if (k === 'audio' && typeof v === 'string') { opt.add('audio/sk/' + v); opt.add('audio/en/' + v); } return v; });
+  if (await prepIntro()) introUrls().forEach(u => opt.add(u));
+  const abs = (u: string) => new URL(u, document.baseURI).href, out = new Map<string, boolean>();
+  opt.forEach(u => out.set(abs(u), true)); need.forEach(u => out.set(abs(u), false));
+  return [...out].map(([u, optional]) => ({ u, optional }));
+}
+
 /* =====================================================================
    HLAVNÁ SLUČKA
    ===================================================================== */
 export function startLoop() {
-  const clock = new THREE.Clock(), p3 = new THREE.Vector3(), q3 = new THREE.Quaternion(), s3 = new THREE.Vector3(), eul = new THREE.Euler();
-  ctx.renderer.setAnimationLoop((_time: number, frame?: XRFrame) => {
-    const dt = Math.min(clock.getDelta(), 0.1), t = clock.elapsedTime, { renderer, camera, anchor, floor } = ctx;
+  const timer = new THREE.Timer(), p3 = new THREE.Vector3(), q3 = new THREE.Quaternion(), s3 = new THREE.Vector3(), eul = new THREE.Euler();
+  ctx.renderer.setAnimationLoop((time: number, frame?: XRFrame) => {
+    timer.update(time);
+    const dt = Math.min(timer.getDelta(), 0.1), t = timer.getElapsed(), { renderer, camera, anchor, floor } = ctx;
     if (renderer.xr.isPresenting) {
       updateInput(); updateAR(frame);
       if (needAnchor && ++anchorFrames > 3) {
@@ -191,7 +256,7 @@ export function startLoop() {
         }
       }
       // po 2 minútach nečinnosti začne appka odznova pre ďalšieho návštevníka
-      if (!['intro', 'operator'].includes(ctx.current) && (ctx.current !== 'lobby' || SET.tutorial) && performance.now() - ctx.lastAct > 120000) { ctx.lastAct = performance.now(); startVisitor(); }
+      if (!['introVideo', 'intro', 'operator'].includes(ctx.current) && (ctx.current !== 'lobby' || SET.tutorial) && performance.now() - ctx.lastAct > 120000) { ctx.lastAct = performance.now(); startVisitor(); }
       visitTick();
     } else camera.rotation.set(look.pitch, look.yaw, 0);
     ctx.modules[ctx.current]?.update?.(dt, t);

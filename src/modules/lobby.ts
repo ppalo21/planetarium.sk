@@ -9,6 +9,7 @@ import { toggleLang } from '../core/app';
 
 /** Úvodná scéna s logom a „portálmi“ do jednotlivých zážitkov. */
 const ITEMS = [
+  { id: 'cosmos', label: { sk: 'Od Zeme po galaxie', en: 'Earth to galaxies' }, icon: 'galaxy' },
   { id: 'solar', label: { sk: 'Let Slnečnou sústavou', en: 'Solar System flight' }, tex: '2k_sun.jpg', c: '#ffb347' },
   { id: 'aurora', label: { sk: 'Polárna žiara', en: 'Aurora' }, icon: 'aurora' },
   { id: 'trips', label: { sk: 'Výlety v 360°', en: '360° trips' }, tex: '2k_mars.jpg', c: '#c1440e' },
@@ -26,7 +27,12 @@ function logoTap() { // 5× rýchlo ťuknúť na logo = režim obsluhy
 }
 function iconTex(kind: string) {
   const c = document.createElement('canvas'); c.width = 512; c.height = 256; const g = c.getContext('2d')!;
-  if (kind === 'aurora') {   // zelené závesy na nočnej oblohe
+  if (kind === 'galaxy') {   // špirálová galaxia
+    g.fillStyle = '#02030a'; g.fillRect(0, 0, 512, 256);
+    for (let i = 0; i < 2600; i++) { const arm = i % 2 ? 0 : Math.PI, r = Math.random() ** 0.8 * 110, th = r * 0.045 + arm + (Math.random() - 0.5) * 0.7;
+      const x = 128 + Math.cos(th) * r, y = 128 + Math.sin(th) * r * 0.75, c = r < 25 ? '255,220,160' : (Math.random() < 0.7 ? '170,195,255' : '255,150,200');
+      g.fillStyle = `rgba(${c},${0.35 + Math.random() * 0.5})`; g.fillRect(x, y, 1.6, 1.6); g.fillRect(x + 256, y, 1.6, 1.6); }
+  } else if (kind === 'aurora') {   // zelené závesy na nočnej oblohe
     g.fillStyle = '#040a14'; g.fillRect(0, 0, 512, 256);
     for (let x = 0; x < 512; x += 2) { const h = 60 + 40 * Math.sin(x * 0.03) + 25 * Math.sin(x * 0.11); const gr = g.createLinearGradient(0, 200 - h, 0, 200);
       gr.addColorStop(0, 'rgba(255,60,90,0)'); gr.addColorStop(0.5, 'rgba(60,255,140,0.5)'); gr.addColorStop(1, 'rgba(120,255,170,0.9)'); g.fillStyle = gr; g.fillRect(x, 200 - h, 2, h); }
@@ -82,7 +88,7 @@ export const lobby: any = {
     // viac ako 6 zážitkov: dva rady nad sebou, aby sa guľe a mená neprekrývali
     const rows = on.length > 6 ? [on.slice(0, Math.ceil(on.length / 2)), on.slice(Math.ceil(on.length / 2))] : [on];
     rows.forEach((row: any[], ri: number) => {
-      const n = row.length, span = Math.min(100, 22 * (n - 1)), y = rows.length > 1 ? (ri === 0 ? 0.1 : -0.3) : -0.02;
+      const n = row.length, span = Math.min(100, 22 * (n - 1)), y = rows.length > 1 ? (ri === 0 ? 0.16 : -0.34) : -0.02;
       row.forEach((g, i) => { const ang = (n > 1 ? -span / 2 + span * i / (n - 1) : 0) * D2R, R = 1.9; g.position.set(Math.sin(ang) * R, y, -Math.cos(ang) * R); g.userData.y0 = y; });
     });
   },
@@ -93,7 +99,8 @@ export const lobby: any = {
   hud() {
     setHud({ kicker: 'KHaP MH', title: ctx.content.ui.title,
       body: { sk: 'Vyberte si zážitok: ukážte lúčom na guľu a štipnite prstami. Domov sa vrátite tlačidlom Domov alebo dlhým štipnutím.', en: 'Choose an experience: point at a sphere and pinch. Return with the Home button or a long pinch.' },
-      actions: [{ label: T(ctx.content.ui.lang), onClick: toggleLang }, { label: T(ctx.content.ui.recenter), onClick: ctx.recenter }] });
+      actions: [{ label: T(ctx.content.ui.lang), onClick: toggleLang }, { label: T(ctx.content.ui.recenter), onClick: ctx.recenter },
+        { label: T(ctx.content.ui.credits), onClick: () => ctx.goTo('credits') }] });
   },
   exit() { this.root.visible = false; },
   update(dt, t) {

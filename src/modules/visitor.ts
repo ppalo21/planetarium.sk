@@ -72,6 +72,7 @@ export const thanks: any = {
     setHud({ kicker: 'KHaP MH', title: { sk: 'Čas na návštevu vypršal', en: 'Your time is up' }, body: { sk: 'Dúfame, že sa vám vesmír páčil. Príďte sa pozrieť aj do Hviezdnej sály!', en: 'We hope you enjoyed space. Come and visit our planetarium dome too!' },
       rows: [[{ label: en() ? 'Next visitor ›' : 'Ďalší návštevník ›', onClick: startVisitor, primary: true }]], home: false, sticky: true });
   },
+  relabel() { if (ctx.current === 'thanks') this.enter(); },
   exit() { this.root.visible = false; }
 };
 
@@ -82,14 +83,15 @@ export const operator: any = {
   enter() { this.root.visible = true; this.hud(); },
   exit() { this.root.visible = false; },
   hud() {
-    const MN: Record<string, any> = { solar: { sk: 'Let', en: 'Flight' }, aurora: { sk: 'Žiara', en: 'Aurora' }, trips: { sk: 'Výlety', en: 'Trips' }, depth: { sk: 'Hĺbka', en: 'Depth' }, planets: { sk: 'Planéty', en: 'Planets' }, phases: { sk: 'Fázy', en: 'Phases' }, gravity: { sk: 'Gravitácia', en: 'Gravity' }, machines: { sk: 'Stroje', en: 'Machines' }, quiz: { sk: 'Kvíz', en: 'Quiz' } };
+    const MN: Record<string, any> = { cosmos: { sk: 'Galaxie', en: 'Galaxies' }, solar: { sk: 'Let', en: 'Flight' }, aurora: { sk: 'Žiara', en: 'Aurora' }, trips: { sk: 'Výlety', en: 'Trips' }, depth: { sk: 'Hĺbka', en: 'Depth' }, planets: { sk: 'Planéty', en: 'Planets' }, phases: { sk: 'Fázy', en: 'Phases' }, gravity: { sk: 'Gravitácia', en: 'Gravity' }, machines: { sk: 'Stroje', en: 'Machines' }, quiz: { sk: 'Kvíz', en: 'Quiz' } };
     const tog = (k: string) => ({ label: T(MN[k]), active: SET.mods[k], onClick: () => { SET.mods[k] = !SET.mods[k]; if (!Object.values(SET.mods).some(Boolean)) SET.mods[k] = true; saveSet(); this.hud(); } });
     const lim = (s: number) => ({ label: s ? (s / 60) + ' min' : (en() ? 'No limit' : 'Bez limitu'), active: SET.limit === s, onClick: () => { SET.limit = s; saveSet(); this.hud(); } });
     const onoff = (v: boolean) => v ? (en() ? 'on' : 'zap') : (en() ? 'off' : 'vyp');
-    setHud({ kicker: { sk: 'Režim obsluhy', en: 'Staff mode' }, title: { sk: 'Čo uvidia návštevníci', en: 'What visitors will see' },
+    setHud({ kicker: { sk: 'Režim obsluhy · verzia ' + __APP_VERSION__, en: 'Staff mode · version ' + __APP_VERSION__ }, title: { sk: 'Čo uvidia návštevníci', en: 'What visitors will see' },
       body: { sk: 'Oranžové = zapnuté. Druhý riadok je čas na jedného návštevníka. Nastavenie sa uloží v okuliaroch. Otvorenie: 5× rýchlo ťuknúť na logo.', en: 'Orange = on. Row two is the time per visitor. Settings are stored in the headset. Open: tap the logo 5 times quickly.' },
       rows: [Object.keys(MN).map(tog), [lim(0), lim(120), lim(180), lim(300)],
-        [{ label: (en() ? 'Intro: ' : 'Úvod: ') + onoff(SET.tutorial), active: SET.tutorial, onClick: () => { SET.tutorial = !SET.tutorial; saveSet(); this.hud(); } },
+        [{ label: (en() ? 'Logo: ' : 'Znelka: ') + onoff(SET.introVideo), active: SET.introVideo, onClick: () => { SET.introVideo = !SET.introVideo; saveSet(); this.hud(); } },
+         { label: (en() ? 'Tutorial: ' : 'Návod: ') + onoff(SET.tutorial), active: SET.tutorial, onClick: () => { SET.tutorial = !SET.tutorial; saveSet(); this.hud(); } },
          { label: (en() ? 'Sound: ' : 'Zvuk: ') + onoff(SET.sound), active: SET.sound, onClick: () => { SET.sound = !SET.sound; saveSet(); SND.ambient(SET.sound && ctx.renderer.xr.isPresenting); this.hud(); } },
          { label: (en() ? 'Voice: ' : 'Hlas: ') + onoff(SET.voice), active: SET.voice, onClick: () => { SET.voice = !SET.voice; saveSet(); this.hud(); } },
          { label: en() ? 'Slovensky' : 'English', onClick: toggleLang }],

@@ -1,0 +1,182 @@
+{
+ "presets": [
+  {
+   "focus": "earth",
+   "z": 7.15,
+   "title": {
+    "sk": "Zem",
+    "en": "Earth"
+   },
+   "text": {
+    "sk": "Naša planéta s priemerom 12 742 km. Chyťte vesmír oboma rukami (štipnite): roztiahnutím približujete, stiahnutím odďaľujete. Jednou rukou ním otáčate.",
+    "en": "Our planet, 12,742 km across. Grab space with both hands (pinch): spread them to zoom in, bring them together to zoom out. One hand turns it."
+   }
+  },
+  {
+   "focus": "earth",
+   "z": 8.63,
+   "title": {
+    "sk": "Zem a Mesiac",
+    "en": "Earth and Moon"
+   },
+   "text": {
+    "sk": "Mesiac obieha 384 400 km od Zeme. Medzi ne by sa zmestilo všetkých 8 planét Slnečnej sústavy.",
+    "en": "The Moon orbits 384,400 km from Earth. All 8 planets of the Solar System would fit in the gap."
+   }
+  },
+  {
+   "focus": "sun",
+   "z": 11.32,
+   "title": {
+    "sk": "Vnútorné planéty",
+    "en": "Inner planets"
+   },
+   "text": {
+    "sk": "Merkúr, Venuša, Zem a Mars sú skalnaté planéty. Za Marsom je pás asteroidov.",
+    "en": "Mercury, Venus, Earth and Mars are rocky planets. Beyond Mars lies the asteroid belt."
+   }
+  },
+  {
+   "focus": "sun",
+   "z": 12.53,
+   "title": {
+    "sk": "Slnečná sústava",
+    "en": "The Solar System"
+   },
+   "text": {
+    "sk": "Osem planét obieha Slnko. Neptún je 30-krát ďalej od Slnka ako Zem a jeden obeh mu trvá 165 rokov.",
+    "en": "Eight planets orbit the Sun. Neptune is 30 times farther out than Earth and takes 165 years per orbit."
+   }
+  },
+  {
+   "focus": "sun",
+   "z": 13.11,
+   "title": {
+    "sk": "Kuiperov pás",
+    "en": "The Kuiper Belt"
+   },
+   "text": {
+    "sk": "Za Neptúnom krúžia milióny ľadových telies vrátane trpasličej planéty Pluto.",
+    "en": "Beyond Neptune circle millions of icy bodies, including the dwarf planet Pluto."
+   }
+  },
+  {
+   "focus": "sun",
+   "z": 16.06,
+   "title": {
+    "sk": "Oortov oblak",
+    "en": "The Oort Cloud"
+   },
+   "text": {
+    "sk": "Obrovský roj komét obklopuje Slnečnú sústavu až do vzdialenosti asi 1,5 svetelného roka. Slnko je odtiaľto len jasná hviezda.",
+    "en": "A vast swarm of comets surrounds the Solar System out to about 1.5 light years. From here the Sun is just a bright star."
+   }
+  },
+  {
+   "focus": "sun",
+   "z": 17.01,
+   "title": {
+    "sk": "Najbližšie hviezdy",
+    "en": "The nearest stars"
+   },
+   "text": {
+    "sk": "Najbližšia hviezda Proxima Centauri je 4,2 svetelného roka ďaleko. Svetlo z nej k nám letí vyše 4 rokov.",
+    "en": "The nearest star, Proxima Centauri, is 4.2 light years away. Its light takes over 4 years to reach us."
+   }
+  },
+  {
+   "focus": "sun",
+   "z": 18.29,
+   "title": {
+    "sk": "Hviezdne okolie Slnka",
+    "en": "The Sun’s stellar neighbourhood"
+   },
+   "text": {
+    "sk": "Takmer všetky hviezdy, ktoré vidíte voľným okom, sú do pár stoviek svetelných rokov od nás. To je len malý kúsok Galaxie.",
+    "en": "Almost every star you can see with the naked eye is within a few hundred light years. That is just a tiny part of the Galaxy."
+   }
+  },
+  {
+   "focus": "gc",
+   "z": 20.54,
+   "title": {
+    "sk": "Mliečna cesta",
+    "en": "The Milky Way"
+   },
+   "text": {
+    "sk": "Naša Galaxia má priemer asi 100 000 svetelných rokov a 100 až 400 miliárd hviezd. Slnko je v jednom z bočných ramien, 26 000 svetelných rokov od stredu.",
+    "en": "Our Galaxy is about 100,000 light years across with 100 to 400 billion stars. The Sun sits in a side arm, 26,000 light years from the centre."
+   }
+  },
+  {
+   "focus": "lg",
+   "z": 22.12,
+   "title": {
+    "sk": "Miestna skupina galaxií",
+    "en": "The Local Group"
+   },
+   "text": {
+    "sk": "Mliečna cesta má susedov: Magellanove oblaky a veľkú galaxiu v Andromede, 2,5 milióna svetelných rokov ďaleko. Jej svetlo dnes vidíme z čias, keď na Zemi žili prví predkovia ľudí.",
+    "en": "The Milky Way has neighbours: the Magellanic Clouds and the great Andromeda Galaxy, 2.5 million light years away. We see its light from the time of the first human ancestors."
+   }
+  },
+  {
+   "focus": "lg",
+   "z": 24.0,
+   "title": {
+    "sk": "Vesmír plný galaxií",
+    "en": "A universe full of galaxies"
+   },
+   "text": {
+    "sk": "Každý bod je celá galaxia s miliardami hviezd. Galaxie tvoria kopy a vlákna, medzi ktorými sú obrovské prázdnoty. V pozorovateľnom vesmíre je ich asi 2 bilióny.",
+    "en": "Every dot is a whole galaxy with billions of stars. Galaxies gather in clusters and filaments with vast voids between them. The observable universe holds roughly 2 trillion."
+   }
+  }
+ ],
+ "facts": {
+  "gc": {
+   "sk": "Stred Galaxie: čierna diera Sagittarius A* so 4 miliónmi hmotností Slnka.",
+   "en": "Galactic centre: the black hole Sagittarius A*, 4 million times the mass of the Sun."
+  },
+  "m31": {
+   "sk": "Galaxia v Andromede, 2,5 milióna svetelných rokov. Najvzdialenejší objekt, ktorý uvidíte voľným okom aj zo Slovenska.",
+   "en": "The Andromeda Galaxy, 2.5 million light years away. The most distant thing you can see with the naked eye, even from Slovakia."
+  },
+  "m33": {
+   "sk": "Galaxia v Trojuholníku, 2,7 milióna svetelných rokov.",
+   "en": "The Triangulum Galaxy, 2.7 million light years away."
+  },
+  "lmc": {
+   "sk": "Veľký Magellanov oblak, 160 000 svetelných rokov. Viditeľný len z južnej pologule.",
+   "en": "Large Magellanic Cloud, 160,000 light years. Visible only from the southern hemisphere."
+  },
+  "smc": {
+   "sk": "Malý Magellanov oblak, 200 000 svetelných rokov.",
+   "en": "Small Magellanic Cloud, 200,000 light years."
+  },
+  "sunmw": {
+   "sk": "Tu sme: Slnko a s ním aj Zem.",
+   "en": "We are here: the Sun, and Earth with it."
+  },
+  "lg": {
+   "sk": "Naša Mliečna cesta, galaxia v Andromede a asi 80 menších galaxií tvoria Miestnu skupinu. Drží ich pohromade gravitácia.",
+   "en": "Our Milky Way, the Andromeda Galaxy and about 80 smaller galaxies form the Local Group, held together by gravity."
+  },
+  "virgo": {
+   "sk": "Najbližšia veľká kopa galaxií, 54 miliónov svetelných rokov od nás. Má vyše 1 300 galaxií a je stredom nadkopy, ku ktorej patrí aj naša Miestna skupina.",
+   "en": "The nearest large galaxy cluster, 54 million light years away. It holds more than 1,300 galaxies and is the heart of the supercluster our Local Group belongs to."
+  },
+  "fornax": {
+   "sk": "Menšia kopa galaxií vo vzdialenosti asi 62 miliónov svetelných rokov. Po kope v Panne je to druhá najbližšia bohatá kopa.",
+   "en": "A smaller galaxy cluster about 62 million light years away, the second-nearest rich cluster after Virgo."
+  },
+  "perseus": {
+   "sk": "Tisíce galaxií vo vzdialenosti 240 miliónov svetelných rokov. Medzi nimi je horúci plyn s teplotou desiatok miliónov stupňov, ktorý žiari v röntgenovom svetle.",
+   "en": "Thousands of galaxies 240 million light years away. Between them lies gas at tens of millions of degrees, glowing in X-rays."
+  },
+  "coma": {
+   "sk": "Vyše tisíc veľkých galaxií vo vzdialenosti 320 miliónov svetelných rokov. Práve tu si Fritz Zwicky v roku 1933 všimol, že galaxie drží pohromade neviditeľná tmavá hmota.",
+   "en": "More than a thousand large galaxies 320 million light years away. Here, in 1933, Fritz Zwicky noticed that invisible dark matter must be holding the galaxies together."
+  }
+ }
+}

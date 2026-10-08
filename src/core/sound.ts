@@ -35,6 +35,8 @@ class Sound {
     f.frequency.setValueAtTime(300, t); f.frequency.exponentialRampToValueAtTime(2400, t + 0.6);
     const g = c.createGain(); g.gain.value = 0.16; s.connect(f); f.connect(g); g.connect(this.master); s.start(t);
   }
+  /** pozastaví všetok zvuk (okuliare zložené z hlavy) */
+  pause(v: boolean) { if (!this.ctx) return; try { if (v) this.ctx.suspend(); else this.ctx.resume(); } catch { /* */ } }
   ambient(on: boolean) {
     if (!this.ctx) return;
     if (on && SET.sound && !this.amb) {

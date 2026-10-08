@@ -1,14 +1,17 @@
 # Vesmír na dosah – KHaP MH
 
-WebXR aplikácia (VR + AR) pre Meta Quest. Verzia 2: TypeScript + Vite + three.js r186 + ostré písmo (troika).
+WebXR aplikácia (VR + AR) pre Meta Quest. Verzia 2.1: TypeScript + Vite + three.js r186 + ostré písmo (troika).
 
 ## Štruktúra
 ```
 public/content/*.json   ← TEXTY A OBSAH (upravuj tu, netreba programovať)
 public/assets/          ← panorámy, textúry planét, 3D modely (stiahne skript)
+public/intro/           ← úvodné video s logom (intro.mp4), návod je v CITAJ.txt
+public/data/            ← katalóg hviezd pre modul Od Zeme po galaxie
 public/fonts/           ← písmo Figtree (SIL Open Font License)
 src/core/               ← jadro: scéna, ovládanie, tabule, zvuky, nastavenia
-src/modules/            ← jednotlivé zážitky (lobby, trips, depth, planets, sun, gravity, machines, quiz, visitor)
+src/modules/            ← jednotlivé zážitky (lobby, cosmos, solar, aurora, trips, depth, planets, phases, gravity, machines, quiz),
+                          visitor = návod a režim obsluhy, brand = úvodné video a zdroje
 scripts/stiahni_obsah.py← stiahne voľne dostupné obrázky a modely do public/assets
 .github/workflows/      ← automatické zostavenie a nasadenie na GitHub Pages
 ```
@@ -22,8 +25,23 @@ scripts/stiahni_obsah.py← stiahne voľne dostupné obrázky a modely do public
 | `features.json` | miesta na povrchu (šírka, dĺžka, názov, popis) |
 | `constellations.json` | súhvezdia (hviezdy, čiary, texty troch krokov) |
 | `gravity.json`, `machines.json`, `quiz.json` | gravitácia, 3D modely, kvíz (`a` = index správnej odpovede od 0) |
+| `solar.json`, `aurora.json` | zastávky letu Slnečnou sústavou a polárnej žiary (text + názov nahrávky) |
+| `cosmos.json` | Od Zeme po galaxie: zastávky (`z` = mierka, log10 metrov na 1 m) a zaujímavosti |
+| `credits.json` | zdroje a poďakovanie (tlačidlo Zdroje) |
 
 Každý text je v tvare `{"sk": "...", "en": "..."}`. Po zmene stačí súbor nahrať na GitHub.
+
+## Úvodné video s logom
+Súbor `public/intro/intro.mp4` (H.264 + AAC, 1920×1080, 5–15 s, do 25 MB). V okuliaroch sa prehrá vo VR pred každým
+návštevníkom (dá sa vypnúť v režime obsluhy: Znelka), na počítači raz pri otvorení stránky. Bez súboru sa úvod preskočí.
+
+## Offline
+Tlačidlo **Pripraviť offline** na úvodnej stránke stiahne do pamäte okuliarov všetko potrebné (skripty, textúry, panorámy,
+modely, hlas, úvodné video). Potom appka funguje aj bez Wi-Fi. Po nahratí novej verzie ho stlačte znova:
+stiahnu sa len súbory, ktoré sa zmenili.
+
+## Verzia
+Číslo verzie je v `package.json` (`version`) a zobrazuje sa na úvodnej stránke, v Zdrojoch a v režime obsluhy.
 
 ## Vývoj na počítači (voliteľné)
 ```

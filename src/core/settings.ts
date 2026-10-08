@@ -3,10 +3,12 @@ export interface Settings {
   mods: Record<string, boolean>;
   limit: number;      // sekundy na návštevníka, 0 = bez limitu
   tutorial: boolean;
+  /** úvodné video s logom pred každým návštevníkom */
+  introVideo: boolean;
   sound: boolean;
   voice: boolean;
 }
-const DEF: Settings = { mods: { solar: true, aurora: true, trips: true, depth: true, planets: true, phases: true, gravity: true, machines: true, quiz: true }, limit: 0, tutorial: true, sound: true, voice: true };
+const DEF: Settings = { mods: { cosmos: true, solar: true, aurora: true, trips: true, depth: true, planets: true, phases: true, gravity: true, machines: true, quiz: true }, limit: 0, tutorial: true, introVideo: true, sound: true, voice: true };
 
 function load(): Settings {
   try {

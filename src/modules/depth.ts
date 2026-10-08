@@ -51,6 +51,7 @@ export const depth: any = {
   },
   setPhase(p: number) { this.phase = p; this.tgt.d = p > 0 ? 1 : 0; this.tgt.r = p === 2 ? 1 : 0; this.hud(); },
   hud() {
+    if (ctx.current !== 'depth') return;   // pri zmene jazyka v inom module sa lišta neprepíše
     const cs = ctx.content.constellations, cd = cs[this.ci], ph = cd.phases[this.phase], sc = fmt(Math.round(1 / this.K));
     setHud({ kicker: { sk: `Hĺbka oblohy   ${T(cd.name)}   ${this.phase + 1} / 3   (1 m = ${sc} ly)`, en: `Depth of the sky   ${T(cd.name)}   ${this.phase + 1} / 3   (1 m = ${sc} ly)` },
       title: ph.title, body: ph.text,

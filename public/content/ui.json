@@ -98,5 +98,21 @@
  "dTitle": {
   "sk": "DIPLOM",
   "en": "CERTIFICATE"
+ },
+ "credits": {
+  "sk": "Zdroje",
+  "en": "Credits"
+ },
+ "offFail": {
+  "sk": "Nepodarilo sa stiahnuť (skúste to znova): ",
+  "en": "Could not download (please try again): "
+ },
+ "offMissing": {
+  "sk": "Na serveri chýba: ",
+  "en": "Missing on the server: "
+ },
+ "offReady": {
+  "sk": "Appka je pripravená na použitie bez internetu.",
+  "en": "The app is ready to use offline."
  }
 }

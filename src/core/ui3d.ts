@@ -77,6 +77,8 @@ export interface HudCfg {
   home?: boolean;
   /** popis nikdy nezmizne */
   sticky?: boolean;
+  /** len lišta tlačidiel, žiadny popis (úvodné video) */
+  bare?: boolean;
 }
 export const HUD_W = 1.2, HUD_H = 0.34;
 const BTN_H = 0.075, GAP = 0.016;
@@ -146,7 +148,7 @@ export function buildHud() {
     });
   });
   barTop = (rows.length - 1) * (BTN_H + GAP) + BTN_H / 2;
-  panel.visible = captionOn || stickyNow();
+  panel.visible = !cfg.bare && (captionOn || stickyNow());
   if (panel.visible) {
     tKicker.text = T(cfg.kicker); const title = T(cfg.title);
     tTitle.text = title; tTitle.fontSize = Math.min(0.04, (HUD_W - 0.09) / Math.max(1, title.length * 0.5));
@@ -168,6 +170,7 @@ function relayout() {
   tKicker.position.set(x0, top, 0.001); tTitle.position.set(x0, top - 0.032, 0.001); tBody.position.set(x0, top - 0.088, 0.001);
   tCredit.position.set(x0, -h / 2 + 0.03, 0.001);
 }
+const tq = new THREE.Quaternion(), te = new THREE.Euler();
 export function hudTick(dt: number, hovered: Set<THREE.Object3D>) {
   // popis po pár sekundách sám zmizne (ostane len lišta tlačidiel)
   if (captionOn && !stickyNow() && panel.visible) {
@@ -175,9 +178,8 @@ export function hudTick(dt: number, hovered: Set<THREE.Object3D>) {
     if (looking) timer = 0; else { timer += dt; if (timer > CAPTION_S) { captionOn = false; buildHud(); } }
   }
   // lišta pomaly nasleduje pohľad, keď sa otočíte o viac ako 40°
-  const q = new THREE.Quaternion();
-  (ctx.renderer.xr.isPresenting ? ctx.renderer.xr.getCamera() : ctx.camera).getWorldQuaternion(q);
-  const e = new THREE.Euler().setFromQuaternion(q, 'YXZ');
+  (ctx.renderer.xr.isPresenting ? ctx.renderer.xr.getCamera() : ctx.camera).getWorldQuaternion(tq);
+  const e = te.setFromQuaternion(tq, 'YXZ');
   const head = e.y - ctx.anchor.rotation.y, wrapA = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
   if (Math.abs(wrapA(head - yawTarget)) > 40 * Math.PI / 180) yawTarget = head;
   hudYaw.rotation.y += wrapA(yawTarget - hudYaw.rotation.y) * Math.min(1, dt * 3);
