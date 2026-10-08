@@ -56,7 +56,10 @@ async function main() {
   const vr = navigator.xr ? await navigator.xr.isSessionSupported('immersive-vr').catch(() => false) : false;
   goTo(!vr && introOnce() ? 'introVideo' : 'lobby');
   document.getElementById('ui')!.hidden = false; bootDone();
-  (window as any).VND = { goTo, ctx, look, hudButtons };   // pre ladenie v konzole
+  (window as any).VND = { goTo, ctx, look, hudButtons };
+  // náročný modul (desaťtisíce hviezd a galaxií) sa pripraví vopred, kým je appka v pokoji – vstup doň potom nezasekne obraz
+  const idle = (cb: () => void) => ('requestIdleCallback' in window ? (window as any).requestIdleCallback(cb, { timeout: 5000 }) : setTimeout(cb, 2000));
+  idle(() => { const m = ctx.modules.cosmos as any; if (!m.built && ctx.current !== 'cosmos') { m.build(); m.built = true; m.root.visible = false; } });   // pre ladenie v konzole
   if ('serviceWorker' in navigator && location.protocol === 'https:' && !/claude|localhost/.test(location.hostname)) navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 main().catch(bootError);

@@ -69,7 +69,7 @@ export function applyEnv() {
    ===================================================================== */
 export function goTo(id: string, arg?: unknown) {
   if (ctx.current && ctx.current !== id && id !== 'operator') SND.whoosh();
-  stopPlacing(); moduleChange(id); ctx.modules[ctx.current]?.exit();
+  stopPlacing(); clearCtrlVisuals(); moduleChange(id); ctx.modules[ctx.current]?.exit();
   ctx.current = id; const m = ctx.modules[id];
   if (!m.built) { m.build(); m.built = true; }
   m.enter(arg); applyEnv(); ctx.lastAct = performance.now();
