@@ -139,7 +139,7 @@ export const solar: any = {
     const au = b.d.a || 0, km = au * 149.6;
     const kick = au ? (en() ? `${this.si + 1} / ${n}   ${fmt(Math.round(km * 10) / 10)} million km from the Sun` : `${this.si + 1} / ${n}   ${fmt(Math.round(km * 10) / 10)} mil. km od Slnka`) : `${this.si + 1} / ${n}`;
     setHud({ kicker: kick, title: st.title, body: st.text, credit: { sk: 'Textúry: Solar System Scope (CC BY 4.0)', en: 'Textures: Solar System Scope (CC BY 4.0)' }, sticky: true,
-      actions: [{ label: SET.voice ? (en() ? 'Voice: on' : 'Hlas: zap') : (en() ? 'Voice: off' : 'Hlas: vyp'), active: SET.voice, onClick: () => { SET.voice = !SET.voice; if (!SET.voice) stopVoice(); else this.say(); this.hud(); } }],
+      actions: SET.expert ? [{ label: SET.voice ? (en() ? 'Voice: on' : 'Hlas: zap') : (en() ? 'Voice: off' : 'Hlas: vyp'), active: SET.voice, onClick: () => { SET.voice = !SET.voice; if (!SET.voice) stopVoice(); else this.say(); this.hud(); } }] : [],
       prev: () => this.go(this.si - 1), next: () => this.go(this.si + 1) });
   },
   onTap() { this.go(this.si + 1); },

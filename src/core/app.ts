@@ -67,14 +67,38 @@ export function applyEnv() {
 /* =====================================================================
    NAVIGÁCIA A NÁVŠTEVNÍK
    ===================================================================== */
+/**
+ * Prechod do iného zážitku: obraz sa krátko zatmie, scéna sa vymení a znova rozsvieti.
+ * Strih v okuliaroch pôsobí rušivo; zatmenie je príjemnejšie a zakryje aj načítanie.
+ */
+let pending: { id: string; arg?: unknown } | null = null, fadeA = 0, fadeDir = 0, fadeMesh: THREE.Mesh | null = null;
 export function goTo(id: string, arg?: unknown) {
-  if (ctx.current && ctx.current !== id && id !== 'operator') SND.whoosh();
+  if (!ctx.current || ctx.current === id || id === 'operator' || ctx.current === 'operator') { goNow(id, arg); return; }
+  if (!pending) SND.swell();
+  pending = { id, arg }; fadeDir = 1; ctx.lastAct = performance.now();
+}
+/** Okamžité prepnutie bez zatmenia (prvé spustenie, režim obsluhy, ladenie). */
+export function goNow(id: string, arg?: unknown) {
+  pending = null;
   stopPlacing(); clearCtrlVisuals(); moduleChange(id); ctx.modules[ctx.current]?.exit();
   ctx.current = id; const m = ctx.modules[id];
   if (!m.built) { m.build(); m.built = true; }
-  m.enter(arg); applyEnv(); ctx.lastAct = performance.now();
+  m.enter(arg); applyEnv(); SND.mood(id); ctx.lastAct = performance.now();
   const ui = document.getElementById('ui');
   if (ui && !ctx.renderer.xr.isPresenting) { ui.classList.toggle('min', id !== 'lobby'); domTexts(); }
+}
+const camP = new THREE.Vector3();
+function fadeTick(dt: number) {
+  if (!fadeDir && fadeA <= 0) { if (fadeMesh) fadeMesh.visible = false; return; }
+  if (!fadeMesh) {
+    fadeMesh = new THREE.Mesh(new THREE.SphereGeometry(0.25, 24, 12), new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.BackSide, transparent: true, depthTest: false, depthWrite: false, fog: false }));
+    fadeMesh.renderOrder = 9999; fadeMesh.frustumCulled = false; ctx.scene.add(fadeMesh);
+  }
+  if (fadeDir === 1) { fadeA += dt / 0.22; if (fadeA >= 1) { fadeA = 1; fadeDir = -1; if (pending) { const p = pending; goNow(p.id, p.arg); } } }
+  else { fadeA -= dt / 0.5; if (fadeA <= 0) { fadeA = 0; fadeDir = 0; } }
+  (ctx.renderer.xr.isPresenting ? ctx.renderer.xr.getCamera() : ctx.camera).getWorldPosition(camP);
+  fadeMesh.position.copy(camP); fadeMesh.visible = fadeA > 0.001;
+  (fadeMesh.material as THREE.MeshBasicMaterial).opacity = fadeA * fadeA * (3 - 2 * fadeA);
 }
 let needAnchor = false, anchorFrames = 0;
 export function recenter() { needAnchor = true; anchorFrames = 0; resetHudYaw(); if (!ctx.renderer.xr.isPresenting) { look.yaw = 0; look.pitch = -0.12; } }
@@ -110,8 +134,11 @@ function visitTick() {
 /* =====================================================================
    SPUSTENIE VR / AR
    ===================================================================== */
-async function startXR(mode: XRSessionMode) {
-  SND.init();
+let xrBusy = false;
+/** silent = automatický pokus pri spustení appky; ak ho prehliadač nepovolí, nič sa nevypíše */
+async function startXR(mode: XRSessionMode, silent = false) {
+  if (xrBusy || ctx.renderer.xr.isPresenting) return;
+  xrBusy = true; SND.init();
   try {
     const ar = mode === 'immersive-ar';
     // AR na Queste 3: hit-test (podlaha, stôl) a depth-sensing (skutočné predmety a ruky zakryjú virtuálne)
@@ -130,9 +157,10 @@ async function startXR(mode: XRSessionMode) {
     });
     s.addEventListener('end', () => {
       ctx.isAR = false; ctx.anchor.position.set(0, 1.6, 0); ctx.anchor.rotation.set(0, 0, 0); ctx.floor.position.set(0, 0, 0); ctx.floor.rotation.set(0, 0, 0);
-      ctx.camera.position.set(0, 1.6, 0); clearCtrlVisuals(); SND.pause(false); SND.ambient(false); stopVoice(); VISIT.start = 0; ctx.goHome(); flush();
+      ctx.camera.position.set(0, 1.6, 0); clearCtrlVisuals(); SND.pause(false); SND.ambient(false); stopVoice(); VISIT.start = 0; goNow('lobby'); flush();
     });
-  } catch (err: any) { showMsg(T(ctx.content.ui.xrfail) + ' (' + err.name + ')'); }
+  } catch (err: any) { if (!silent) showMsg(T(ctx.content.ui.xrfail) + ' (' + err.name + ')'); }
+  finally { xrBusy = false; }
 }
 
 /* =====================================================================
@@ -168,7 +196,19 @@ export function initDom() {
   $('btnCredits').onclick = domCredits;
   $('btnMin').onclick = () => { $('ui').classList.toggle('min'); domTexts(); };
   if (navigator.xr) {
-    navigator.xr.isSessionSupported('immersive-vr').then(ok => { if (ok) { $('btnVR').hidden = false; $('xrrow').hidden = false; } }).catch(() => {});
+    navigator.xr.isSessionSupported('immersive-vr').then(ok => {
+      if (!ok) return;
+      $('btnVR').hidden = false; $('xrrow').hidden = false;
+      // V okuliaroch: appka sa pokúsi prejsť do VR sama (nainštalovaná appka v režime „immersive“ to povoľuje).
+      // Ak to prehliadač nedovolí, stačí kliknúť kamkoľvek – celá obrazovka je tlačidlo „Spustiť“.
+      if (/OculusBrowser|Quest|Pico|VR/i.test(navigator.userAgent)) {
+        document.body.classList.add('headset');
+        startXR('immersive-vr', true);
+        ctx.renderer.domElement.addEventListener('click', () => startXR('immersive-vr'));
+      }
+    }).catch(() => {});
+    // prechod do VR bez kliknutia, keď ho systém ponúkne (spustenie z knižnice, návrat do appky)
+    (navigator.xr as any).addEventListener?.('sessiongranted', () => startXR('immersive-vr', true));
     navigator.xr.isSessionSupported('immersive-ar').then(ok => { if (ok) { $('btnAR').hidden = false; $('xrrow').hidden = false; } }).catch(() => {});
   }
   $('btnVR').onclick = () => startXR('immersive-vr'); $('btnAR').onclick = () => startXR('immersive-ar');
@@ -262,7 +302,7 @@ export function startLoop() {
       visitTick();
     } else camera.rotation.set(look.pitch, look.yaw, 0);
     ctx.modules[ctx.current]?.update?.(dt, t);
-    hudTick(dt, hovered);
+    hudTick(dt, hovered); fadeTick(dt);
     renderer.render(ctx.scene, camera);
   });
 }

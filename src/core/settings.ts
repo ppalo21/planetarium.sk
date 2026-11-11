@@ -6,9 +6,11 @@ export interface Settings {
   /** úvodné video s logom pred každým návštevníkom */
   introVideo: boolean;
   sound: boolean;
+  /** rozšírené ovládanie na lište (zoom, čas, hlas) – pre sprievodcu; návštevník má len späť / ďalej / domov */
+  expert: boolean;
   voice: boolean;
 }
-const DEF: Settings = { mods: { cosmos: true, solar: true, aurora: true, trips: true, depth: true, planets: true, phases: true, gravity: true, machines: true, quiz: true }, limit: 0, tutorial: true, introVideo: true, sound: true, voice: true };
+const DEF: Settings = { mods: { cosmos: true, solar: true, aurora: true, trips: true, depth: true, planets: true, phases: true, gravity: true, machines: true, quiz: true }, limit: 0, tutorial: true, introVideo: true, sound: true, voice: true, expert: false };
 
 function load(): Settings {
   try {

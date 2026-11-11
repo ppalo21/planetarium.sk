@@ -38,7 +38,11 @@ export function textSprite(lines: string | string[], colors: string | string[], 
   let w = 0; ls.forEach((l, i) => { g.font = f(i); w = Math.max(w, g.measureText(l).width); });
   c.width = Math.ceil(w + px); c.height = Math.ceil(px * 1.3 * ls.length + px * 0.4);
   g.textAlign = 'center'; g.textBaseline = 'middle'; g.shadowColor = 'rgba(0,0,0,.85)'; g.shadowBlur = px * 0.25;
-  ls.forEach((l, i) => { g.font = f(i); g.fillStyle = Array.isArray(colors) ? colors[i] : colors; g.fillText(l, c.width / 2, px * 0.85 + i * px * 1.3); });
+  ls.forEach((l, i) => {
+    g.font = f(i); const y = px * 0.85 + i * px * 1.3;
+    g.lineWidth = px * 0.14; g.lineJoin = 'round'; g.strokeStyle = 'rgba(2,5,16,.75)'; g.strokeText(l, c.width / 2, y);   // tmavý obrys: text sa číta aj na jasnom pozadí
+    g.fillStyle = Array.isArray(colors) ? colors[i] : colors; g.fillText(l, c.width / 2, y);
+  });
   const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: canvasTex(c), transparent: true, depthWrite: false }));
   s.userData.aspect = c.width / c.height; s.userData.lines = ls.length; return s;
 }

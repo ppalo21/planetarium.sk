@@ -1,5 +1,20 @@
 import { SET } from './settings';
 
+/** Akordy pozadia (Hz): pokojné kvinty a oktávy, pre každý zážitok iná tónina. */
+const MOODS: Record<string, number[]> = {
+  lobby: [110, 164.81, 220.5, 329.6],          // A – vítanie
+  cosmos: [82.41, 123.47, 164.9, 246.94],      // E – hlboký vesmír
+  solar: [73.42, 110, 146.9, 220],             // D – let
+  aurora: [98, 146.83, 196.3, 293.66],         // G – severská noc
+  trips: [87.31, 130.81, 174.7, 261.63],       // F – cudzie svety
+  depth: [92.5, 138.59, 185.2, 277.18],        // F# – hviezdy
+  planets: [103.83, 155.56, 207.9, 311.13],
+  phases: [98, 146.83, 196.3, 293.66],
+  gravity: [130.81, 196, 261.9, 392],          // C – hravé
+  machines: [116.54, 174.61, 233.3, 349.23],
+  quiz: [130.81, 196, 261.9, 392]
+};
+
 /** Zvuky syntetizované cez WebAudio – bez zvukových súborov. */
 class Sound {
   ctx: AudioContext | null = null;
@@ -35,14 +50,27 @@ class Sound {
     f.frequency.setValueAtTime(300, t); f.frequency.exponentialRampToValueAtTime(2400, t + 0.6);
     const g = c.createGain(); g.gain.value = 0.16; s.connect(f); f.connect(g); g.connect(this.master); s.start(t);
   }
+  /** krátky jemný zvuk pri prechode medzi krokmi (šípky) */
+  step(up = true) { this.tone(up ? 520 : 440, 0.12, 'sine', 0.07, up ? 700 : 340); }
+  /** tichý „nádych“ pri stmievaní scény */
+  swell() {
+    if (!this.ok()) return;
+    const c = this.ctx!, t = c.currentTime, n = Math.floor(c.sampleRate * 1.1), b = c.createBuffer(1, n, c.sampleRate), d = b.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.sin(Math.PI * i / n) ** 2;
+    const s = c.createBufferSource(); s.buffer = b;
+    const f = c.createBiquadFilter(); f.type = 'lowpass'; f.Q.value = 0.7; f.frequency.setValueAtTime(250, t); f.frequency.exponentialRampToValueAtTime(1400, t + 0.5); f.frequency.exponentialRampToValueAtTime(300, t + 1.1);
+    const g = c.createGain(); g.gain.value = 0.09; s.connect(f); f.connect(g); g.connect(this.master); s.start(t);
+  }
   /** pozastaví všetok zvuk (okuliare zložené z hlavy) */
   pause(v: boolean) { if (!this.ctx) return; try { if (v) this.ctx.suspend(); else this.ctx.resume(); } catch { /* */ } }
+  /** Hudobné pozadie: štyri tiché tóny, ktoré sa pomaly prelievajú. Každý zážitok má vlastný akord (náladu). */
+  private chord = MOODS.lobby;
   ambient(on: boolean) {
     if (!this.ctx) return;
     if (on && SET.sound && !this.amb) {
-      const c = this.ctx, g = c.createGain(); g.gain.value = 0; g.gain.linearRampToValueAtTime(0.045, c.currentTime + 3);
-      const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 600; lp.connect(g); g.connect(this.master);
-      const os = [110, 164.81, 220.5, 329.6].map((f, i) => {
+      const c = this.ctx, g = c.createGain(); g.gain.value = 0; g.gain.linearRampToValueAtTime(0.05, c.currentTime + 3);
+      const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 650; lp.connect(g); g.connect(this.master);
+      const os = this.chord.map((f, i) => {
         const o = c.createOscillator(); o.type = i % 2 ? 'triangle' : 'sine'; o.frequency.value = f; o.detune.value = (i - 1.5) * 6;
         const og = c.createGain(); og.gain.value = i < 2 ? 0.5 : 0.18;
         const l = c.createOscillator(); l.frequency.value = 0.05 + i * 0.03; const lg = c.createGain(); lg.gain.value = 0.15;
@@ -51,10 +79,17 @@ class Sound {
       });
       this.amb = { g, os };
     } else if ((!on || !SET.sound) && this.amb) {
-      const a = this.amb, c = this.ctx; a.g.gain.linearRampToValueAtTime(0, c.currentTime + 1);
+      const a = this.amb, c = this.ctx; a.g.gain.cancelScheduledValues(c.currentTime); a.g.gain.setValueAtTime(a.g.gain.value, c.currentTime); a.g.gain.linearRampToValueAtTime(0, c.currentTime + 1);
       setTimeout(() => a.os.forEach(p => p.forEach(o => { try { o.stop(); } catch { /* */ } })), 1200);
       this.amb = null;
     }
+  }
+  /** Plynule preladí pozadie na náladu daného zážitku. */
+  mood(id: string) {
+    this.chord = MOODS[id] || MOODS.lobby;
+    if (!this.ctx || !this.amb) return;
+    const t = this.ctx.currentTime;
+    this.amb.os.forEach((p, i) => p[0].frequency.setTargetAtTime(this.chord[i], t, 1.2));
   }
 }
 export const SND = new Sound();

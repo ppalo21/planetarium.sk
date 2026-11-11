@@ -30,32 +30,46 @@ export const intro: any = {
     rayL.rotation.x = Math.PI / 2; rayL.position.set(0, 0.06, -0.16); cg.add(rayL); cg.scale.setScalar(1.6); r.add(cg);
     makeClickable(this.orb, { onClick: () => this.done(), onHover: v => { this.hover = v; } });
   },
+  /** Krok 0: namieriť a štipnúť Zem. Krok 1: vyskúšať tlačidlo na lište dole. Až potom ponuka. */
   label() {
     if (this.lab) { this.root.remove(this.lab); disposeTree(this.lab); }
-    this.lab = textSprite([en() ? 'Welcome to space!' : 'Vitaj vo vesmíre!', T({ sk: 'Namier na Zem a štipni', en: 'Point at Earth and pinch' })], ['#ffb46b', '#e9ecf7'], 80);
+    const two = this.step === 1;
+    this.lab = textSprite(two ? [en() ? 'Great!' : 'Výborne!', T({ sk: 'Teraz to isté skúste na tlačidle dole ↓', en: 'Now try the same on the button below ↓' })]
+      : [en() ? 'Welcome to space!' : 'Vitajte vo vesmíre!', T(INPUT.mode === 'controllers' ? { sk: 'Namierte lúčom na Zem a stlačte spúšť', en: 'Point the ray at Earth and press the trigger' } : { sk: 'Namierte rukou na Zem a spojte palec s ukazovákom', en: 'Point your hand at Earth and touch thumb to index finger' })], ['#ffb46b', '#e9ecf7'], 80);
     setSpriteH(this.lab, 0.24); this.lab.position.set(0, 0.42, -1.6); this.root.add(this.lab);
     if (this.tl) { this.root.remove(this.tl); disposeTree(this.tl); }
     this.tl = textSprite(INPUT.mode === 'controllers' ? (en() ? 'trigger (index finger)' : 'spúšť (ukazovák)') : (en() ? 'thumb + index finger' : 'palec + ukazovák'), '#ffb46b', 56);
     setSpriteH(this.tl, 0.045); this.root.add(this.tl);
   },
-  enter() { this.root.visible = true; this.label(); this.hud(); },
+  enter() { this.root.visible = true; this.step = 0; this.pop = 0; this.label(); this.hud(); },
   hud() {
     const c = INPUT.mode === 'controllers';
-    setHud({ kicker: c ? { sk: 'Ako ovládať: ovládače', en: 'How to control: controllers' } : { sk: 'Ako ovládať: ruky', en: 'How to control: hands' },
-      title: c ? { sk: 'Spúšť stlačíte ukazovákom', en: 'Press the trigger with your index finger' } : { sk: 'Spojte palec a ukazovák ako pinzetu', en: 'Touch your thumb and index finger' },
-      body: c ? { sk: 'Namierte modrým lúčom z ovládača na Zem a stlačte spúšť pod ukazovákom. Podržaním spúšte na 1,5 s sa kedykoľvek vrátite domov. Ovládače môžete odložiť, appka funguje aj s rukami.', en: 'Point the blue ray from the controller at the Earth and press the trigger under your index finger. Hold the trigger for 1.5 s to go home at any time. You can also put the controllers down and use your hands.' }
-        : { sk: 'Na vzdialené veci namierte lúčom z ruky a krátko spojte palec s ukazovákom. Tlačidlá na tabuli pod vami stačí ťuknúť prstom ako na mobile. Dlhé štipnutie (1,5 s) vás vráti domov.', en: 'For things far away, point the ray from your hand and briefly touch thumb and index finger. The buttons on the panel below you can be tapped with a finger like a phone. A long pinch (1.5 s) takes you home.' },
+    if (this.step === 1) {
+      setHud({ kicker: { sk: 'Ako ovládať   2 / 2', en: 'How to control   2 / 2' }, title: { sk: 'Tlačidlá sú vždy tu dole', en: 'The buttons are always down here' },
+        body: c ? { sk: 'Šípkami idete ďalej a späť, tlačidlom Domov sa vrátite do ponuky. Domov vás vráti aj podržanie spúšte na 1,5 sekundy.', en: 'Arrows take you forward and back, Home returns to the menu. Holding the trigger for 1.5 seconds also takes you home.' }
+          : { sk: 'Šípkami idete ďalej a späť, tlačidlom Domov sa vrátite do ponuky. Domov vás vráti aj dlhé štipnutie (1,5 sekundy).', en: 'Arrows take you forward and back, Home returns to the menu. A long pinch (1.5 seconds) also takes you home.' },
+        rows: [[{ label: en() ? 'Got it, let’s go ›' : 'Rozumiem, poďme ›', primary: true, onClick: () => this.finish() }]], home: false, sticky: true });
+      return;
+    }
+    setHud({ kicker: { sk: 'Ako ovládať   1 / 2', en: 'How to control   1 / 2' },
+      title: c ? { sk: 'Namierte a stlačte spúšť', en: 'Point and press the trigger' } : { sk: 'Namierte a štipnite', en: 'Point and pinch' },
+      body: c ? { sk: 'Z ovládača vychádza lúč. Namierte ho na Zem pred vami a stlačte spúšť pod ukazovákom. Ovládače môžete aj odložiť a používať ruky.', en: 'A ray comes out of the controller. Point it at the Earth in front of you and press the trigger under your index finger. You can also put the controllers down and use your hands.' }
+        : { sk: 'Z ruky vychádza lúč. Namierte ho na Zem pred vami a krátko spojte palec s ukazovákom.', en: 'A ray comes out of your hand. Point it at the Earth in front of you and briefly touch your thumb and index finger together.' },
       rows: [[{ label: 'Slovensky', active: !en(), onClick: () => setLang('sk') }, { label: 'English', active: en(), onClick: () => setLang('en') }]], home: false, sticky: true });
   },
-  done() { SND.good(); VISIT.start = performance.now(); VISIT.warned = false; ctx.goTo('lobby'); },
+  /** Zem trafená: krátka odmena (zväčšenie, zvuk) a druhý krok */
+  done() { if (this.step !== 0) return; SND.good(); this.step = 1; this.pop = 1; this.label(); this.hud(); },
+  finish() { SND.good(); VISIT.start = performance.now(); VISIT.warned = false; ctx.goTo('lobby'); },
   relabel() { if (ctx.current === 'intro') { this.label(); this.hud(); } },
   exit() { this.root.visible = false; },
   update(dt: number, t: number) {
-    const k = (this.hover ? 1.25 : 1) * (1 + 0.05 * Math.sin(t * 3)); this.orb.scale.setScalar(k); this.orb.rotation.y += dt * 0.3;
-    this.ring.lookAt(ctx.anchor.localToWorld(new THREE.Vector3())); this.ring.scale.setScalar(k * (1 + 0.15 * ((t * 0.8) % 1))); this.ring.material.opacity = 1 - ((t * 0.8) % 1);
+    this.pop = Math.max(0, (this.pop || 0) - dt * 1.6);
+    const one = this.step === 0, k = (this.hover && one ? 1.25 : 1) * (1 + 0.05 * Math.sin(t * 3)) * (1 + 0.5 * Math.sin(this.pop * Math.PI));
+    this.orb.scale.setScalar(k); this.orb.rotation.y += dt * (one ? 0.3 : 1.2);
+    this.ring.visible = one; this.ring.lookAt(ctx.anchor.localToWorld(new THREE.Vector3())); this.ring.scale.setScalar(k * (1 + 0.15 * ((t * 0.8) % 1))); this.ring.material.opacity = 1 - ((t * 0.8) % 1);
     const ph = (Math.sin(t * 2.4) + 1) / 2, gap = 0.012 + 0.05 * ph, c = this.orb.position, ctl = INPUT.mode === 'controllers';
     this.f1.position.set(c.x + 0.3, c.y - 0.02 + gap, c.z + 0.15); this.f2.position.set(c.x + 0.3, c.y - 0.02 - gap, c.z + 0.15);
-    this.f1.visible = this.f2.visible = !ctl; this.ctrl.visible = ctl;
+    this.f1.visible = this.f2.visible = !ctl && one; this.ctrl.visible = ctl && one; if (this.tl) this.tl.visible = one;
     this.ctrl.position.set(c.x + 0.32, c.y - 0.1, c.z + 0.35); this.ctrl.rotation.set(0, 0.5, 0); this.trigPivot.rotation.x = -0.45 * ph;
     if (this.tl) this.tl.position.set(c.x + 0.32, c.y + (ctl ? -0.2 : -0.1), c.z + (ctl ? 0.35 : 0.15));
   }
@@ -88,12 +102,13 @@ export const operator: any = {
     const lim = (s: number) => ({ label: s ? (s / 60) + ' min' : (en() ? 'No limit' : 'Bez limitu'), active: SET.limit === s, onClick: () => { SET.limit = s; saveSet(); this.hud(); } });
     const onoff = (v: boolean) => v ? (en() ? 'on' : 'zap') : (en() ? 'off' : 'vyp');
     setHud({ kicker: { sk: 'Režim obsluhy · verzia ' + __APP_VERSION__, en: 'Staff mode · version ' + __APP_VERSION__ }, title: { sk: 'Čo uvidia návštevníci', en: 'What visitors will see' },
-      body: { sk: 'Oranžové = zapnuté. Druhý riadok je čas na jedného návštevníka. Nastavenie sa uloží v okuliaroch. Otvorenie: 5× rýchlo ťuknúť na logo.', en: 'Orange = on. Row two is the time per visitor. Settings are stored in the headset. Open: tap the logo 5 times quickly.' },
+      body: { sk: 'Oranžové = zapnuté. Druhý riadok je čas na jedného návštevníka. Rozšírená lišta pridá zoom, čas a hlas (pre sprievodcu). Nastavenie sa uloží v okuliaroch. Otvorenie: 5× rýchlo ťuknúť na logo.', en: 'Orange = on. Row two is the time per visitor. Settings are stored in the headset. Open: tap the logo 5 times quickly.' },
       rows: [Object.keys(MN).map(tog), [lim(0), lim(120), lim(180), lim(300)],
         [{ label: (en() ? 'Logo: ' : 'Znelka: ') + onoff(SET.introVideo), active: SET.introVideo, onClick: () => { SET.introVideo = !SET.introVideo; saveSet(); this.hud(); } },
          { label: (en() ? 'Tutorial: ' : 'Návod: ') + onoff(SET.tutorial), active: SET.tutorial, onClick: () => { SET.tutorial = !SET.tutorial; saveSet(); this.hud(); } },
          { label: (en() ? 'Sound: ' : 'Zvuk: ') + onoff(SET.sound), active: SET.sound, onClick: () => { SET.sound = !SET.sound; saveSet(); SND.ambient(SET.sound && ctx.renderer.xr.isPresenting); this.hud(); } },
          { label: (en() ? 'Voice: ' : 'Hlas: ') + onoff(SET.voice), active: SET.voice, onClick: () => { SET.voice = !SET.voice; saveSet(); this.hud(); } },
+         { label: en() ? (SET.expert ? 'Controls: full' : 'Controls: simple') : (SET.expert ? 'Lišta: rozšírená' : 'Lišta: jednoduchá'), active: SET.expert, onClick: () => { SET.expert = !SET.expert; saveSet(); this.hud(); } },
          { label: en() ? 'Slovensky' : 'English', onClick: toggleLang }],
         [{ label: en() ? 'Done, new visitor ›' : 'Hotovo, nový návštevník ›', primary: true, onClick: startVisitor }]], home: false, sticky: true });
   },

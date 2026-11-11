@@ -4,6 +4,7 @@ import { T, en, fmt } from '../core/i18n';
 import { setHud, setCaption, keepHud, makeClickable } from '../core/ui3d';
 import { loadTex, freeTex, textSprite, canvasTex, camWorld } from '../core/util';
 import { sunMaterial, SUN_U } from './sun';
+import { SET } from '../core/settings';
 import { planetMaterial, earthMaterial } from './space';
 
 /**
@@ -45,6 +46,7 @@ const Q_LG = (() => {
   const X = M31_PC.clone().sub(GC_PC).normalize(), Y = GZ.clone().addScaledVector(X, -GZ.dot(X)).normalize(), Z = new THREE.Vector3().crossVectors(X, Y);
   return new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(X, Y, Z).transpose());
 })();
+const LABEL_H = 0.034;   // výška popiskov (v radiánoch zorného poľa) – čitateľné aj pre deti
 const Q_ID = new THREE.Quaternion(), M4 = new THREE.Matrix4(), W1 = new THREE.Vector3(), W3 = new THREE.Vector3();
 const V1 = new THREE.Vector3(), V2 = new THREE.Vector3(), V3 = new THREE.Vector3();   // pomocné vektory (bez vytvárania nových v každej snímke)
 
@@ -418,8 +420,8 @@ export const cosmos: any = {
     this.objs.push(o); this.byId[o.id] = o;
   },
   mkLabel(o: any) {
-    const s = textSprite(T(o.name), o.color, 52); s.material.sizeAttenuation = false; s.material.depthTest = false; s.renderOrder = 12;
-    s.scale.set(0.024 * s.userData.aspect, 0.024, 1); s.center.set(0.5, 1.6); this.content.add(s);
+    const s = textSprite(T(o.name), o.color, 64); s.material.sizeAttenuation = false; s.material.depthTest = false; s.renderOrder = 12;
+    s.scale.set(LABEL_H * s.userData.aspect, LABEL_H, 1); s.center.set(0.5, 1.6); this.content.add(s);
     makeClickable(s, { onClick: () => this.focusOn(o.id) }); return s;
   },
 
@@ -492,8 +494,9 @@ export const cosmos: any = {
     if (c) this.cap = c;
     setHud({ kicker: this.kicker(), title: this.cap.title, body: this.cap.body,
       credit: { sk: 'Hviezdy: katalóg HYG (CC BY-SA 4.0) · Textúry: Solar System Scope (CC BY 4.0) · Obloha: ESO/S. Brunier', en: 'Stars: HYG catalogue (CC BY-SA 4.0) · Textures: Solar System Scope (CC BY 4.0) · Sky: ESO/S. Brunier' },
-      actions: [{ label: '−', onClick: () => this.zoomStep(0.8) }, { label: '+', onClick: () => this.zoomStep(-0.8) },
-        { label: this.timeLabel(), active: this.speed > 0, onClick: () => { this.speed = (this.speed + 1) % 5; keepHud(); this.hud(); } }],
+      // návštevník má len späť / ďalej / domov; zoom tlačidlami a čas sú v rozšírenej lište (režim obsluhy)
+      actions: SET.expert ? [{ label: '−', onClick: () => this.zoomStep(0.8) }, { label: '+', onClick: () => this.zoomStep(-0.8) },
+        { label: this.timeLabel(), active: this.speed > 0, onClick: () => { this.speed = (this.speed + 1) % 5; keepHud(); this.hud(); } }] : [],
       prev: () => this.go(this.caption.startsWith('p') ? this.pi - 1 : this.nearestPreset() - 1),
       next: () => this.go(this.caption.startsWith('p') ? this.pi + 1 : this.nearestPreset() + 1) });
   },
@@ -607,6 +610,28 @@ export const cosmos: any = {
       o.label.visible = lbl; o.label.position.copy(tmp);
       if (lbl) { const a = Math.min(sstep(o.zL[0], o.zL[0] + 0.3, z), 1 - sstep(o.zL[1] - 0.3, o.zL[1], z)); o.label.material.opacity = a; }
     }
+    this.declutter(dt);
     this.ringUpdate();
+  },
+  /**
+   * Popisky sa nesmú prekrývať: idú v poradí dôležitosti (zvolený objekt, potom poradie v zozname)
+   * a popisok, ktorý by zasahoval do už umiestneného, plynule zmizne. Bodka objektu ostáva klikateľná.
+   */
+  declutter(dt: number) {
+    const cam = ctx.renderer.xr.isPresenting ? ctx.renderer.xr.getCamera() : ctx.camera, placed = this.boxes || (this.boxes = []); placed.length = 0;
+    cam.getWorldPosition(W1); const fwd = cam.getWorldDirection(W3);
+    const list = this.objs as any[];
+    for (let pass = 0; pass < 2; pass++) for (const o of list) {
+      if ((o.id === this.focusId) !== (pass === 0) || !o.label.visible) continue;
+      const d = o.label.getWorldPosition(V3).sub(W1), dist = d.length(); d.multiplyScalar(1 / (dist || 1));
+      if (d.dot(fwd) < 0.2) { o.lblA = 0; o.label.visible = false; continue; }
+      // smer popisku ako dva uhly (azimut, výška) – nezávisí od oka, takže v oboch očiach vyjde rovnako
+      const az = Math.atan2(d.x, -d.z), el = Math.asin(d.y) - LABEL_H * 1.1, hw = LABEL_H * o.label.userData.aspect * 0.5 + 0.004, hh = LABEL_H * 0.5 + 0.003;
+      let free = true;
+      for (let i = 0; i < placed.length; i += 4) { let da = Math.abs(az - placed[i]); if (da > Math.PI) da = 2 * Math.PI - da; if (da < hw + placed[i + 2] && Math.abs(el - placed[i + 1]) < hh + placed[i + 3]) { free = false; break; } }
+      if (free) placed.push(az, el, hw, hh);
+      o.lblA = THREE.MathUtils.clamp((o.lblA ?? 1) + (free ? 1 : -1) * dt * 5, 0, 1);
+      o.label.material.opacity *= o.lblA; if (o.lblA <= 0.01) o.label.visible = false;
+    }
   }
 };

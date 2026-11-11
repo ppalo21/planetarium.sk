@@ -126,7 +126,7 @@ export const aurora: any = {
     const st = this.steps[this.si], n = this.steps.length;
     setHud({ kicker: { sk: `Polárna žiara   ${this.si + 1} / ${n}`, en: `Aurora   ${this.si + 1} / ${n}` }, title: st.title, body: st.text, sticky: true,
       credit: { sk: 'Textúry Zeme: Solar System Scope (CC BY 4.0) · Nočná obloha: ESO/S. Brunier (CC BY 4.0) · Žiara: fyzikálny model', en: 'Earth textures: Solar System Scope (CC BY 4.0) · Night sky: ESO/S. Brunier (CC BY 4.0) · Aurora: physical model' },
-      actions: [{ label: SET.voice ? (en() ? 'Voice: on' : 'Hlas: zap') : (en() ? 'Voice: off' : 'Hlas: vyp'), active: SET.voice, onClick: () => { SET.voice = !SET.voice; if (!SET.voice) stopVoice(); else speak(st.audio, T(st.text)); this.hud(); } }],
+      actions: SET.expert ? [{ label: SET.voice ? (en() ? 'Voice: on' : 'Hlas: zap') : (en() ? 'Voice: off' : 'Hlas: vyp'), active: SET.voice, onClick: () => { SET.voice = !SET.voice; if (!SET.voice) stopVoice(); else speak(st.audio, T(st.text)); this.hud(); } }] : [],
       prev: () => this.setStep(this.si - 1), next: () => this.setStep(this.si + 1) });
   },
   onTap() { this.setStep(this.si + 1); },

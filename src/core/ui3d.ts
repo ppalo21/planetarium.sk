@@ -129,10 +129,10 @@ export function buildHud() {
   } else {
     const bar: BtnCfg[] = [];
     if (!stickyNow()) bar.push({ label: 'Info', onClick: toggleCaption, active: captionOn });
-    if (cfg.prev) bar.push({ label: '‹', onClick: cfg.prev });
+    if (cfg.prev) bar.push({ label: '‹', onClick: () => { SND.step(false); cfg!.prev!(); } });
     bar.push(...(cfg.actions || []));
     if (home) bar.push({ label: T({ sk: 'Domov', en: 'Home' }), onClick: ctx.goHome });
-    if (cfg.next) bar.push({ label: '›', onClick: cfg.next, primary: true });
+    if (cfg.next) bar.push({ label: '›', onClick: () => { SND.step(true); cfg!.next!(); }, primary: true });
     rows = [bar];
   }
   // riadky odspodu nahor: posledný riadok je pri y = 0

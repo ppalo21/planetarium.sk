@@ -1,7 +1,7 @@
 import './style.css';
 import { ctx, url } from './core/context';
 import { initStats } from './core/stats';
-import { initScene, initDom, startLoop, goTo, recenter, startVisitor, afterIntro } from './core/app';
+import { initScene, initDom, startLoop, goTo, goNow, recenter, startVisitor, afterIntro } from './core/app';
 import { look } from './core/input';
 import { hudButtons } from './core/ui3d';
 import { lobby } from './modules/lobby';
@@ -56,7 +56,7 @@ async function main() {
   const vr = navigator.xr ? await navigator.xr.isSessionSupported('immersive-vr').catch(() => false) : false;
   goTo(!vr && introOnce() ? 'introVideo' : 'lobby');
   document.getElementById('ui')!.hidden = false; bootDone();
-  (window as any).VND = { goTo, ctx, look, hudButtons };
+  (window as any).VND = { goTo: goNow, ctx, look, hudButtons };
   // náročný modul (desaťtisíce hviezd a galaxií) sa pripraví vopred, kým je appka v pokoji – vstup doň potom nezasekne obraz
   const idle = (cb: () => void) => ('requestIdleCallback' in window ? (window as any).requestIdleCallback(cb, { timeout: 5000 }) : setTimeout(cb, 2000));
   idle(() => { const m = ctx.modules.cosmos as any; if (!m.built && ctx.current !== 'cosmos') { m.build(); m.built = true; m.root.visible = false; } });   // pre ladenie v konzole

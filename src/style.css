@@ -49,3 +49,6 @@ button[hidden], .row[hidden] { display: none; }
 #ui[hidden] { display: none; }
 #ver { margin-top: .4rem; opacity: .7; }
 button:disabled { opacity: .5; cursor: progress; }
+/* v okuliaroch: jedno veľké tlačidlo Spustiť (kliknúť sa dá aj kamkoľvek mimo panela) */
+body.headset #ui:not(.min) #btnVR { font-size: 1.5rem; padding: 1.1rem 2.2rem; background: var(--betel); color: #2a1300; border-color: var(--betel); font-weight: 700; }
+body.headset #ui:not(.min) #xrrow { margin: 1rem 0; }
