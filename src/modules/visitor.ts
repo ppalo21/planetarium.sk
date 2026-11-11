@@ -26,8 +26,7 @@ export const intro: any = {
     const face = new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.026, 0.008, 24), dk); face.position.set(0, 0.058, -0.006); face.rotation.x = -0.35; cg.add(face);
     const trig = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.03, 0.012), new THREE.MeshStandardMaterial({ color: 0xffb46b, emissive: new THREE.Color('#ff8a2a'), emissiveIntensity: 0.5 }));
     this.trigPivot = new THREE.Group(); this.trigPivot.position.set(0, 0.035, -0.028); this.trigPivot.add(trig); trig.position.set(0, -0.012, -0.004); cg.add(this.trigPivot);
-    const rayL = new THREE.Mesh(new THREE.CylinderGeometry(0.0015, 0.0015, 0.28, 6), new THREE.MeshBasicMaterial({ color: 0x9fc0ff, transparent: true, opacity: 0.7 }));
-    rayL.rotation.x = Math.PI / 2; rayL.position.set(0, 0.06, -0.16); cg.add(rayL); cg.scale.setScalar(1.6); r.add(cg);
+    cg.scale.setScalar(1.6); r.add(cg);
     makeClickable(this.orb, { onClick: () => this.done(), onHover: v => { this.hover = v; } });
   },
   /** Krok 0: namieriť a štipnúť Zem. Krok 1: vyskúšať tlačidlo na lište dole. Až potom ponuka. */

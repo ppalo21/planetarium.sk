@@ -97,7 +97,12 @@ function nearGrabbable(i: number): THREE.Object3D | null {
 function updateCtrl(c: THREE.XRTargetRaySpace, hs: Set<THREE.Object3D>, rayOff: boolean) {
   // Ruka alebo ovládač, ktorý okuliare práve nevidia (napr. hneď po spustení VR), nemá platnú polohu:
   // lúč ani bodka sa nekreslia a nič sa ním nevyberá. Inak by ostali „visieť“ na poslednom mieste.
-  if (!c.visible || !c.userData.src) {
+  // To isté platí pre ovládač, ktorý nehybne leží na stole (okuliare ho stále vidia, ale nikto ho nedrží).
+  c.getWorldPosition(tmpV); c.getWorldQuaternion(tmpQ);
+  const st = c.userData.still || (c.userData.still = { p: new THREE.Vector3(1e9, 0, 0), q: new THREE.Quaternion(), t: performance.now() });
+  if (st.p.distanceToSquared(tmpV) > 1e-6 || st.q.angleTo(tmpQ) > 0.004 || c.userData.hold || c.userData.grabbing) { st.p.copy(tmpV); st.q.copy(tmpQ); st.t = performance.now(); }
+  const idle = !c.userData.src?.hand && performance.now() - st.t > 2500;
+  if (!c.visible || !c.userData.src || idle) {
     c.userData.hit = null; c.userData.dot.visible = false; c.userData.line.visible = false; c.userData.lastHover = null;
     if (c.userData.grabbing) { const ck = c.userData.grabbing; c.userData.grabbing = null; ck.grab.end(c); }
     c.userData.hold = null; return;
@@ -152,7 +157,8 @@ export function updateInput() {
   const holding = ctrls.some(c => c.userData.grabbing);
   if (holding) hudHiddenUntil = performance.now() + 600;
   hud.visible = performance.now() > hudHiddenUntil;
-  hands.forEach(h => { h.visible = handMode && !ctx.isAR; });
+  // ruka sa kreslí len vtedy, keď ju okuliare práve vidia (inak by ostala „zamrznutá“ na poslednom mieste)
+  hands.forEach(h => { h.visible = handMode && !ctx.isAR && !!(h as any).joints?.['index-finger-tip']?.visible; });
   ctrls.forEach((c, i) => { const near = handMode ? updatePoke(hands[i], hs) : false; updateCtrl(c, hs, near); });
   setHovered(hs);
   // ruky alebo ovládače?
