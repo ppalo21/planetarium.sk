@@ -4,7 +4,7 @@ import { T, en, fmt } from '../core/i18n';
 import { setHud, setCaption } from '../core/ui3d';
 import { loadTex, freeTex, textSprite, canvasTex } from '../core/util';
 import { sunMaterial, SUN_U } from './sun';
-import { planetMaterial, earthMaterial, starSky } from './space';
+import { planetMaterial, earthMaterial, starSky, addRing, updateRing, addAtmosphere, sunGlowTex } from './space';
 import { speak, stopVoice } from '../core/narration';
 import { SET } from '../core/settings';
 
@@ -51,10 +51,10 @@ export const solar: any = {
       const tilt = new THREE.Group(); tilt.rotation.z = (d.tilt || 0) * D2R; b.holder.add(tilt); b.tilt = tilt;
       if (id === 'sun') {
         b.mesh = new THREE.Mesh(new THREE.SphereGeometry(0.5, 96, 48), sunMaterial());
-        const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex('rgba(255,225,160,0.55)', 'rgba(255,150,60,0)'), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
-        halo.scale.set(2.6, 2.6, 1); b.holder.add(halo);
+        const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: sunGlowTex(), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+        halo.scale.set(4.2, 4.2, 1); b.holder.add(halo);
       } else if (id === 'earth') {
-        b.mat = earthMaterial(); b.mesh = new THREE.Mesh(new THREE.SphereGeometry(b.r, 128, 64), b.mat);
+        b.mat = earthMaterial(); b.mesh = new THREE.Mesh(new THREE.SphereGeometry(b.r, 128, 64), b.mat); addAtmosphere(b.mesh, b.r, '#5a9cff', 1.1);
         // Mesiac
         const mAng = (218.316 + 13.176396 * days) * D2R, md = 384400 / KM_PER_U;
         b.moonMat = planetMaterial('#b8b8b8');
@@ -65,13 +65,9 @@ export const solar: any = {
         b.mat = planetMaterial(d.color, d.atmo || '#000000', d.atmoStr || 0);
         b.mesh = new THREE.Mesh(new THREE.SphereGeometry(b.r, 96, 48), b.mat);
         loadTex(tex('2k', d.tex)).then(t => { if (t) { b.mat.uniforms.uMap.value = t; b.mat.uniforms.uHasMap.value = 1; } });
-        if (d.ring) {
-          const inner = b.r * 1.24, outer = b.r * 2.27, rg = new THREE.RingGeometry(inner, outer, 192, 1), pos = rg.attributes.position, uv = rg.attributes.uv, v = new THREE.Vector3();
-          for (let k = 0; k < pos.count; k++) { v.fromBufferAttribute(pos, k); uv.setXY(k, (v.length() - inner) / (outer - inner), 0.5); }
-          const rm = new THREE.MeshBasicMaterial({ color: 0xd9c79a, side: THREE.DoubleSide, transparent: true, opacity: 0.8, depthWrite: false });
-          loadTex(tex('2k', 'saturn_ring_alpha.png')).then(t => { if (t) { rm.map = t; rm.color.set('#e8e0cc'); rm.opacity = 1; rm.needsUpdate = true; } });
-          const ring = new THREE.Mesh(rg, rm); ring.rotation.x = -Math.PI / 2; tilt.add(ring);
-        }
+        if (d.ring) this.ring = addRing(tilt, b.mesh, b.r);
+        if (id === 'venus') addAtmosphere(b.mesh, b.r, '#ffe2b0', 0.7, 1.035);
+        if (id === 'mars') addAtmosphere(b.mesh, b.r, '#ffb090', 0.25, 1.02);
       }
       tilt.add(b.mesh);
       // značka a meno, keď je teleso priďaleko na to, aby bolo vidno
@@ -161,6 +157,7 @@ export const solar: any = {
     this.U.updateMatrixWorld(true);
     const sunW = this.U.localToWorld(new THREE.Vector3()), cam = ctx.camera.getWorldPosition(new THREE.Vector3());
     const camW = ctx.renderer.xr.isPresenting ? ctx.renderer.xr.getCamera().getWorldPosition(new THREE.Vector3()) : cam;
+    const tb = this.b[this.steps[this.si].target], tW = tb.holder.getWorldPosition(new THREE.Vector3()), tDist = tW.distanceTo(camW), tDir = tW.sub(camW).normalize(), tAng = Math.atan((tb.r * this.view.Z) / Math.max(tDist, 1e-4));
     for (const b of Object.values<any>(this.b)) {
       if (b.mat?.uniforms?.uSun) b.mat.uniforms.uSun.value.copy(sunW);
       if (b.moonMat) b.moonMat.uniforms.uSun.value.copy(sunW);
@@ -168,11 +165,15 @@ export const solar: any = {
       if (b.id !== 'sun') b.mesh.rotation.y += dt * 0.08;
       // zdanlivá veľkosť: značka a meno len pri malých/vzdialených telesách
       const w = b.holder.getWorldPosition(new THREE.Vector3()), dist = w.distanceTo(camW), ang = (b.r * this.view.Z) / Math.max(dist, 1e-4);
-      const show = ang < 0.012; b.marker.visible = show && dist < 1.5e6; b.label.visible = (show || ang < 0.05) && dist < 1.5e6 && dist > 0.15;
+      // teleso schované za práve navštívenou planétou sa nepopisuje (meno by svietilo cez ňu)
+      let hidden = false;
+      if (b !== tb) { const d1 = w.clone().sub(camW).normalize(); hidden = dist > tDist && Math.acos(Math.min(1, d1.dot(tDir))) < tAng * 1.15; }
+      const show = ang < 0.012 && !hidden; b.marker.visible = show && dist < 1.5e6; b.label.visible = !hidden && (show || ang < 0.05) && dist < 1.5e6 && dist > 0.15;
       // značky majú stálu veľkosť na obrazovke – vyrovnáme zväčšenie celého vesmíru
       const k = 1 / this.view.Z, ms = b.id === 'sun' ? 0.035 : 0.012;
       b.marker.scale.set(ms * k, ms * k, 1); b.label.scale.set(0.028 * b.label.userData.aspect * k, 0.028 * k, 1);
     }
     this.sky.position.set(0, 0, 0);
+    if (this.ring) updateRing(this.ring);
   }
 };

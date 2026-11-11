@@ -4,6 +4,8 @@ import { T, fmt, en } from '../core/i18n';
 import { setHud, keepHud, makeClickable } from '../core/ui3d';
 import { loadTex, textSprite, setSpriteH, disposeTree, camWorld, sphereDir } from '../core/util';
 import { sunMaterial, buildSunExtras, SUN_U } from './sun';
+import { planetMaterial, earthMaterial, addRing, updateRing, addAtmosphere } from './space';
+const LIGHT = new THREE.Vector3();
 
 /** Planéty v ruke: chytiť, priblížiť, otáčať; popisy miest na povrchu sa ukazujú len na strane k divákovi. */
 export const planets: any = {
@@ -11,21 +13,29 @@ export const planets: any = {
   build() {
     const r = this.root = new THREE.Group(); ctx.anchor.add(r); this.real = false; this.sel = null; this.ha = false; this.items = [];
     ctx.content.bodies.forEach((b: any) => {
-      const mat: THREE.Material = b.sun ? sunMaterial() : new THREE.MeshStandardMaterial({ color: new THREE.Color(b.c), roughness: 1, metalness: 0 });
+      // planéty osvetľuje „Slnko“ spoza ľavého pleca diváka: vidno deň aj noc, atmosféru aj tieň prstencov
+      let mat: THREE.ShaderMaterial;
+      if (b.sun) mat = sunMaterial();
+      else if (b.id === 'earth') {
+        mat = earthMaterial(); const u = mat.uniforms, P = ASSET.planets;
+        loadTex(P + b.tex).then(t => { if (t) u.uDay.value = t; });
+        loadTex(P + '2k_earth_nightmap.jpg').then(t => { if (t) { u.uNight.value = t; u.uHasNight.value = 1; } });
+        loadTex(P + '2k_earth_clouds.jpg').then(t => { if (t) { t.wrapS = THREE.RepeatWrapping; u.uClouds.value = t; u.uHasClouds.value = 1; } });
+        loadTex(P + '2k_earth_specular_map.jpg').then(t => { if (t) { u.uSpec.value = t; u.uHasSpec.value = 1; } });
+      } else {
+        mat = planetMaterial(b.c); mat.uniforms.uAmb.value = 0.07;
+        loadTex(ASSET.planets + b.tex).then(t => { if (t) { mat.uniforms.uMap.value = t; mat.uniforms.uHasMap.value = 1; } });
+      }
       const mesh = new THREE.Mesh(new THREE.SphereGeometry(1, 64, 32), mat);
-      if (!b.sun) loadTex(ASSET.planets + b.tex).then(t => { if (t) { const m = mat as THREE.MeshStandardMaterial; m.map = t; m.color.set('#ffffff'); m.needsUpdate = true; } });
-      else buildSunExtras(mesh);
+      if (b.sun) buildSunExtras(mesh);
+      if (b.id === 'earth') addAtmosphere(mesh, 1, '#5a9cff', 1.1);
+      if (b.id === 'venus') addAtmosphere(mesh, 1, '#ffe2b0', 0.7, 1.035);
       if (b.id === 'uranus') mesh.rotation.z = 98 * D2R;
       const holder = new THREE.Group(), sg = new THREE.Group(); sg.add(mesh); holder.add(sg); r.add(holder);
-      if (b.ring) {
-        const inner = 1.24, outer = 2.27, rg = new THREE.RingGeometry(inner, outer, 96, 1), pos = rg.attributes.position, uv = rg.attributes.uv, v = new THREE.Vector3();
-        for (let i = 0; i < pos.count; i++) { v.fromBufferAttribute(pos, i); uv.setXY(i, (v.length() - inner) / (outer - inner), 0.5); }
-        const rm = new THREE.MeshBasicMaterial({ color: 0xd9c79a, side: THREE.DoubleSide, transparent: true, opacity: 0.75, depthWrite: false });
-        loadTex(ASSET.planets + b.ring).then(t => { if (t) { rm.map = t; rm.color.set('#ffffff'); rm.opacity = 1; rm.needsUpdate = true; } });
-        const ring = new THREE.Mesh(rg, rm); ring.rotation.x = -Math.PI / 2 + 27 * D2R; sg.add(ring);
-      }
+      let ring: THREE.Mesh | null = null;
+      if (b.ring) { ring = addRing(sg, mesh, 1); ring.rotation.x += 27 * D2R; }
       const lab = textSprite(T(b.name), '#e9ecf7', 56); holder.add(lab);
-      const it: any = { b, holder, sg, mesh, lab, slot: new THREE.Vector3(), size: 0.07, grabbed: null, marks: [] };
+      const it: any = { b, holder, sg, mesh, lab, ring, mat, slot: new THREE.Vector3(), size: 0.07, grabbed: null, marks: [] };
       this.buildMarks(it);
       makeClickable(mesh, { onClick: () => this.select(it), onHover: v => { it.hover = v; }, grab: { start: c => this.grab(it, c), end: () => this.release(it) } });
       this.items.push(it);
@@ -68,7 +78,7 @@ export const planets: any = {
     const s = this.sel; let title: any, body: any;
     if (!s) {
       title = { sk: 'Planéty v ruke', en: 'Planets in hand' };
-      body = { sk: 'Ukážte na planétu a krátko štipnite: priletí k vám. Ak ju podržíte, môžete ju vziať do ruky a otáčať.', en: 'Point at a planet and pinch briefly: it flies to you. Hold the pinch to take it in your hand and turn it.' };
+      body = { sk: 'Krátke štipnutie: planéta priletí k vám. Podržanie: vezmete si ju do ruky a môžete ňou otáčať.', en: 'Short pinch: the planet flies to you. Hold the pinch: take it in your hand and turn it.' };
     } else {
       const b = s.b; title = b.name;
       const parts = [(en() ? 'Diameter ' : 'Priemer ') + fmt(b.d) + ' km'];
@@ -91,7 +101,10 @@ export const planets: any = {
     const e = Math.min(1, dt * 4);
     SUN_U.uTime.value += dt; SUN_U.uHa.value += ((this.ha ? 1 : 0) - SUN_U.uHa.value) * Math.min(1, dt * 2.5);
     const cam = camWorld(), c = new THREE.Vector3(), p = new THREE.Vector3(), v = new THREE.Vector3();
+    const sunW = ctx.anchor.localToWorld(LIGHT.set(-5, 4, 3)), tt = (this.tt = (this.tt || 0) + dt);
     this.items.forEach((it: any) => {
+      const u = it.mat.uniforms; if (u.uSun) { u.uSun.value.copy(sunW); if (u.uTime && !it.b.sun) u.uTime.value = tt; }
+      if (it.ring) updateRing(it.ring);
       const close = !!(it.grabbed || it.inspect);
       if (!it.grabbed) it.mesh.rotation.y += dt * (it.b.sun ? 0.05 : (it.inspect ? 0.35 : 0.3));
       if (it.marks.length) {

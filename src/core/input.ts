@@ -156,6 +156,8 @@ export function updateInput() {
     if (nm !== INPUT.mode) { INPUT.mode = nm; onModeChange(); }
   }
 }
+/** Vidia okuliare aspoň jednu ruku? (kĺb ukazováka má platnú polohu) */
+export function handsTracked() { return hands.some(h => !!(h as any).joints?.['index-finger-tip']?.visible); }
 export function clearCtrlVisuals() { ctrls.forEach(c => { c.userData.dot.visible = false; c.userData.hit = null; }); }
 
 /* ---------------- myš (náhľad na PC) ---------------- */

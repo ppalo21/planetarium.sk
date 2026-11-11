@@ -39,7 +39,7 @@ function rrGeo(w: number, h: number, r: number) {
 }
 
 /* ---------------- tlačidlo ---------------- */
-export interface BtnCfg { label: string; onClick: () => void; primary?: boolean; active?: boolean; tone?: 'good' | 'bad' | null }
+export interface BtnCfg { label: string; onClick: () => void; primary?: boolean; active?: boolean; tone?: 'good' | 'bad' | null; /** veľké tlačidlo (odpovede v kvíze) */ big?: boolean }
 export function makeButton(b: BtnCfg, w: number, h: number) {
   const g = new THREE.Group(), geo = rrGeo(w, h, h * 0.3);
   const mat = new THREE.MeshBasicMaterial({ transparent: true, depthTest: false, depthWrite: false });
@@ -136,18 +136,19 @@ export function buildHud() {
     rows = [bar];
   }
   // riadky odspodu nahor: posledný riadok je pri y = 0
+  const rowH = rows.map(r => (r.some(b => b.big) ? BTN_H * 1.45 : BTN_H)), rowY: number[] = [];
+  for (let i = rows.length - 1, y = 0; i >= 0; i--) { rowY[i] = i === rows.length - 1 ? 0 : y + rowH[i + 1] / 2 + GAP + rowH[i] / 2; y = rowY[i]; }
   rows.forEach((row, ri) => {
-    const fromBottom = rows.length - 1 - ri;
-    const widths = row.map(b => (b.label.length <= 1 ? 0.11 : b.label === 'Info' ? 0.16 : Math.min(0.34, Math.max(0.2, 0.035 + b.label.length * 0.017))));
+    const widths = row.map(b => (b.big ? 0.56 : b.label.length <= 1 ? 0.11 : b.label === 'Info' ? 0.16 : Math.min(0.34, Math.max(0.2, 0.035 + b.label.length * 0.017))));
     const sum = widths.reduce((a, b) => a + b, 0) + GAP * (row.length - 1), k = sum > HUD_W ? HUD_W / sum : 1;
     let x = -sum * k / 2;
     row.forEach((b, i) => {
-      const w = widths[i] * k, m = makeButton({ ...b, onClick: wrap(b.onClick) }, w, BTN_H);
-      m.position.set(x + w / 2, fromBottom * (BTN_H + GAP), 0.002); x += w + GAP * k;
+      const w = widths[i] * k, m = makeButton({ ...b, onClick: wrap(b.onClick) }, w, rowH[ri]);
+      m.position.set(x + w / 2, rowY[ri], 0.002); x += w + GAP * k;
       m.userData.bg.userData.isHud = true; hud.add(m); buttons.push(m);
     });
   });
-  barTop = (rows.length - 1) * (BTN_H + GAP) + BTN_H / 2;
+  barTop = rowY[0] + rowH[0] / 2;
   panel.visible = !cfg.bare && (captionOn || stickyNow());
   if (panel.visible) {
     tKicker.text = T(cfg.kicker); const title = T(cfg.title);

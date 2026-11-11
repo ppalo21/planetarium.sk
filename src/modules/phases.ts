@@ -70,7 +70,7 @@ export const phases: any = {
     while (this.marks.children.length) { const o = this.marks.children.pop(); disposeTree(o); }
     // poloha vzhľadom na smer k Slnku: 0° = Nov, 90° = Prvá štvrť (proti smeru hodín pri pohľade zhora)
     [[0, { sk: 'Nov', en: 'New' }], [90, { sk: 'Prvá štvrť', en: '1st quarter' }], [180, { sk: 'Spln', en: 'Full' }], [270, { sk: 'Posledná štvrť', en: 'Last quarter' }]]
-      .forEach(([deg, name]: any) => { const s = textSprite(T(name), '#9fc0ff', 52); setSpriteH(s, 0.03); s.userData.deg = deg; this.marks.add(s); });
+      .forEach(([deg, name]: any) => { const s = textSprite(T(name), '#9fc0ff', 56); setSpriteH(s, 0.042); s.userData.deg = deg; this.marks.add(s); });
   },
   grab(c: THREE.Object3D) { this.mode = 'hand'; this.grabbed = c; c.attach(this.moon); this.moon.position.set(0, 0.02, -0.12); keepHud(); this.hud(); },
   release() { this.grabbed = null; this.root.attach(this.moon); },
@@ -87,8 +87,8 @@ export const phases: any = {
     const body = isPlacing()
       ? { sk: 'Pozrite sa na stôl, poličku alebo stenu, kde má svietiť Slnko, a štipnite. Bez terčíka štipnite kdekoľvek a Slnko ostane, kde je.', en: 'Look at a table, shelf or wall where the Sun should shine, then pinch. Without a target, pinch anywhere to keep the Sun where it is.' }
       : this.mode === 'hand'
-        ? { sk: 'Vaša hlava je Zem. Chyťte Mesiac, natiahnite ruku a pomaly sa otáčajte dokola. Sledujte, ako sa mení osvetlená časť.', en: 'Your head is the Earth. Grab the Moon, stretch your arm out and slowly turn around. Watch the lit part change.' }
-        : { sk: 'Vaša hlava je Zem, lampa je Slnko. Mesiac je vždy z polovice osvetlený, ale podľa toho, kde je, vidíme z osvetlenej časti viac alebo menej.', en: 'Your head is the Earth, the lamp is the Sun. The Moon is always half lit, but depending on where it is, we see more or less of the lit half.' };
+        ? { sk: 'Chyťte Mesiac, natiahnite ruku a pomaly sa otáčajte dokola. Sledujte, ako sa mení jeho osvetlená časť.', en: 'Grab the Moon, stretch out your arm and slowly turn around. Watch its lit part change.' }
+        : { sk: 'Vaša hlava je Zem, lampa je Slnko. Sledujte Mesiac, ako vás obieha: je stále z polovice osvetlený, len z nej vidíme raz viac a raz menej. Štipnutím ho zastavíte.', en: 'Your head is the Earth, the lamp is the Sun. Follow the Moon as it orbits you: it is always half lit, we just see more or less of that half. Pinch to pause it.' };
     setHud({ kicker: this.kicker(), title: this.cur ? this.cur.name : { sk: 'Fázy Mesiaca', en: 'Moon phases' }, body,
       credit: { sk: 'Textúra Mesiaca: Solar System Scope (CC BY 4.0)', en: 'Moon texture: Solar System Scope (CC BY 4.0)' }, actions });
   },

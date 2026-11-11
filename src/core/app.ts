@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import { ctx, ASSET } from './context';
-import { L, T, en } from './i18n';
+import { L, T, en, INPUT } from './i18n';
 import { SET } from './settings';
 import { SND } from './sound';
 import { initHud, hud, hudTick, hudCfg, buildHud, resetHudYaw } from './ui3d';
-import { initInput, updateInput, hovered, look, clearCtrlVisuals } from './input';
+import { initInput, updateInput, hovered, look, clearCtrlVisuals, handsTracked } from './input';
 import { textSprite, setSpriteH, disposeTree } from './util';
 import { initAR, startARSession, updateAR, stopPlacing } from './ar';
 import { track, newVisitor, moduleChange, flush } from './stats';
@@ -116,20 +116,50 @@ export function afterIntro() {
   if (SET.tutorial && xr) goTo('intro');
   else { goTo('lobby'); if (xr) VISIT.start = performance.now(); }
 }
-let timerSprite: THREE.Sprite | null = null, timerTxt = '';
-function visitTick() {
-  const show = ctx.renderer.xr.isPresenting && SET.limit > 0 && VISIT.start && !['introVideo', 'intro', 'thanks', 'operator'].includes(ctx.current);
-  if (!show) { if (timerSprite) timerSprite.visible = false; return; }
-  const left = Math.ceil(SET.limit - (performance.now() - VISIT.start) / 1000);
-  if (left <= 30 && !VISIT.warned) { VISIT.warned = true; SND.chime(); }
-  if (left <= 0) { SND.chime(); goTo('thanks'); return; }
-  const txt = left <= 30 ? (en() ? `${left} s left` : `zostáva ${left} s`) : '';
+/* ---------- oznam pred očami návštevníka (nasleduje pohľad, nedá sa prehliadnuť) ---------- */
+let note: THREE.Sprite | null = null, noteKey = '', noteA = 0, noteOn = false, noteDy = 0.12;
+const nP = new THREE.Vector3(), nD = new THREE.Vector3(), nT = new THREE.Vector3();
+/** Zobrazí (alebo skryje, ak lines = null) oznam. key = aby sa rovnaký text nevykresľoval znova. */
+function setNotice(key: string, lines: string[] | null, colors: string[] = ['#ffb46b', '#e9ecf7'], h = 0.11, dy = 0.12) {
+  noteOn = !!lines; if (lines) noteDy = dy;
+  if (!lines || key === noteKey) return;
+  noteKey = key; if (note) { ctx.scene.remove(note); disposeTree(note); }
+  note = textSprite(lines, colors, 110, 700); note.material.depthTest = false; note.renderOrder = 40; note.userData.h = h * lines.length;
+  setSpriteH(note, note.userData.h); note.material.opacity = 0; ctx.scene.add(note);
+}
+function noticeTick(dt: number) {
+  if (!note) return;
+  noteA = THREE.MathUtils.clamp(noteA + (noteOn ? 1 : -1) * dt * 4, 0, 1); note.visible = noteA > 0.01; note.material.opacity = noteA;
+  if (!note.visible) return;
+  const cam = ctx.renderer.xr.isPresenting ? ctx.renderer.xr.getCamera() : ctx.camera;
+  cam.getWorldPosition(nP); cam.getWorldDirection(nD);
+  nT.copy(nP).addScaledVector(nD, 1.1); nT.y += noteDy;
+  if (note.position.lengthSq() === 0) note.position.copy(nT); else note.position.lerp(nT, Math.min(1, dt * 4));   // plynule dobieha pohľad
+}
+let lostT = 0;
+function visitTick(dt: number) {
+  const xr = ctx.renderer.xr.isPresenting;
+  // 1) okuliare dlho nevidia ruky: návštevník asi nevie, ako ďalej. Poradíme mu – nevtieravo, pod stredom pohľadu,
+  //    a až po 20 sekundách (zložené ruky pri pozeraní sú v poriadku).
+  const noHands = xr && INPUT.mode === 'hands' && !handsTracked() && !['operator', 'introVideo', 'thanks', 'credits'].includes(ctx.current);
+  lostT = noHands ? lostT + dt : 0;
+  // 2) koniec času: 30 s vopred upozornenie, posledných 10 s veľký odpočet
+  const timed = xr && SET.limit > 0 && VISIT.start && !['introVideo', 'intro', 'thanks', 'operator'].includes(ctx.current);
+  const left = timed ? Math.ceil(SET.limit - (performance.now() - VISIT.start) / 1000) : Infinity;
+  if (timed && left <= 30 && !VISIT.warned) { VISIT.warned = true; SND.chime(); }
+  if (timed && left <= 0) { SND.chime(); setNotice('', null); goTo('thanks'); return; }
+  if (left <= 10) setNotice('c' + left + L.lang, [String(left), en() ? 'Your time is almost up' : 'Váš čas sa končí'], ['#ffb46b', '#e9ecf7'], 0.13);
+  else if (left <= 30 && left > 25) setNotice('w' + L.lang, [en() ? 'Half a minute left' : 'Zostáva pol minúty'], ['#ffb46b'], 0.09);
+  else if (lostT > 20) setNotice('h' + L.lang, en() ? ['To continue, hold your hands up in front of you'] : ['Na ovládanie zdvihnite ruky pred seba'], ['#e9ecf7'], 0.06, -0.22);
+  else setNotice(noteKey, null);
+  // malý odpočet pri lište (30 – 11 s)
+  const txt = timed && left <= 30 && left > 10 ? (en() ? `${left} s left` : `zostáva ${left} s`) : '';
   if (txt !== timerTxt) {
     timerTxt = txt; if (timerSprite) { hud.remove(timerSprite); disposeTree(timerSprite); timerSprite = null; }
-    if (txt) { const s = textSprite(txt, '#ffb46b', 64); setSpriteH(s, 0.05); s.material.depthTest = false; s.renderOrder = 25; s.position.set(0.45, 0.5, 0.01); hud.add(s); timerSprite = s; }
+    if (txt) { const sp = textSprite(txt, '#ffb46b', 64); setSpriteH(sp, 0.05); sp.material.depthTest = false; sp.renderOrder = 25; sp.position.set(0.45, 0.5, 0.01); hud.add(sp); timerSprite = sp; }
   }
-  if (timerSprite) timerSprite.visible = true;
 }
+let timerSprite: THREE.Sprite | null = null, timerTxt = '';
 
 /* =====================================================================
    SPUSTENIE VR / AR
@@ -299,10 +329,10 @@ export function startLoop() {
       }
       // po 2 minútach nečinnosti začne appka odznova pre ďalšieho návštevníka
       if (!['introVideo', 'intro', 'operator'].includes(ctx.current) && (ctx.current !== 'lobby' || SET.tutorial) && performance.now() - ctx.lastAct > 120000) { ctx.lastAct = performance.now(); startVisitor(); }
-      visitTick();
+      visitTick(dt);
     } else camera.rotation.set(look.pitch, look.yaw, 0);
     ctx.modules[ctx.current]?.update?.(dt, t);
-    hudTick(dt, hovered); fadeTick(dt);
+    hudTick(dt, hovered); noticeTick(dt); fadeTick(dt);
     renderer.render(ctx.scene, camera);
   });
 }

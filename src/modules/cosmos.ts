@@ -5,7 +5,7 @@ import { setHud, setCaption, keepHud, makeClickable } from '../core/ui3d';
 import { loadTex, freeTex, textSprite, canvasTex, camWorld } from '../core/util';
 import { sunMaterial, SUN_U } from './sun';
 import { SET } from '../core/settings';
-import { planetMaterial, earthMaterial } from './space';
+import { planetMaterial, earthMaterial, addRing, updateRing, addAtmosphere, sunGlowTex } from './space';
 
 /**
  * „Od Zeme po galaxie“ – plynulý logaritmický zoom od Zeme až po vesmír plný galaxií.
@@ -226,7 +226,7 @@ export const cosmos: any = {
     const B = ctx.content.solar.bodies;
     // Slnko
     const sun = new THREE.Mesh(new THREE.SphereGeometry(1, 96, 48), sunMaterial());
-    const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex('rgba(255,225,160,0.6)', 'rgba(255,150,60,0)'), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+    const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: sunGlowTex(), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
     this.content.add(sun, halo); this.sunHalo = halo;
     this.addObj({ id: 'sun', name: B.sun.name, kind: 'sun', r: 696340 * KM, pos: () => [0, 0, 0], mesh: sun, zL: [9.0, 18.4], color: '#ffe08a', focusZ: 9.25 });
     // planéty
@@ -236,13 +236,10 @@ export const cosmos: any = {
       else { mat = planetMaterial(d.color, d.atmo || '#000000', d.atmoStr || 0); loadTex(ASSET.planets + '2k_' + d.tex).then(t => { if (t) { mat.uniforms.uMap.value = t; mat.uniforms.uHasMap.value = 1; } }); }
       const holder = new THREE.Group(), tilt = new THREE.Group(); tilt.rotation.z = (d.tilt || 0) * D2R; holder.add(tilt);
       const mesh = new THREE.Mesh(new THREE.SphereGeometry(1, 96, 48), mat); tilt.add(mesh);
-      if (d.ring) {
-        const inner = 1.24, outer = 2.27, rg = new THREE.RingGeometry(inner, outer, 192, 1), pos = rg.attributes.position, uv = rg.attributes.uv, v = new THREE.Vector3();
-        for (let k = 0; k < pos.count; k++) { v.fromBufferAttribute(pos, k); uv.setXY(k, (v.length() - inner) / (outer - inner), 0.5); }
-        const rm = new THREE.MeshBasicMaterial({ color: 0xd9c79a, side: THREE.DoubleSide, transparent: true, opacity: 0.8, depthWrite: false });
-        loadTex(ASSET.planets + '2k_saturn_ring_alpha.png').then(t => { if (t) { rm.map = t; rm.color.set('#e8e0cc'); rm.opacity = 1; rm.needsUpdate = true; } });
-        const ring = new THREE.Mesh(rg, rm); ring.rotation.x = -Math.PI / 2; tilt.add(ring);
-      }
+      if (d.ring) this.satRing = addRing(tilt, mesh, 1);
+      if (id === 'earth') addAtmosphere(mesh, 1, '#5a9cff', 1.1);
+      if (id === 'venus') addAtmosphere(mesh, 1, '#ffe2b0', 0.7, 1.035);
+      if (id === 'mars') addAtmosphere(mesh, 1, '#ffb090', 0.25, 1.02);
       this.content.add(holder);
       const a = d.a * AU, P = d.P, L0 = d.L0;
       this.addObj({ id, name: d.name, kind: 'planet', r: d.r * KM, mesh: holder, spin: mesh, mat, tex: d.tex, zL: [6.5, 13.7], color: '#bcd2ff',
@@ -599,7 +596,7 @@ export const cosmos: any = {
         if (o.spin) o.spin.rotation.y += dt * 0.1;
         if (o.mat?.uniforms?.uSun) { o.mat.uniforms.uSun.value.copy(sunW); if (o.mat.uniforms.uTime) o.mat.uniforms.uTime.value = t; }
       }
-      if (o.id === 'sun') { this.sunHalo.position.copy(tmp); this.sunHalo.scale.setScalar(rS * 7); this.sunHalo.visible = o.mesh.visible; }
+      if (o.id === 'sun') { this.sunHalo.position.copy(tmp); this.sunHalo.scale.setScalar(rS * 10); this.sunHalo.visible = o.mesh.visible; }
       if (o.dotS) {
         const showDot = (o.kind === 'star' || o.kind === 'gal') ? inRange : (inRange && ang < 0.004);
         o.dotS.visible = showDot && dist < (o.kind === 'planet' || o.kind === 'sun' ? 600 : 2.5e6); o.dotS.position.copy(tmp);
@@ -610,6 +607,7 @@ export const cosmos: any = {
       o.label.visible = lbl; o.label.position.copy(tmp);
       if (lbl) { const a = Math.min(sstep(o.zL[0], o.zL[0] + 0.3, z), 1 - sstep(o.zL[1] - 0.3, o.zL[1], z)); o.label.material.opacity = a; }
     }
+    if (this.satRing?.parent?.parent?.visible) updateRing(this.satRing);
     this.declutter(dt);
     this.ringUpdate();
   },

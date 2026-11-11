@@ -49,7 +49,7 @@ export const quiz: any = {
     this.order = all.slice(0, Math.min(COUNT, all.length));
     this.clearReveal(); this.drawStars(); this.qs.visible = true; this.hud();
   },
-  exit() { this.root.visible = false; this.clearReveal(); },
+  exit() { this.root.visible = false; this.clearReveal(); if (this.mark) { this.root.remove(this.mark); disposeTree(this.mark); this.mark = null; } },
   cur() { return ctx.content.quiz[this.order[this.i]]; },
   drawStars() {
     while (this.starRow.children.length) { const o = this.starRow.children.pop(); o.material.dispose(); }
@@ -65,12 +65,34 @@ export const quiz: any = {
     const q = this.cur(), ok = k === q.a; this.answered = k;
     this.results = this.results || []; this.results[this.i] = ok;
     if (ok) { this.score++; SND.good(); this.firework(); } else SND.bad();
-    this.drawStars(); this.qs.visible = false; this.showReveal(q.reveal); this.hud();
+    this.pop(ok ? '✓' : '✗', ok ? '#5fe08a' : '#ff7a70');
+    this.drawStars(); this.starPulse = ok ? 1 : 0; this.qs.visible = false; this.showReveal(q.reveal); this.hud();
   },
   next() {
-    this.i++; this.answered = null; this.clearReveal(); this.qs.visible = true;
-    if (this.i >= this.order.length) { quizFinished(this.score, this.order.length); if (this.score === this.order.length) this.firework(); }
+    this.i++; this.answered = null; this.clearReveal(); this.revTok = Math.random(); this.qs.visible = true;
+    if (this.i >= this.order.length) { quizFinished(this.score, this.order.length); this.showResult(); }
     this.hud();
+  },
+  /** Veľký znak ✓ alebo ✗, ktorý po odpovedi vyskočí a zmizne. */
+  pop(ch: string, color: string) {
+    if (this.mark) { this.root.remove(this.mark); disposeTree(this.mark); }
+    const m = textSprite(ch, color, 220, 700); m.position.set(0.42, 0.16, -1.2); m.material.depthTest = false; m.renderOrder = 30; this.root.add(m);
+    this.mark = m; this.markT = 0;
+  },
+  /** Hodnotenie podľa počtu správnych odpovedí. */
+  tier() {
+    const k = this.score / this.order.length;
+    return k >= 1 ? { name: { sk: 'Veliteľ misie', en: 'Mission Commander' }, text: { sk: 'Bez jedinej chyby! O vesmíre viete naozaj veľa.', en: 'Not a single mistake! You really know your space.' } }
+      : k >= 0.7 ? { name: { sk: 'Astronóm', en: 'Astronomer' }, text: { sk: 'Skvelý výsledok. Ešte kúsok a budete veliť misii.', en: 'A great result. A little more and you will command the mission.' } }
+      : k >= 0.4 ? { name: { sk: 'Pozorovateľ oblohy', en: 'Sky Watcher' }, text: { sk: 'Dobrý začiatok. Skúste to znova, otázky budú iné.', en: 'A good start. Try again, the questions will be different.' } }
+      : { name: { sk: 'Vesmírny nováčik', en: 'Space Rookie' }, text: { sk: 'Každý astronóm raz začínal. Prejdite si ostatné zážitky a skúste to znova.', en: 'Every astronomer started somewhere. Explore the other experiences and try again.' } };
+  },
+  showResult() {
+    this.clearReveal(); this.revTok = Math.random(); this.qs.visible = false;   // zruší aj model, ktorý sa ešte načítava
+    const t = this.tier(), n = this.order.length;
+    const big = textSprite([`${this.score} / ${n}`, T(t.name)], ['#ffc857', '#e9ecf7'], 150, 700); setSpriteH(big, 0.34); big.position.set(0, 0.1, 0); this.rev.add(big);
+    this.resT = 0; this.anim = (dt: number) => { this.resT += dt; const k = Math.min(1, this.resT / 0.5), e = 1 - (1 - k) ** 3; big.scale.set(0.34 * big.userData.aspect * e, 0.34 * e, 1); };
+    if (this.score / n >= 0.7) { this.firework(); SND.good(); } else SND.chime();
   },
   /* ---------- odhalenia po odpovedi ---------- */
   clearReveal() { while (this.rev.children.length) { const o = this.rev.children.pop(); disposeTree(o); } this.anim = null; },
@@ -149,14 +171,13 @@ export const quiz: any = {
     const Q = this.order.map((k: number) => ctx.content.quiz[k]), UI = ctx.content.ui;
     if (this.i >= Q.length) {
       const s = this.score, n = Q.length;
-      setHud({ kicker: { sk: 'Kvíz', en: 'Quiz' }, title: { sk: `Výsledok: ${s} z ${n} hviezdičiek`, en: `Score: ${s} of ${n} stars` },
-        body: s === n ? { sk: 'Perfektné! Všetky hviezdičky sú vaše, ste skutočný astronóm.', en: 'Perfect! You collected every star, you are a real astronomer.' }
-          : { sk: 'Výborne! Chcete to skúsiť znova? Otázky budú iné.', en: 'Well done! Want to try again? The questions will be different.' },
+      const t = this.tier();
+      setHud({ kicker: { sk: `Kvíz   výsledok: ${s} z ${n} hviezdičiek`, en: `Quiz   score: ${s} of ${n} stars` }, title: t.name, body: t.text, sticky: true,
         rows: [[{ label: T(UI.again), onClick: () => this.enter(), primary: true }]] });
       return;
     }
     const q = this.cur(), a = this.answered;
-    const opt = (k: number) => ({ label: T(q.o[k]), onClick: () => this.answer(k), tone: a == null ? null : (k === q.a ? 'good' : (k === a ? 'bad' : null)) as any });
+    const opt = (k: number) => ({ label: T(q.o[k]), big: true, onClick: () => this.answer(k), tone: a == null ? null : (k === q.a ? 'good' : (k === a ? 'bad' : null)) as any });
     const rows: any[] = [[opt(0), opt(1)], [opt(2), opt(3)]];
     if (a != null) rows.push([{ label: T(UI.next) + ' ›', onClick: () => this.next(), primary: true }, { label: T(UI.home), onClick: ctx.goHome }]);
     setHud({ kicker: { sk: `Kvíz   otázka ${this.i + 1} z ${Q.length}`, en: `Quiz   question ${this.i + 1} of ${Q.length}` }, title: q.q,
@@ -167,6 +188,14 @@ export const quiz: any = {
   relabel() { if (ctx.current === 'quiz') this.hud(); },
   update(dt: number, t: number) {
     this.qs.position.y = 0.2 + Math.sin(t * 1.2) * 0.03;
+    if (this.mark) {   // ✓ / ✗: rýchlo vyskočí, chvíľu drží, potom zmizne
+      this.markT += dt; const k = this.markT, sc = k < 0.25 ? 1.25 * (k / 0.25) : k < 0.4 ? 1.25 - 0.25 * ((k - 0.25) / 0.15) : 1;
+      setSpriteH(this.mark, 0.3 * sc); this.mark.material.opacity = k < 0.9 ? 1 : Math.max(0, 1 - (k - 0.9) / 0.4);
+      if (k > 1.3) { this.root.remove(this.mark); disposeTree(this.mark); this.mark = null; }
+    }
+    if (this.starPulse > 0) {   // práve získaná hviezdička sa zväčší
+      this.starPulse = Math.max(0, this.starPulse - dt * 1.5); const st = this.starRow.children[this.i]; if (st) { const z = 0.07 * (1 + 0.9 * Math.sin(this.starPulse * Math.PI)); st.scale.set(z, z, 1); }
+    }
     this.anim?.(dt, t);
     if (this.fw.visible) {
       this.fwT += dt; const P = this.fw.geometry.attributes.position.array as Float32Array, V = this.fwv;

@@ -4,6 +4,7 @@ import { T, en, dec } from '../core/i18n';
 import { setHud, keepHud } from '../core/ui3d';
 import { loadTex, textSprite, setSpriteH, disposeTree } from '../core/util';
 import { arReady, startPlacing, isPlacing } from '../core/ar';
+import { SND } from '../core/sound';
 
 /** Gravitácia: loptičky padajú naraz na Mesiaci, Marse, Zemi a Jupiteri. */
 export const gravity: any = {
@@ -18,12 +19,14 @@ export const gravity: any = {
       const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, H + 0.1, 8), new THREE.MeshBasicMaterial({ color: 0x445588 })); pole.position.set(-0.2, (H + 0.1) / 2, 0); g.add(pole);
       for (let k = 0; k <= 3; k++) { const tk = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.003, 0.003), new THREE.MeshBasicMaterial({ color: 0x8a93b8 })); tk.position.set(-0.2, k * 0.5, 0); g.add(tk); }
       const ball = new THREE.Mesh(new THREE.SphereGeometry(0.055, 32, 16), new THREE.MeshStandardMaterial({ color: new THREE.Color(w.c).lerp(new THREE.Color('#ffffff'), 0.25), roughness: 0.5 })); g.add(ball);
-      const col = { w, g, ball, y: H, v: 0, state: 'ready', time: null as number | null, lab: null as THREE.Sprite | null }; this.cols.push(col); this.label(col);
+      // krúžok, ktorý blikne pri dopade
+      const ring = new THREE.Mesh(new THREE.RingGeometry(0.07, 0.085, 48).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xffb46b, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide })); ring.position.y = 0.034; g.add(ring);
+      const col = { w, g, ball, ring, y: H, v: 0, state: 'ready', time: null as number | null, rank: 0, flash: 0, lab: null as THREE.Sprite | null }; this.cols.push(col); this.label(col);
     });
   },
   label(col: any) {
     if (col.lab) { col.g.remove(col.lab); disposeTree(col.lab); }
-    const l2 = col.time != null ? (en() ? 'landed in ' : 'dopad za ') + dec(col.time) + ' s' : 'g = ' + dec(col.w.g) + ' m/s²';
+    const l2 = col.time != null ? (col.rank ? col.rank + '.  ' : '') + (en() ? 'landed in ' : 'dopad za ') + dec(col.time) + ' s' : 'g = ' + dec(col.w.g) + ' m/s²';
     const lines = [T(col.w.name), l2], colors = ['#e9ecf7', col.time != null ? '#ffb46b' : '#c9cfe6'];
     if (this.mass) {   // váha: koľko by ukázala osobná váha na tomto svete
       const kg = Math.round(this.mass * col.w.g / 9.81);
@@ -33,11 +36,11 @@ export const gravity: any = {
   },
   setMass(m: number) { this.mass = m; this.cols.forEach((c: any) => this.label(c)); keepHud(); this.hud(); },
   nextMass() { const L = [0, 20, 30, 40, 60, 80]; this.setMass(L[(L.indexOf(this.mass || 0) + 1) % L.length]); },
-  reset() { this.cols.forEach((c: any) => { c.y = this.H; c.v = 0; c.state = 'ready'; c.time = null; c.ball.position.set(0, c.y, 0); this.label(c); }); this.running = false; this.hud(); },
+  reset() { this.cols.forEach((c: any) => { c.y = this.H; c.v = 0; c.state = 'ready'; c.time = null; c.rank = 0; c.ball.position.set(0, c.y, 0); this.label(c); }); this.running = false; this.rank = 0; this.hud(); },
   drop() { keepHud(); if (this.running) { this.reset(); return; } this.running = true; this.cols.forEach((c: any) => { c.state = 'fall'; }); this.hud(); },
   hud() {
     setHud({ kicker: { sk: 'Gravitácia', en: 'Gravity' }, title: { sk: 'Na ktorom svete dopadne loptička prvá?', en: 'On which world does the ball land first?' },
-      body: isPlacing() ? { sk: 'Pozrite sa na podlahu, objaví sa oranžový terčík. Štipnite a pokus sa postaví tam. Bez terčíka štipnite kdekoľvek a pokus ostane tu.', en: 'Look at the floor until an orange target appears, then pinch to set up the experiment there. Without a target, pinch anywhere to keep it here.' } : { sk: `Všetky loptičky padajú z výšky ${dec(this.H, 1)} m. Na Mesiaci je gravitácia asi 6-krát slabšia ako na Zemi, na Jupiteri 2,5-krát silnejšia. Tlačidlom Moja váha uvidíte, čo by na každom svete ukázala osobná váha.`, en: `All balls fall from ${this.H} m. Gravity on the Moon is about 6 times weaker than on Earth, on Jupiter 2.5 times stronger. Use My weight to see what a bathroom scale would show on each world.` },
+      body: isPlacing() ? { sk: 'Pozrite sa na podlahu, objaví sa oranžový terčík. Štipnite a pokus sa postaví tam. Bez terčíka štipnite kdekoľvek a pokus ostane tu.', en: 'Look at the floor until an orange target appears, then pinch to set up the experiment there. Without a target, pinch anywhere to keep it here.' } : this.running ? { sk: 'Čím silnejšia gravitácia, tým rýchlejší pád. Na Mesiaci je asi 6-krát slabšia ako na Zemi, na Jupiteri 2,5-krát silnejšia.', en: 'The stronger the gravity, the faster the fall. On the Moon it is about 6 times weaker than on Earth, on Jupiter 2.5 times stronger.' } : { sk: `Všetky loptičky pustíme naraz z výšky ${dec(this.H, 1)} m. Tipnite si, kde dopadne prvá, a stlačte Pustiť loptičky.`, en: `All balls are dropped together from ${this.H} m. Guess where the first one lands, then press Drop the balls.` },
       actions: [{ label: this.running ? T(ctx.content.ui.again) : (en() ? 'Drop the balls' : 'Pustiť loptičky'), onClick: () => this.drop(), primary: true },
         { label: this.mass ? (en() ? `My weight: ${this.mass} kg` : `Moja váha: ${this.mass} kg`) : (en() ? 'My weight' : 'Moja váha'), active: !!this.mass, onClick: () => this.nextMass() }] });
   },
@@ -51,8 +54,9 @@ export const gravity: any = {
     this.cols.forEach((c: any) => {
       if (c.state === 'rest') return;
       c.v -= c.w.g * dt; c.y += c.v * dt;
-      if (c.y <= R) { c.y = R; if (c.time == null) { c.time = Math.sqrt(2 * (this.H - R) / c.w.g); this.label(c); } if (Math.abs(c.v) < 0.3) { c.v = 0; c.state = 'rest'; } else c.v = -c.v * 0.5; }
+      if (c.y <= R) { c.y = R; if (c.time == null) { c.time = Math.sqrt(2 * (this.H - R) / c.w.g); c.rank = this.rank = (this.rank || 0) + 1; SND.tone(c.rank === 1 ? 1318.5 : 880, 0.18, 'sine', c.rank === 1 ? 0.08 : 0.05); c.flash = 1; this.label(c); } if (Math.abs(c.v) < 0.3) { c.v = 0; c.state = 'rest'; } else c.v = -c.v * 0.5; }
       c.ball.position.y = c.y;
+      c.flash = Math.max(0, (c.flash || 0) - dt * 2); c.ring.scale.setScalar(1 + (1 - c.flash) * 1.6); c.ring.material.opacity = c.flash * 0.9;
     });
   }
 };
