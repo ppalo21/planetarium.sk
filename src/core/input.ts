@@ -46,7 +46,7 @@ export function initInput(modeChanged: () => void) {
     const dot = new THREE.Mesh(new THREE.SphereGeometry(0.007, 12, 8), new THREE.MeshBasicMaterial({ color: 0xffb46b, depthTest: false }));
     dot.renderOrder = 30; dot.visible = false; scene.add(dot); c.userData.dot = dot;
     c.addEventListener('connected', (e: any) => { c.userData.src = e.data; });
-    c.addEventListener('disconnected', () => { c.userData.src = null; });
+    c.addEventListener('disconnected', () => { c.userData.src = null; c.userData.dot.visible = false; c.userData.hit = null; });
     c.addEventListener('selectstart', () => {
       ctx.lastAct = performance.now();
       let h = c.userData.hit;
@@ -95,6 +95,13 @@ function nearGrabbable(i: number): THREE.Object3D | null {
   return best;
 }
 function updateCtrl(c: THREE.XRTargetRaySpace, hs: Set<THREE.Object3D>, rayOff: boolean) {
+  // Ruka alebo ovládač, ktorý okuliare práve nevidia (napr. hneď po spustení VR), nemá platnú polohu:
+  // lúč ani bodka sa nekreslia a nič sa ním nevyberá. Inak by ostali „visieť“ na poslednom mieste.
+  if (!c.visible || !c.userData.src) {
+    c.userData.hit = null; c.userData.dot.visible = false; c.userData.line.visible = false; c.userData.lastHover = null;
+    if (c.userData.grabbing) { const ck = c.userData.grabbing; c.userData.grabbing = null; ck.grab.end(c); }
+    c.userData.hold = null; return;
+  }
   c.getWorldPosition(tmpV); c.getWorldQuaternion(tmpQ);
   tmpD.set(0, 0, -1).applyQuaternion(tmpQ);
   const h = c.userData.grabbing || rayOff ? null : pick(tmpV, tmpD); c.userData.hit = h;
