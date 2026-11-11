@@ -175,6 +175,8 @@ export function initDom() {
   $('btnOffline').onclick = async () => {
     const btn = $('btnOffline') as HTMLButtonElement; if (btn.disabled) return;
     btn.disabled = true; showMsg(T(UI.offRun));
+    // požiadať prehliadač, aby uložené súbory nemazal ani pri nedostatku miesta
+    try { await navigator.storage?.persist?.(); } catch { /* */ }
     const list = await offlineUrls(), missing: string[] = []; let ok = 0, done = 0, failed = 0;
     // súbory sa ukladajú priamo do pamäte, z ktorej číta offline režim (sw.js) – funguje aj pri prvom otvorení
     const cache = 'caches' in window ? await caches.open(CACHE).catch(() => null) : null;

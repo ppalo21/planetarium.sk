@@ -45,6 +45,10 @@
     {
      "sk": "Mliečna cesta: ESO/S. Brunier (CC BY 4.0)",
      "en": "Milky Way: ESO/S. Brunier (CC BY 4.0)"
+    },
+    {
+     "sk": "Mliečna cesta zhora a z boku: ESA/Gaia/DPAC, Stefan Payne-Wardenaar (CC BY-SA 3.0 IGO), zmenšené",
+     "en": "Milky Way face-on and edge-on: ESA/Gaia/DPAC, Stefan Payne-Wardenaar (CC BY-SA 3.0 IGO), resized"
     }
    ]
   },
@@ -101,6 +105,10 @@
     {
      "sk": "Fakty a čísla: NASA, ESA, ESO",
      "en": "Facts and figures: NASA, ESA, ESO"
+    },
+    {
+     "sk": "Polárna žiara: vlastný fyzikálny model (výšky a farby žiarenia kyslíka a dusíka, zakrivenie Zeme)",
+     "en": "Aurora: in-house physical model (emission heights and colours of oxygen and nitrogen, Earth curvature)"
     }
    ]
   },

@@ -45,7 +45,7 @@ const Q_LG = (() => {
   const X = M31_PC.clone().sub(GC_PC).normalize(), Y = GZ.clone().addScaledVector(X, -GZ.dot(X)).normalize(), Z = new THREE.Vector3().crossVectors(X, Y);
   return new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(X, Y, Z).transpose());
 })();
-const Q_ID = new THREE.Quaternion();
+const Q_ID = new THREE.Quaternion(), M4 = new THREE.Matrix4(), W1 = new THREE.Vector3(), W3 = new THREE.Vector3();
 const V1 = new THREE.Vector3(), V2 = new THREE.Vector3(), V3 = new THREE.Vector3();   // pomocné vektory (bez vytvárania nových v každej snímke)
 
 /* ---------- textúry ---------- */
@@ -82,10 +82,10 @@ void main(){
   gl_PointSize = vA > 0.003 ? clamp(2.0 + (5.5 - m) * 0.95, 1.2, 11.0) * uPx : 0.0;
 }`;
 const GAL_VS = `attribute vec3 col; attribute float size; attribute float grp; attribute float mag; attribute vec2 shape;
-uniform vec3 uF; uniform float uInvS; uniform vec3 uFade; uniform float uProj; uniform vec2 uFloor; uniform vec3 uMinPx;
+uniform vec3 uF; uniform float uInvS; uniform vec3 uFade; uniform float uProj; uniform vec2 uFloor; uniform vec3 uMinPx; uniform float uMw;
 varying vec3 vCol; varying float vA; varying vec3 vShape;
 void main(){
-  float f = grp < 0.5 ? uFade.x : (grp < 1.5 ? uFade.y : uFade.z);
+  float f = grp < 0.5 ? uFade.x * uMw : (grp < 1.5 ? uFade.y : uFade.z);
   vec3 l = (position - uF) * uInvS;
   vec4 mv = modelViewMatrix * vec4(l, 1.0);
   float depth = max(-mv.z, 1e-4);
@@ -304,6 +304,51 @@ export const cosmos: any = {
     } catch { /* bez katalógu ostane obloha z panorámy */ }
   },
 
+  /**
+   * Obraz Mliečnej cesty zhora (ESA/Gaia) položený do galaktickej roviny.
+   * Poloha a mierka sa odvodia z dvoch bodov na obrázku: stred Galaxie a Slnko (content/cosmos.json → mw).
+   * Ak súbor chýba, ostáva procedurálny model z bodov.
+   */
+  buildMwImage() {
+    const cfg = ctx.content.cosmos.mw; if (!cfg?.file) return;
+    loadTex(cfg.file).then(tex => {
+      if (!tex) return;
+      const dx = cfg.sun[0] - cfg.gc[0], dy = -(cfg.sun[1] - cfg.gc[1]), len = Math.hypot(dx, dy), a = dx / len, b = dy / len;
+      const sunW = GX.clone().negate(), perp = new THREE.Vector3().crossVectors(GZ, sunW).multiplyScalar(cfg.flip ? -1 : 1);
+      const ex = sunW.clone().multiplyScalar(a).addScaledVector(perp, -b), ey = sunW.clone().multiplyScalar(b).addScaledVector(perp, a);
+      const width = 8178 / len;                                              // šírka obrázka v parsekoch
+      const center = GC_PC.clone().addScaledVector(ex, (0.5 - cfg.gc[0]) * width).addScaledVector(ey, (cfg.gc[1] - 0.5) * width);
+      const mat = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending,
+        uniforms: { uMap: { value: tex }, uFade: { value: 0 }, uGc: { value: new THREE.Vector2(cfg.gc[0], 1 - cfg.gc[1]) }, uEdge: { value: cfg.edge ?? 0.48 } },
+        vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+        fragmentShader: `uniform sampler2D uMap; uniform float uFade; uniform vec2 uGc; uniform float uEdge; varying vec2 vUv;
+          void main(){ vec3 c = texture2D(uMap, vUv).rgb; c = max(c - 0.02, 0.0) * 1.15;
+            float r = distance(vUv, uGc); c *= 1.0 - smoothstep(uEdge * 0.8, uEdge, r);      // okraj obrázka sa stratí do tmy
+            gl_FragColor = vec4(c * uFade, 1.0);
+            #include <colorspace_fragment>
+          }` });
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), mat);
+      m.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(ex, ey, new THREE.Vector3().crossVectors(ex, ey)));
+      m.renderOrder = -5; m.frustumCulled = false; this.content.add(m);
+      this.mwImg = { m, mat, center, width };
+      // pohľad z boku: keď sa na Galaxiu pozeráme takmer v jej rovine, plochý obraz by zmizol – nahradí ho obraz disku z profilu
+      if (cfg.side) loadTex(cfg.side).then(st => {
+        if (!st) return;
+        const sm = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending,
+          uniforms: { uMap: { value: st }, uFade: { value: 0 } },
+          vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+          fragmentShader: `uniform sampler2D uMap; uniform float uFade; varying vec2 vUv;
+            void main(){ vec3 c = max(texture2D(uMap, vUv).rgb - 0.01, 0.0); vec2 d = abs(vUv - 0.5) * 2.0; c *= (1.0 - smoothstep(0.85, 1.0, d.x)) * (1.0 - smoothstep(0.5, 0.9, d.y));
+              gl_FragColor = vec4(c * uFade, 1.0);
+              #include <colorspace_fragment>
+            }` });
+        const q = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), sm); q.renderOrder = -4; q.frustumCulled = false; this.content.add(q);
+        this.mwImg.side = q; this.mwImg.sideMat = sm;
+      });
+      this.galMat.uniforms.uMw.value = cfg.points ?? 0.3;                     // body ostávajú ako jemné hviezdy a dodávajú disku hrúbku
+    });
+  },
+
   /* ---------- Mliečna cesta, Miestna skupina, vzdialené galaxie ---------- */
   buildGalaxies() {
     const b: Buf = { p: [], c: [], s: [], g: [], m: [], sh: [] };
@@ -320,8 +365,9 @@ export const cosmos: any = {
     g.setAttribute('size', new THREE.Float32BufferAttribute(b.s, 1)); g.setAttribute('grp', new THREE.Float32BufferAttribute(b.g, 1));
     g.setAttribute('mag', new THREE.Float32BufferAttribute(b.m, 1)); g.setAttribute('shape', new THREE.Float32BufferAttribute(b.sh, 2));
     this.galMat = new THREE.ShaderMaterial({ vertexShader: GAL_VS, fragmentShader: GAL_FS, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-      uniforms: { uF: { value: new THREE.Vector3() }, uInvS: { value: 1 }, uFade: { value: new THREE.Vector3() }, uProj: { value: 750 }, uFloor: { value: new THREE.Vector2(0.22, 0.4) }, uMinPx: { value: new THREE.Vector3(1.0, 1.3, 1.0) } } });
+      uniforms: { uF: { value: new THREE.Vector3() }, uInvS: { value: 1 }, uFade: { value: new THREE.Vector3() }, uProj: { value: 750 }, uFloor: { value: new THREE.Vector2(0.22, 0.4) }, uMinPx: { value: new THREE.Vector3(1.0, 1.3, 1.0) }, uMw: { value: 1 } } });
     const pts = new THREE.Points(g, this.galMat); pts.frustumCulled = false; this.content.add(pts);
+    this.buildMwImage();
     const P = (v: THREE.Vector3) => () => [v.x * PC, v.y * PC, v.z * PC];
     const F = ctx.content.cosmos.facts;
     this.addObj({ id: 'gc', name: { sk: 'Stred Galaxie', en: 'Galactic centre' }, kind: 'gal', r: 0, pos: P(GC_PC), zL: [19.4, 21.4], color: '#ffd9a0', fact: F.gc, focusZ: 20.54 });
@@ -510,6 +556,22 @@ export const cosmos: any = {
     if (this.starMat) { const u = this.starMat.uniforms; u.uF.value.copy(Fpc); u.uInvS.value = PC * inv; u.uCam.value.copy(camL); u.uFade.value = 1 - sstep(19.2, 20.1, z); u.uPx.value = ctx.renderer.xr.isPresenting ? 1.0 : 1.15; }
     const gu = this.galMat.uniforms; gu.uF.value.copy(Fpc); gu.uInvS.value = PC * inv;
     // Mliečna cesta · susedné galaxie · vzdialené galaxie (tie sú v pozadí už pri pohľade na našu Galaxiu)
+    if (this.mwImg) {
+      const w = this.mwImg, k = PC * inv; w.m.position.set(w.center.x * k - F[0] * inv, w.center.y * k - F[1] * inv, w.center.z * k - F[2] * inv);
+      const fade = sstep(18.9, 19.8, z); w.m.scale.setScalar(w.width * k); w.m.visible = z > 18.9;
+      // uhol pohľadu voči rovine Galaxie
+      const cam = this.content.worldToLocal(camWorld()), gcx = GC_PC.x * k - F[0] * inv, gcy = GC_PC.y * k - F[1] * inv, gcz = GC_PC.z * k - F[2] * inv;
+      W3.set(cam.x - gcx, cam.y - gcy, cam.z - gcz); const dist = W3.length() || 1, sinB = Math.abs(W3.dot(GZ)) / dist;
+      const edgeOn = 1 - sstep(0.05, 0.22, sinB);
+      w.mat.uniforms.uFade.value = fade * (0.25 + 0.75 * sstep(0.03, 0.2, sinB));
+      if (w.side) {
+        w.side.visible = w.m.visible && edgeOn > 0.01; w.sideMat.uniforms.uFade.value = fade * edgeOn;
+        if (w.side.visible) {
+          const n = W3.addScaledVector(GZ, -W3.dot(GZ)).normalize(), ex = W1.crossVectors(GZ, n).normalize();
+          w.side.quaternion.setFromRotationMatrix(M4.makeBasis(ex, GZ, n)); w.side.position.set(gcx, gcy, gcz); w.side.scale.setScalar(w.width * k);
+        }
+      }
+    }
     gu.uFade.value.set(sstep(18.5, 19.6, z), sstep(19.8, 20.5, z), 0.55 * sstep(19.6, 20.4, z) + 0.45 * sstep(21.6, 23.0, z));
     gu.uProj.value = ctx.renderer.xr.isPresenting ? 760 : ctx.renderer.domElement.height / (2 * Math.tan(ctx.camera.fov * D2R / 2));
     // Slnečná sústava: dráhy a pásy (jednotky AU)

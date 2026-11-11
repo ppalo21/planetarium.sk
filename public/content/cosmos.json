@@ -178,5 +178,20 @@
    "sk": "Vyše tisíc veľkých galaxií vo vzdialenosti 320 miliónov svetelných rokov. Práve tu si Fritz Zwicky v roku 1933 všimol, že galaxie drží pohromade neviditeľná tmavá hmota.",
    "en": "More than a thousand large galaxies 320 million light years away. Here, in 1933, Fritz Zwicky noticed that invisible dark matter must be holding the galaxies together."
   }
+ },
+ "mw": {
+  "file": "assets/galaxie/mliecna-cesta-zhora.jpg",
+  "side": "assets/galaxie/mliecna-cesta-zboku.jpg",
+  "gc": [
+   0.4991,
+   0.5001
+  ],
+  "sun": [
+   0.4991,
+   0.7131
+  ],
+  "flip": false,
+  "edge": 0.5,
+  "points": 0.3
  }
 }

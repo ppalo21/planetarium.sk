@@ -17,6 +17,17 @@ PANORÁMY 360°
 - Celá Mliečna cesta – ESO/S. Brunier, CC BY 4.0
   https://www.eso.org/public/images/eso0932a/
 
+MLIEČNA CESTA ZHORA A Z BOKU (modul Od Zeme po galaxie)
+- ESA/Gaia/DPAC, Stefan Payne-Wardenaar, CC BY-SA 3.0 IGO – „The best Milky Way map, by Gaia“ (2025)
+  https://www.esa.int/ESA_Multimedia/Images/2025/01/The_best_Milky_Way_map_by_Gaia
+  https://www.esa.int/ESA_Multimedia/Images/2025/01/The_best_Milky_Way_map_by_Gaia_edge-on
+  Zmenšené na 2048 px → public/assets/galaxie/. Poloha Slnka a mierka sú určené podľa trpasličej galaxie
+  v Strelcovi, ktorá je na oboch obrázkoch (nastavenie v public/content/cosmos.json → mw).
+
+POLÁRNA ŽIARA
+- Vlastný fyzikálny model (src/modules/auroraSky.ts): závesy vo výške 100 – 400 km nad guľatou Zemou,
+  zelená a červená čiara kyslíka, dusíkový okraj. Nič sa nesťahuje.
+
 TEXTÚRY PLANÉT, MESIACA A HVIEZDNEJ OBLOHY
 - Solar System Scope / INOVE, CC BY 4.0 (na základe údajov NASA)
   https://www.solarsystemscope.com/textures/

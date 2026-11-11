@@ -7,6 +7,7 @@ import { sunMaterial, SUN_U } from './sun';
 import { earthMaterial, starSky } from './space';
 import { speak, stopVoice } from '../core/narration';
 import { SET } from '../core/settings';
+import { AuroraSky, elevationOf } from './auroraSky';
 
 /**
  * Polárna žiara: slnečný vietor → magnetosféra → cesta k pólom → žiara zo Zeme → farby → nad Slovenskom.
@@ -17,29 +18,26 @@ const EARTH = new THREE.Vector3(0.35, 0.02, -1.7);
 const R0 = 2.6 * RE;                 // vzdialenosť magnetopauzy na dennej strane (zmenšená kvôli prehľadnosti)
 const NP = 1800;
 
-const CURTAIN_VS = `uniform float uTime; uniform float uA0; uniform float uA1; uniform float uR; uniform float uH0; uniform float uHH; uniform float uSeed;
-varying vec2 vUv;
+// prstenec polárnej žiary okolo pólu (pohľad z vesmíru): zelený pás okolo ~67° geomagnetickej šírky,
+// na nočnej strane širší a jasnejší, s pohyblivými lúčmi a červeným okrajom navrchu
+const OVAL_VS = `varying vec3 vP; varying vec3 vN; varying vec3 vW;
+void main(){ vP = normalize(position); vN = normalize(normalMatrix * normal); vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }`;
+const OVAL_FS = `uniform float uTime; uniform vec3 uSunDir; uniform float uOn; varying vec3 vP; varying vec3 vN; varying vec3 vW;
+float h11(float x){ return fract(sin(x * 127.1) * 43758.5453); }
+float vn(float x){ float i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f); return mix(h11(i), h11(i + 1.0), f); }
 void main(){
-  vUv = uv; float u = uv.x, v = uv.y;
-  float ang = mix(uA0, uA1, u) + 0.06*sin(u*9.0 + uTime*0.18 + uSeed);
-  float r = uR + 7.0*sin(u*6.0 + uTime*0.12 + uSeed) + 3.0*sin(u*17.0 - uTime*0.3 + uSeed*2.0);
-  vec3 p = vec3(sin(ang)*r, uH0 + v*uHH, -cos(ang)*r);
-  gl_Position = projectionMatrix*modelViewMatrix*vec4(p,1.0);
-}`;
-const CURTAIN_FS = `uniform float uTime; uniform float uRed; uniform float uGain; uniform float uSeed; varying vec2 vUv;
-void main(){
-  float u=vUv.x, v=vUv.y;
-  // zvislé lúče, ktoré sa presúvajú pozdĺž závesu
-  float rays = 0.55 + 0.25*sin(u*230.0 + 3.0*sin(u*31.0 + uTime*0.9 + uSeed) + uTime*1.3) + 0.2*sin(u*97.0 - uTime*0.7);
-  float fold = 0.55 + 0.45*sin(u*13.0 - uTime*0.35 + uSeed);
-  float edge = smoothstep(0.0,0.07,u)*smoothstep(1.0,0.93,u);
-  float prof = smoothstep(0.0,0.05,v)*exp(-v*2.4) + 0.25*smoothstep(0.35,0.7,v)*exp(-(v-0.7)*(v-0.7)*14.0)*uRed;
-  vec3 green = vec3(0.22,1.0,0.48), red = vec3(1.0,0.18,0.28), purple = vec3(0.85,0.3,0.95);
-  vec3 col = mix(green, red, smoothstep(0.42,0.85,v));
-  col = mix(purple, col, smoothstep(0.0,0.07,v));
-  col = mix(col, red, uRed*0.85);
-  float a = prof*rays*fold*edge*(1.0-smoothstep(0.88,1.0,v))*uGain;
-  gl_FragColor = vec4(col*a*1.7, a);
+  float lat = degrees(asin(abs(vP.y))), lon = atan(vP.z, vP.x);
+  vec3 eq = normalize(vec3(vP.x, 0.0, vP.z) + 1e-5);
+  float night = 0.5 - 0.5 * dot(eq, normalize(vec3(uSunDir.x, 0.0, uSunDir.z)));       // 1 = polnoc, 0 = poludnie
+  float c = mix(76.0, 66.0, night), w = mix(1.6, 4.5, night);
+  c += 1.2 * sin(lon * 5.0 + uTime * 0.3) + 0.6 * sin(lon * 13.0 - uTime * 0.5);
+  float band = exp(-pow((lat - c) / w, 2.0));
+  float rays = 0.45 + 0.55 * vn(lon * 60.0 + uTime * 1.2) * vn(lon * 23.0 - uTime * 0.4);
+  float g = band * rays * (0.35 + 0.65 * night);
+  float red = exp(-pow((lat - c - w * 0.9) / (w * 1.2), 2.0)) * 0.35 * night;
+  vec3 V = normalize(cameraPosition - vW); float limb = 0.6 + 0.8 * pow(1.0 - abs(dot(normalize(vN), V)), 2.0);
+  vec3 col = (vec3(0.15, 1.0, 0.45) * g + vec3(1.0, 0.15, 0.2) * red) * limb * uOn * 2.6;
+  gl_FragColor = vec4(col, 1.0);
 }`;
 
 export const aurora: any = {
@@ -80,33 +78,14 @@ export const aurora: any = {
       fm.userData.n = (fm.userData.n || 0) + 1;
       this.field.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), fm));
     }
-    // prstence polárnej žiary okolo pólov
-    this.ovals = new THREE.Group(); this.ovals.position.copy(EARTH); this.ovals.rotation.z = 0.15; sp.add(this.ovals);
-    for (const s of [1, -1]) {
-      const lat = 67 * D2R, rr = RE * 1.012 * Math.cos(lat), y = s * RE * 1.012 * Math.sin(lat);
-      const gm = new THREE.Mesh(new THREE.TorusGeometry(rr, RE * 0.035, 12, 96), new THREE.MeshBasicMaterial({ color: 0x4dff8a, transparent: true, opacity: 0.8, depthWrite: false, blending: THREE.AdditiveBlending }));
-      gm.rotation.x = Math.PI / 2; gm.position.y = y; this.ovals.add(gm);
-      const rm = new THREE.Mesh(new THREE.TorusGeometry(rr * 0.98, RE * 0.025, 12, 96), new THREE.MeshBasicMaterial({ color: 0xff4060, transparent: true, opacity: 0.35, depthWrite: false, blending: THREE.AdditiveBlending }));
-      rm.rotation.x = Math.PI / 2; rm.position.y = y + s * RE * 0.06; this.ovals.add(rm);
-    }
+    // prstence polárnej žiary okolo pólov (tenká žiariaca vrstva nad atmosférou)
+    this.ovalU = { uTime: { value: 0 }, uSunDir: { value: new THREE.Vector3(-1, 0, 0) }, uOn: { value: 1 } };
+    this.ovals = new THREE.Mesh(new THREE.SphereGeometry(RE * 1.025, 160, 80), new THREE.ShaderMaterial({ vertexShader: OVAL_VS, fragmentShader: OVAL_FS, uniforms: this.ovalU, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+    this.ovals.position.copy(EARTH); this.ovals.rotation.z = 0.15; sp.add(this.ovals);
     this.spaceLabels = new THREE.Group(); sp.add(this.spaceLabels);
-    /* ---------- pozemská scéna: noc, kopce, závesy žiary ---------- */
+    /* ---------- pozemská scéna: severská noc, les, jazero a polárna žiara ---------- */
     const gnd = this.ground = new THREE.Group(); root.add(gnd);
-    const floor = new THREE.Mesh(new THREE.CircleGeometry(400, 64).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0x05070d })); floor.position.y = -1.6; gnd.add(floor);
-    // silueta kopcov
-    const hp: number[] = [], seg = 240;
-    for (let k = 0; k <= seg; k++) { const a = k / seg * Math.PI * 2, h = 6 + 5 * Math.sin(a * 3 + 1) + 3 * Math.sin(a * 7) + 2 * Math.sin(a * 13 + 2); hp.push(Math.sin(a) * 300, h, -Math.cos(a) * 300); }
-    const hg = new THREE.BufferGeometry(), hv: number[] = [];
-    for (let k = 0; k < seg; k++) { const i = k * 3, j = (k + 1) * 3; hv.push(hp[i], -1.6, hp[i + 2], hp[j], -1.6, hp[j + 2], hp[j], hp[j + 1], hp[j + 2], hp[i], -1.6, hp[i + 2], hp[j], hp[j + 1], hp[j + 2], hp[i], hp[i + 1], hp[i + 2]); }
-    hg.setAttribute('position', new THREE.Float32BufferAttribute(hv, 3));
-    gnd.add(new THREE.Mesh(hg, new THREE.MeshBasicMaterial({ color: 0x03050a, side: THREE.DoubleSide })));
-    this.curtains = [];
-    const mk = (a0: number, a1: number, R: number, H0: number, HH: number, seed: number) => {
-      const u = { uTime: { value: 0 }, uA0: { value: a0 * D2R }, uA1: { value: a1 * D2R }, uR: { value: R }, uH0: { value: H0 }, uHH: { value: HH }, uSeed: { value: seed }, uRed: { value: 0 }, uGain: { value: 1 } };
-      const m = new THREE.Mesh(new THREE.PlaneGeometry(1, 1, 320, 24), new THREE.ShaderMaterial({ uniforms: u, vertexShader: CURTAIN_VS, fragmentShader: CURTAIN_FS, transparent: true, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending }));
-      m.frustumCulled = false; gnd.add(m); this.curtains.push({ m, u, base: { R, H0, HH } }); return m;
-    };
-    mk(-70, 40, 90, 22, 55, 0.0); mk(-30, 75, 130, 30, 70, 2.3); mk(-85, -5, 60, 18, 45, 4.1); mk(10, 95, 70, 20, 50, 6.7);
+    this.auroraSky = new AuroraSky(gnd);
     this.groundLabels = new THREE.Group(); gnd.add(this.groundLabels);
   },
   spawn(p: any, randomX = false) {
@@ -129,17 +108,16 @@ export const aurora: any = {
       : sc === 'field' ? [[{ sk: 'magnetosféra', en: 'magnetosphere' }, EARTH.x, EARTH.y + 1.05, EARTH.z, '#8fe3ff'], [{ sk: 'chvost magnetosféry', en: 'magnetotail' }, EARTH.x + 2.1, EARTH.y + 0.25, EARTH.z, '#8fe3ff']]
       : sc === 'poles' ? [[{ sk: 'polárna žiara na severe', en: 'northern aurora' }, EARTH.x, EARTH.y + RE + 0.12, EARTH.z, '#7dffa8'], [{ sk: 'a na juhu', en: 'and southern aurora' }, EARTH.x, EARTH.y - RE - 0.12, EARTH.z, '#7dffa8']] : [], 0.06);
     const sk = sc === 'slovakia';
-    this.curtains.forEach((c: any, k: number) => {
-      c.m.visible = !sk || k === 0;
-      c.u.uRed.value = sk ? 1 : 0; c.u.uGain.value = sk ? 0.85 : 1;
-      c.u.uR.value = sk ? 220 : c.base.R; c.u.uH0.value = sk ? -2 : c.base.H0; c.u.uHH.value = sk ? 30 : c.base.HH;
-      if (sk) { c.u.uA0.value = -55 * D2R; c.u.uA1.value = 55 * D2R; } else if (k === 0) { c.u.uA0.value = -70 * D2R; c.u.uA1.value = 40 * D2R; }
-    });
+    this.sky.visible = !ground;
+    if (ground) this.auroraSky.setMode(sc as any, !this.wasGround); this.wasGround = ground;
+    // popisky farieb: presne vo výške, kde daná farba svieti (záves 160 km na sever)
+    const at = (hKm: number, az: number): [number, number, number] => { const e = elevationOf(hKm, 160), R = 80; return [Math.sin(az) * Math.cos(e) * R, Math.sin(e) * R, -Math.cos(az) * Math.cos(e) * R]; };
+    const az = 0;
     this.labels(this.groundLabels, sc === 'colors' ? [
-      [{ sk: 'červená: kyslík, nad 250 km', en: 'red: oxygen, above 250 km' }, -38, 62, -75, '#ff8a9a'],
-      [{ sk: 'zelená: kyslík, 100 – 250 km', en: 'green: oxygen, 100 – 250 km' }, -38, 38, -75, '#8affb0'],
-      [{ sk: 'fialový okraj: dusík, okolo 100 km', en: 'purple edge: nitrogen, about 100 km' }, -38, 22, -75, '#e2a0ff']]
-      : sk ? [[{ sk: 'SEVER', en: 'NORTH' }, 0, 3, -120, '#9fb2d8']] : sc === 'sky' ? [[{ sk: 'pozrite sa nahor ↑', en: 'look up ↑' }, 0, 6, -30, '#9fb2d8']] : [], sc === 'colors' ? 4.2 : 3.5);
+      [{ sk: 'červená: kyslík, nad 200 km', en: 'red: oxygen, above 200 km' }, ...at(270, az), '#ff8a9a'],
+      [{ sk: 'zelená: kyslík, 100 – 200 km', en: 'green: oxygen, 100 – 200 km' }, ...at(150, az), '#8affb0'],
+      [{ sk: 'ružovofialový okraj: dusík, okolo 100 km', en: 'pink-purple edge: nitrogen, about 100 km' }, ...at(98, az), '#e2a0ff']]
+      : sk ? [[{ sk: 'SEVER', en: 'NORTH' }, 0, 4, -120, '#9fb2d8']] : sc === 'sky' ? [[{ sk: 'pozrite sa nahor ↑', en: 'look up ↑' }, 0, 6, -30, '#9fb2d8']] : [], sc === 'colors' ? 2.6 : 3.5);
     this.hud(); speak(this.steps[this.si].audio, T(this.steps[this.si].text));
   },
   enter() { this.root.visible = true; this.setStep(this.si); },
@@ -147,7 +125,7 @@ export const aurora: any = {
   hud() {
     const st = this.steps[this.si], n = this.steps.length;
     setHud({ kicker: { sk: `Polárna žiara   ${this.si + 1} / ${n}`, en: `Aurora   ${this.si + 1} / ${n}` }, title: st.title, body: st.text, sticky: true,
-      credit: { sk: 'Textúry Zeme: Solar System Scope (CC BY 4.0)', en: 'Earth textures: Solar System Scope (CC BY 4.0)' },
+      credit: { sk: 'Textúry Zeme: Solar System Scope (CC BY 4.0) · Nočná obloha: ESO/S. Brunier (CC BY 4.0) · Žiara: fyzikálny model', en: 'Earth textures: Solar System Scope (CC BY 4.0) · Night sky: ESO/S. Brunier (CC BY 4.0) · Aurora: physical model' },
       actions: [{ label: SET.voice ? (en() ? 'Voice: on' : 'Hlas: zap') : (en() ? 'Voice: off' : 'Hlas: vyp'), active: SET.voice, onClick: () => { SET.voice = !SET.voice; if (!SET.voice) stopVoice(); else speak(st.audio, T(st.text)); this.hud(); } }],
       prev: () => this.setStep(this.si - 1), next: () => this.setStep(this.si + 1) });
   },
@@ -155,13 +133,14 @@ export const aurora: any = {
   relabel() { if (this.built && ctx.current === 'aurora') this.setStep(this.si); },
   update(dt: number, t: number) {
     this.t += dt; SUN_U.uTime.value += dt; SUN_U.uHa.value = 0;
-    this.curtains.forEach((c: any) => { c.u.uTime.value = t; });
+    if (this.ground.visible) this.auroraSky.update(dt, t);
     if (!this.space.visible) return;
+    this.ovalU.uTime.value = t; this.ovalU.uOn.value = this.scene() === 'poles' ? 1 : 0;
+    this.ovals.worldToLocal(this.ovalU.uSunDir.value.copy(this.sun.getWorldPosition(new THREE.Vector3()))).normalize();
     this.emat.uniforms.uSun.value.copy(this.sun.getWorldPosition(new THREE.Vector3())); this.emat.uniforms.uTime.value = t;
     this.earth.rotation.y += dt * 0.05;
     const sc = this.scene(), shield = sc !== 'wind', poles = sc === 'poles';
     const P = this.parts.geometry.attributes.position.array as Float32Array, C = this.parts.geometry.attributes.color.array as Float32Array;
-    const ovalPulse = 0.6 + 0.4 * Math.sin(t * 3); this.ovals.children.forEach((m: any, k: number) => { m.material.opacity = (k % 2 ? 0.3 : 0.75) * ovalPulse; });
     this.pv.forEach((p: any, i: number) => {
       if (p.cap >= 0) {                                       // zachytená častica letí po siločiare k pólu
         p.cap += dt * 0.6; const s = Math.min(1, p.cap);
